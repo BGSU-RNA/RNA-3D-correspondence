@@ -3,6 +3,7 @@ coordinates.
 """
 
 import numpy
+import math
 from RMSD import RMSD
 from RMSD import sumsquarederror
 
@@ -109,7 +110,9 @@ def besttransformation_weighted(set1, set2, weights=[1.0]):
     V, diagS, Wt = numpy.linalg.svd(A)
     I = numpy.matrix(numpy.identity(3))
     d = numpy.linalg.det(numpy.dot(numpy.transpose(Wt), numpy.transpose(V)))
-    if numpy.isclose(d, -1.0):
+    #if math.isclose(d, -1.0):
+        #I[2, 2] = d
+    if abs(d+1) < 0.00001:
         I[2, 2] = d
     U = numpy.dot(numpy.dot(numpy.transpose(Wt), I), numpy.transpose(V))
     new1 = numpy.dot(dev1, U)
@@ -117,7 +120,8 @@ def besttransformation_weighted(set1, set2, weights=[1.0]):
     rmsd = RMSD(new1, new2)
     sse = sumsquarederror(new1, new2)
     rotation_matrix = U
-    return rotation_matrix, new1, mean1, rmsd, sse
+    #return d, None, None, None, None, None
+    return rotation_matrix, new1, mean1, rmsd, sse, mean2
 
 #For weighted discrepancies, I think you just set up a diagonal matrix with
 #non-negative weights on the diagonal, then multiply this diagonal matrix

@@ -8,6 +8,7 @@ from scipy.cluster.hierarchy import dendrogram, linkage
 
 def optimalLeafOrder(allvsallmatrix):
 
+    # TypeError: linkage() got an unexpected keyword argument 'optimal_ordering'
     Z = linkage(allvsallmatrix, "average")
 
 #    fig = plt.figure(figsize=(5, 5))
@@ -27,3 +28,4 @@ def optimalLeafOrder(allvsallmatrix):
             newallvsallmatrix[i][j] = allvsallmatrix[dn['leaves'][i]][dn['leaves'][j]]
 
     return newOrder
+

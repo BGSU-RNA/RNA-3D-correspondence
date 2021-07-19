@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-
+import math
 import numpy as np
 from fr3d.geometry.angleofrotation import angle_of_rotation
 from fr3d.geometry.superpositions import besttransformation
 from fr3d.geometry.superpositions import besttransformation_weighted
+
 
 class MissingBaseException(Exception):
     """An exception that is raised when a base center that does not exist is
@@ -148,16 +149,17 @@ def matrix_discrepancy(centers1, rotations1, centers2, rotations2,
     discrepancy.
     :returns: A float, the discprenacy.
     """
+    
+    #assert len(centers1) == len(centers2)
+    #assert len(rotations1) == len(rotations2)
+    #assert len(centers1) == len(rotations1)
+    #assert len(centers1) >= 3
 
-    assert len(centers1) == len(centers2)
-    assert len(rotations1) == len(rotations2)
-    assert len(centers1) == len(rotations1)
-    assert len(centers1) >= 3
-
-    rotation_matrix, new1, mean1, RMSD, sse = \
+    rotation_matrix, new1, mean1, RMSD, sse, mean2 = \
         besttransformation_weighted(centers1, centers2, center_weight)
     rotation_matrix = np.transpose(rotation_matrix)
-
+   
+    
     orientation_error = 0
     for r1, r2 in zip(rotations1, rotations2):
         angle = angle_of_rotation(np.dot(np.dot(rotation_matrix, r1),
@@ -166,4 +168,24 @@ def matrix_discrepancy(centers1, rotations1, centers2, rotations2,
 
     n = len(centers1)
     discrepancy = np.sqrt(sse + angle_weight * orientation_error) / n
+    
+    
     return discrepancy
+
+
+def relative_discrepancy(centers1, centers2, start_nt, query_len, center_weight=[1.0]):
+
+    rotation_matrix, new1, mean1, RMSD, sse, mean2 = \
+        besttransformation_weighted(centers1[0:start_nt], centers2[0:start_nt], center_weight)
+    rotation_matrix = np.transpose(rotation_matrix)
+
+    newcenters = {}
+    for i in range(start_nt, len(centers1)):
+        newcenters[i] = np.dot(rotation_matrix, (centers1[i] - mean1)) + mean2
+
+    d = 0
+    for i in range(start_nt, len(centers1)):
+        d += np.linalg.norm(newcenters[i] - centers2[i])**2
+    d = math.sqrt(d)/query_len
+
+    return d

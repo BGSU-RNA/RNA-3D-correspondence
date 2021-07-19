@@ -1,92 +1,118 @@
-from app import db
+from sqlalchemy.sql.schema import Column
+from sqlalchemy import Integer, String, Text, Date, Table
+from database import Base
 
+'''
+class UnitInfo(Base):
+    __tablename__ = "unit_info"
 
-class UnitInfo(db.Model):
-	__tablename__ = "unit_info"
+    unit_id = Column(String, primary_key=True)
+    pdb_id = Column(String)
+    chain = Column(String)
+    chain_index = Column(Integer)
 
-	unit_id = db.Column(db.String, primary_key=True)
-	pdb_id = db.Column(db.String)
-	chain = db.Column(db.String)
-	chain_index = db.Column(db.Integer)
-
-
-class UnitCorrespondence(db.Model):
-    __tablename__ = "correspondence_units"
-
-    # correspondence_id = db.Column(db.String, primary_key=True)
-    unit_id_1 = db.Column(db.String, primary_key=True)
-    unit_id_2 = db.Column(db.String, primary_key=True)
-    pdb_id_1 = db.Column(db.String, primary_key=True)
-    pdb_id_2 = db.Column(db.String, primary_key=True)
-    chain_name_2 = db.Column(db.String, primary_key=True)
-
-    # def __init__(self, unit_id_1, unit_id_2, pdb_id_1, pdb_id_2):
-    # self.unit_id_1 = unit_id_1
-    # self.unit_id_2 = unit_id_2
-    # self.pdb_id_1 = pdb_id_1
-    # self.pdb_id_2 = pdb_id_2
-
-
-class UnitCenters(db.Model):
-    __tablename__ = "unit_centers"
-
-    # correspondence_id = db.Column(db.String, primary_key=True)
-    unit_center_id = db.Column(db.Integer, primary_key=True)
-    unit_id = db.Column(db.String)
-    pdb_id = db.Column(db.String)
-    name = db.Column(db.String)
-    x = db.Column(db.Float)
-    y = db.Column(db.Float)
-    z = db.Column(db.Float)
-
-
-class UnitRotations(db.Model):
-    __tablename__ = "unit_rotations"
-
-    # correspondence_id = db.Column(db.String, primary_key=True)
-    unit_id = db.Column(db.String, primary_key=True)
-    pdb_id = db.Column(db.String)
-    cell_0_0 = db.Column(db.Float)
-    cell_0_1 = db.Column(db.Float)
-    cell_0_2 = db.Column(db.Float)
-    cell_1_0 = db.Column(db.Float)
-    cell_1_1 = db.Column(db.Float)
-    cell_1_2 = db.Column(db.Float)
-    cell_2_0 = db.Column(db.Float)
-    cell_2_1 = db.Column(db.Float)
-    cell_2_2 = db.Column(db.Float)
-
-class LoopInfo(db.Model):
+class LoopInfo(Base):
     __tablename__ = "loop_info"
 
-    loop_id = db.Column(db.String, primary_key=True)
-    unit_ids = db.Column(db.Text)
+    loop_id = Column(String, primary_key=True)
+    unit_ids = Column(Text)
+    loop_name = Column(Text)
 
-class NrReleases(db.Model):
+
+class NrReleases(Base):
     __tablename__ = "nr_releases"
 
-    nr_release_id = db.Column(db.String, primary_key=True)
-    date = db.Column(db.Date)
-    classes = db.relationship("NrClasses", backref='nr_releases', lazy=True)
+    nr_release_id = Column(String, primary_key=True)
+    date = Column(Date)
+    #classes = relationship("NrClasses", backref='nr_releases', lazy=True)
 
-class NrClasses(db.Model):
+
+class NrClasses(Base):
     __tablename__ = "nr_classes"
 
-    nr_class_id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    nr_release_id = db.Column(db.String, db.ForeignKey("nr_releases.nr_release_id"))
-    resolution = db.Column(db.String)
-    chains = db.relationship("NrChains", backref='nr_classes', lazy=True)
+    nr_class_id = Column(Integer, primary_key=True)
+    name = Column(String)
+    #nr_release_id = Column(String, ForeignKey("nr_releases.nr_release_id"))
+    resolution = Column(String)
+    #chains = relationship("NrChains", backref='nr_classes', lazy=True)
 
-class NrChains(db.Model):
+
+class NrChains(Base):
     __tablename__ = "nr_chains"
 
-    nr_chain_id = db.Column(db.Integer, primary_key=True)
-    ife_id = db.Column(db.String)
-    nr_class_id = db.Column(db.Integer, db.ForeignKey("nr_classes.nr_class_id"))
-    nr_release_id = db.Column(db.String, db.ForeignKey("nr_releases.nr_release_id"))
+    nr_chain_id = Column(Integer, primary_key=True)
+    ife_id = Column(String)
+    nr_class_id = Column(Integer)
+    #nr_class_id = Column(Integer, ForeignKey("nr_classes.nr_class_id"))
+    #nr_release_id = Column(String, ForeignKey("nr_releases.nr_release_id"))
 
 
+class UnitCorrespondence(Base):
+    __tablename__ = "correspondence_units"
+
+    unit_id_1 = Column(String, primary_key=True)
+    unit_id_2 = Column(String)
+    pdb_id_1 = Column(String)
+    pdb_id_2 = Column(String)
+    chain_name_2 = Column(String)
 
 
+meta = Metadata()
 
+test_view = Table("correspondence_units", meta,
+                Column("unit_id_1", Integer, primary_key=True),
+                autoload_with=engine
+)  
+'''  
+
+# This is a view. Had to make each col as primary key for the query to work
+class UnitCorrespondence(Base):
+    __table__ = Table('correspondence_units', Base.metadata,
+                Column('unit_id_1', String, primary_key=True),
+                Column('chain_name_1', String, primary_key=True),
+                Column('pdb_id_1', String, primary_key=True),
+                Column('unit_id_2', String, primary_key=True),
+                Column('chain_name_2', String, primary_key=True),
+                Column('pdb_id_2', String, primary_key=True),
+                )
+
+
+class UnitRotation(Base):
+    __table__ = Base.metadata.tables['unit_rotations']
+
+
+class UnitCenter(Base):
+    __table__ = Base.metadata.tables['unit_centers']
+
+
+class NrChains(Base):
+    __table__ = Base.metadata.tables['nr_chains']
+
+
+class NrClasses(Base):
+    __table__ = Base.metadata.tables['nr_classes']
+
+
+class NrReleases(Base):
+    __table__ = Base.metadata.tables['nr_releases']
+
+
+class UnitInfo(Base):
+    __table__ = Base.metadata.tables['unit_info']
+
+
+class IfeInfo(Base):
+    __table__ = Base.metadata.tables['ife_info']
+
+
+class PDBInfo(Base):
+    __table__ = Base.metadata.tables['pdb_info']
+
+
+class LoopInfo(Base):
+    __table__ = Base.metadata.tables['loop_info']
+
+
+class UnitPairsInteractions(Base):
+    __table__ = Base.metadata.tables['unit_pairs_interactions']
+    

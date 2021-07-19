@@ -9,10 +9,10 @@ import collections as coll
 
 from werkzeug.exceptions import BadRequest
 
-PARTS_LIMIT = 15
+PARTS_LIMIT = 40
+
 
 def input_type(data):
-
     parts = data.split(',')
     if len(parts) == 0 or len(parts) > PARTS_LIMIT:
         raise BadRequest("Must give 1 to %s parts in a collection" %
@@ -36,8 +36,16 @@ def input_type(data):
 
     return processed
 
+
 def check_query(query):
-    
+    """
+    This check the type of query. It can be of three types:
+    i)   loop_id
+    ii)  single range (for a HL)
+    iii) multiples ranges (for a IL)
+    iv)  string of unit ids
+    """
+
     if len(query) == 1:
         if query[0][0] == query[0][1]:
             query_type = 'loop_id'
@@ -48,5 +56,15 @@ def check_query(query):
             query_type = 'multiple_ranges'
         else:
             query_type = 'units_str'
-    
+
     return query_type
+
+
+def check_input_type(loop_id, unit_id, res_num):
+
+    if loop_id is not None and unit_id is None and res_num is None:
+        return "loop_id"
+    elif unit_id is not None and loop_id is None and res_num is None:
+        return "unit_id"
+    elif res_num is not None and loop_id is None and unit_id is None:
+        return "res_num"

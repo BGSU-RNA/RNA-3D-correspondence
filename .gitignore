@@ -102,3 +102,9 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+#python
+.pyc
+
+#ignore testing files
+test_app.py

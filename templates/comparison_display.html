@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>BGSU RNA 3D Motif Correspondence Server</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js" type="text/javascript"></script>
+  <script src="http://rna.bgsu.edu/rna3dhub/js/jsmol/JSmol.min.nojq.js"></script>
+  <script src="http://rna.bgsu.edu/rna3dhub/js/jquery.jmolTools.js"></script>
+  <!--<script src="http://rna.bgsu.edu/webfr3d/js/data_corr.js"></script>
+  <script src="/static/js/jsmol/JSmol.min.nojq.js"></script>
+  <script src="/static/js/jquery.jmolTools.js"></script>
+  <script src="/static/js/data_test.js"></script>-->
+
+  <script src="//d3js.org/d3.v4.min.js"></script>
+  <style>
+    /* Remove the navbar's default margin-bottom and rounded borders */
+    .navbar {
+      margin-bottom: 0;
+      border-radius: 0;
+    }
+
+   /*  Set height of the grid so .sidenav can be 100% (adjust as needed) */
+    .row.content {height: 250px }
+
+    /* Set gray background color and 100% height */
+    .sidenav {
+      padding-top: 5px;
+      background-color: #f1f1f1;
+      height: 300px;
+    }
+
+    /* Set black background color, white text and some padding */
+    footer {
+      background-color: #555;
+      color: white;
+      padding: 15px;
+    }
+
+    /* On small screens, set height to 'auto' for sidenav and grid */
+    @media screen and (max-width: 767px) {
+      .sidenav {
+        height: auto;
+        padding: 15px;
+      }
+      .row.content {height:auto;}
+    }
+
+    /* Table properties */
+    .tablecontainer {height: 320px; overflow: scroll;}
+      /*tr {display: block; }
+      th, td { width: 333px; }
+      tbody { display: block; height: 200px; overflow: auto;}
+      tbody {display: block; height: 200px; overflow: auto;}*/
+
+    #chart {
+      padding-left: 0px;
+    }
+
+  </style>
+
+  <script type="text/javascript">
+
+          var jmolApplet0; // set up in HTML table, below
+
+          // logic is set by indicating order of USE -- default is HTML5 for this test page, though
+          var use = "HTML5" // JAVA HTML5 WEBGL IMAGE  are all otions
+
+          jmol_isReady = function(applet) {
+              Jmol._getElement(applet, "appletdiv").style.border="1px solid blue";
+              $('.jmolInline').first().jmolToggle();
+          }
+
+          var Info = {
+              width: 370,
+              height: 370,
+              debug: false,
+              color: "white",
+              addSelectionOptions: false,
+              use: "HTML5",
+              j2sPath: "http://rna.bgsu.edu/rna3dhub/js/jsmol/j2s/",
+              //j2sPath: "/static/js/jsmol/j2s",
+              readyFunction: jmol_isReady,
+              //script: script,
+              //jarPath: "java",
+              //jarFile: (useSignedApplet ? "JmolAppletSigned.jar" : "JmolApplet.jar"),
+              //isSigned: useSignedApplet,
+              //disableJ2SLoadMonitor: true,
+              disableInitialConsole: true
+              //defaultModel: "$dopamine",
+              //console: "none", // default will be jmolApplet0_infodiv
+          }
+
+
+          // these are conveniences that mimic behavior of Jmol.js
+
+          function jmolCheckbox(script1, script0,text,ischecked) {Jmol.jmolCheckbox(jmolApplet0,script1, script0, text, ischecked)}
+          function jmolButton(script, text) {Jmol.jmolButton(jmolApplet0, script,text)}
+          function jmolHtml(s) { document.write(s) };
+          function jmolBr() { jmolHtml("<br />") }
+          function jmolMenu(a) {Jmol.jmolMenu(jmolApplet0, a)}
+          function jmolScript(cmd) {Jmol.script(jmolApplet0, cmd)}
+          function jmolScriptWait(cmd) {Jmol.scriptWait(jmolApplet0, cmd)}
+
+    </script>
+
+    <link rel="shortcut icon" href="http://rnatest.bgsu.edu/rna3dhub/icons/C_icon.png">
+</head>
+<body>
+
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/correspondence">Correspondence Server</a>
+    </div>
+    <div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav">
+        <li><a href="/" target="_blank">BGSU Home</a></li>
+        <li><a href="">Help</a></li>
+        <li><a href="">APIs</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container-fluid text-center">
+  <div class="row content">
+    <div class="col-sm-2 sidenav" text-left">
+      <div class="block-div resizable" id="annotation-panel">
+                        <dl>
+
+                            <dt>Selection PDB:</dt>
+                              <dd id="common_name" class="edit">{{ selection_data[0] }}</dd>
+
+                            <dt>Selection Chain:</dt>
+                              <dd id="common_name" class="edit">{{ selection_data[1] }}</dd>
+
+                            <dt>Selection Residues:</dt>
+                              <dd id="common_name" class="edit">{{ selection_data[2] }}</dd>
+
+                            <dt>Maximum Discrepancy:</dt>
+                              <dd id="max_disc" class="edit">{{ maxDisc }}</dd>
+
+                            <dt>Equivalence Class:</dt>
+                              <dd id="common_name" class="edit"><a href="http://rna.bgsu.edu/rna3dhub/nrlist/view/{{ ec_name }}" target="_blank">{{ ec_name }}</a></dd>
+
+                            <dt>NR Release</dt>
+                              <dd id="common_name" class="edit"><a href="http://rna.bgsu.edu/rna3dhub/nrlist/release/{{ nr_release }}" target="_blank">{{ nr_release }}</a></dd>
+
+                            <dt>Number of instances</dt>
+                              <dd id="common_name" class="edit">{{ coord|length }}</a></dd>
+
+                        </dl>
+      </div>
+
+    </div>
+
+
+    <div class="col-sm-10">
+        <div class="tablecontainer">
+          <table class="table table-bordered">
+              <thead class="text-nowrap text-center">
+                <tr>
+                  <th scope="col">View</th>
+                  <th scope="col">RNA Chain</th>
+                  <!--<th scope="col" class="text-nowrap">Residues</th>-->
+                  {% for position_num in positions_header %}
+                    <th scope="col">{{ position_num }}</th>
+                  {% endfor %}
+                  {% for res_pair in interactions_header %}
+                    <th scope="col">{{ res_pair }}</th>
+                  {% endfor %}
+                </tr>
+              </thead>
+              <tbody class="text-justify">
+                {% for k, v in coord.items() %}
+                  <tr>
+                    <td><input type='checkbox' id='{{ loop.index0 }}' class='jmolInline' data-coord = '{{ coord[k] }}' data-quality = '{{ coord[k] }}'>{{ loop.index }}</td>
+                    <td>{{ k }}</td>
+                    <!--<td> {{ coord[k] }} </td>-->
+                      {% for position_num in positions_header %}
+                        <td> {{ res_position[k][position_num]}} </td>
+                      {% endfor %}
+
+                      {% for res_pair in interactions_header %}
+                        <td> {{ pairwise_interactions[k][res_pair]}} </td>
+                      {% endfor %}
+                  </tr>  
+                {% endfor %}
+              </tbody>
+          </table>
+        </div>
+    </div>
+
+
+  </div>
+
+
+  <div class="row content">
+    
+    <div class="col-sm-4">
+      <div id ='chart'>
+            <script type="text/javascript">
+                var data = {{ data | tojson | safe }};
+            </script>
+            <!--<script type="text/javascript" src="http://rnatest.bgsu.edu/corr-server/static/js/heatmap.js"></script>-->
+      </div>
+
+    </div> 
+
+    <div class="col-sm-4">
+    </div>
+    
+
+    <div class="col-sm-4">
+        <script type="text/javascript">
+
+          jmolApplet0 = Jmol.getApplet("jmolApplet0", Info);
+
+          $(document).ready(function(){
+          // initialize the plugin
+              $('.jmolInline').jmolTools({
+                  showStereoId: 'stereo2',
+                  showNeighborhoodId: 'neighborhood',
+                  showNumbersId: 'showNtNums',
+                  colorOption: 'colorOPT',
+                  showNextId: 'next',
+                  showPrevId: 'prev',
+                  showAllId: 'all'
+              });
+
+          });
+
+        </script>
+
+        <input type="button" id="neighborhood" value="Show neighborhood">
+          <input type="button" id="prev" value="Previous">
+          <input type="button" id="next" value="Next">
+          <input type="button" id='all' value='Show all'>
+          <label><input type="checkbox" id="showNtNums">Nucleotide numbers</label>
+          <input type="button" id="stereo2" value="Stereo">
+
+          Coloring options: <select id="colorOPT">
+                          <option value="Default" selected>Default</option>
+                          <option value="CPK">CPK</option>
+                          <option value="RSR">Real Space R (RSR)</option>
+                          <option value="RSRZ">RSR Z-Score (RSRZ)</option></select>
+
+          <div class='showRSR' style="display:none">
+                    <svg height="30" width="340">
+                        <defs>
+                            <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="10%" style="stop-color:#0d0887; stop-opacity:1" />
+                                <stop offset="20%" style="stop-color:#6603a5; stop-opacity:1" />
+                                <stop offset="30%" style="stop-color:#8a0da2; stop-opacity:1" />
+                                <stop offset="40%" style="stop-color:#ac2693; stop-opacity:1" />
+                                <stop offset="50%" style="stop-color:#ca457a; stop-opacity:1" />
+                                <stop offset="60%" style="stop-color:#df6264; stop-opacity:1" />
+                                <stop offset="70%" style="stop-color:#f0824d; stop-opacity:1" />
+                                <stop offset="80%" style="stop-color:#faa638; stop-opacity:1" />
+                                <stop offset="90%" style="stop-color:#fbcc27; stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#f0f921; stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                    <rect x="0" y="0" width="300" height="15" fill="url(#grad3)"  />
+                    <text x="0" y="30" font-family="sans-serif" font-size="12px" fill="black">0.0</text>
+                    <text x="70" y="30" font-family="sans-serif" font-size="12px" fill="black">RSR Scale truncated at 0.5</text>
+                    <text x="285" y="30" font-family="sans-serif" font-size="12px" fill="black">0.5</text>
+                    </svg>
+          </div>
+
+          <div class='showRSRZ' style="display:none">
+                    <svg height="45" width="340">
+                        <defs>
+                        <text x="120" y="0" font-family="sans-serif" font-size="12px" fill="black">RSRZ Scale</text>
+                            <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="25%" style="stop-color:green;stop-opacity:1" />
+                                <stop offset="25%" style="stop-color:yellow;stop-opacity:1" />
+                                <stop offset="50%" style="stop-color:yellow;stop-opacity:1" />
+                                <stop offset="50%" style="stop-color:orange;stop-opacity:1" />
+                                <stop offset="75%" style="stop-color:orange;stop-opacity:1" />
+                                <stop offset="75%" style="stop-color:red;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:red;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                    <rect x="0" y="0" width="300" height="15" fill="url(#grad2)"  />
+                    <text x="72" y="30" font-family="sans-serif" font-size="12px" fill="black">1</text>
+                    <text x="147" y="30" font-family="sans-serif" font-size="12px" fill="black">2</text>
+                    <text x="223" y="30" font-family="sans-serif" font-size="12px" fill="black">3</text>
+                    <text x="120" y="45" font-family="sans-serif" font-size="12px" fill="black">RSRZ Scale</text>
+                    </svg>
+          </div>
+
+    </div>
+
+  </div>  
+
+  
+</div>
+</body>
+
+<script src="http://rna.bgsu.edu/webfr3d/js/heatmap.js"></script>
+
+<footer class="container-fluid text-center">
+  <p>BGSU RNA Home</p>
+  <p>Page generated in: {{ code_time }} seconds</p>
+</footer>
+
+</html>
