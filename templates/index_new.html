@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
     <link rel="shortcut icon" href="http://rnatest.bgsu.edu/rna3dhub/icons/C_icon.png">
-   <link rel="stylesheet" type="text/css" href="/r3d-2-msa/static/css/style.css">
-   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-   <title>RNA 3D Motif Correspondence Server</title>
+    <link rel="stylesheet" type="text/css" href="/r3d-2-msa/static/css/style.css">
+    <script src="https://use.fontawesome.com/fa1f25e5ba.js"></script>
+    <title>RNA 3D Motif Correspondence Server</title>
   </head>
 
   <body>
@@ -53,23 +53,26 @@
 
       <div class="row">
 
-        <form class="form-horizontal col-sm-12" id="generateCorrespondence" action="http://rna.bgsu.edu/corr-server/comparison?" >
+        <form class="form-horizontal col-sm-12" id="generateCorrespondence" action="http://rna.bgsu.edu/correspondence/comparison">
 
           <div class="form-group col-sm-5">
 
             <label for="ife">Choose Selection Type</label>
-            <select class="form-control" id="input-type">
+            <select class="form-control" id="input-type" name="selection_type">
                 <option value="loop_id">loop_id</option>
                 <option value="unit_id">unit_id</option>
             </select>
             </br>
             
             <label for="selection">Enter Selection</label>
-            <input type="text" class="form-control" id="selection">
+            <input type="text" class="form-control" id="selection" name="selection">
+            <!--<i class="fas fa-check-circle"></i>
+            <i class="fas fa-exclamation-circle"></i>
+            <small>Error message</small>-->
             </br>
 
             <label for="structure-resolution">Choose Equivalence Class Resolution Threshold</label>
-            <select class="form-control" id="structure-resolution">
+            <select class="form-control" id="structure-resolution" name="resolution_threshold">
                 <option value="4.0" selected>4.0</option>
                 <option value="1.5">1.5</option>
                 <option value="2.0">2.0</option>
@@ -80,9 +83,8 @@
             </select>
             </br>
 
-
             <label for="experimental-method">Choose Experimental Technique</label>
-            <select class="form-control" id="experimental-method">
+            <select class="form-control" id="experimental-method" name="exp_method">
                 <option value="all" selected>Any</option>
                 <option value="xray">X-ray diffraction</option>
                 <option value="em">Cryo-electron microscopy</option>
@@ -90,11 +92,12 @@
             </br>
 
             <button type="submit" id="submit_test" class="btn btn-primary">Submit</button>
-
-
-
-
           </div>
+
+
+
+
+      
 
           
 
@@ -103,13 +106,15 @@
             <ul class="list-unstyled">
                 
                 <li>
-                  <a class="example-data" href="http://rna.bgsu.edu/correspondence/comparison?resolution_threshold=4.0&exp_method=xray&loop_id=IL_5J7L_060" target="_blank">
-                    Decoding loop in <i>E. coli</i> SSU crystal structures
+                  <!--<a class="example-data" href="http://rna.bgsu.edu/correspondence/comparison?resolution_threshold=4.0&exp_method=xray&selection=IL_5J7L_060&selection_type=loop_id" target="_blank">
+                    Decoding loop in <i>E. coli</i> SSU crystal structures-->
+                    <a class="example-data" href="http://rna.bgsu.edu/correspondence/comparison?resolution_threshold=4.0&exp_method=xray&selection=5J7L|1|AA|G|1405,5J7L|1|AA|U|1406,5J7L|1|AA|5MC|1407,5J7L|1|AA|A|1408,5J7L|1|AA|C|1409,5J7L|1|AA|G|1491,5J7L|1|AA|A|1492,5J7L|1|AA|A|1493,5J7L|1|AA|G|1494,5J7L|1|AA|U|1495,5J7L|1|AA|C|1496&selection_type=unit_id" target="_blank">
+                      Decoding loop in <i>E. coli</i> SSU crystal structures
                   </a>
                 </li>
                 
                 <li>
-                  <a class="example-data" href="http://rna.bgsu.edu/correspondence/comparison?resolution_threshold=4.0&exp_method=all&loop_id=HL_3WC2_002" target="_blank">
+                  <a class="example-data" href="http://rna.bgsu.edu/correspondence/comparison?resolution_threshold=4.0&exp_method=all&selection=HL_3WC2_002&selection_type=loop_id" target="_blank">
                     Anticodon stem-loop in tRNA(Phe) from <i>S. cerevisae</i>
                   </a>
                 </li>
@@ -169,10 +174,11 @@
   
       if (id == 'loop_id') {
         let formAction = $('#generateCorrespondence').attr('action');
-        let url = formAction + 'resolution_threshold=' + resolution + '&' + 'exp_method=' + method + '&' + 'loop_id=' + selection ;
+        //let url = formAction + 'resolution_threshold=' + resolution + '&' + 'exp_method=' + method + '&' + 'loop_id=' + selection ;
         //$('#generateCorrespondence').attr('action', url);
-        console.log(url);
-        window.location.assign(url)
+        let url = formAction + $('#generateCorrespondence').serialize();
+        // alert(url);
+        //window.location.assign(url)
         }
       });
       
