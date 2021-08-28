@@ -3,6 +3,7 @@ from discrepancy import matrix_discrepancy
 import numpy as np
 from ordering import optimalLeafOrder
 from ordering_similarity import treePenalizedPathLength
+import math
 
 def get_disc(d, first, second):
     return d.get(second, {}).get(first, 0.0)
@@ -113,7 +114,38 @@ def order_similarity(ife_list, distances):
 
     return ifes_ordered
 
+def build_heatmap_data_new(distances, ifes_ordered):
+    ife1 = []
+    ife2 = []
+    row_labels = []
 
+    for member1 in ifes_ordered:
+        row_labels.append(member1[1])
+        for member2 in ifes_ordered:
+            ife1.append(member1[1])
+            ife2.append(member2[1]) 
+
+    ife_pairs = zip(ife1, ife2)
+
+    disc_ordered = [get_disc(distances, first, second) or get_disc(distances, second, first) for first, second in ife_pairs]
+
+    disc_formatted = []
+    for disc in disc_ordered:
+        disc = '%.4f' % disc
+        disc_formatted.append(disc)
+
+    a = np.array(disc_formatted)
+    a = a.astype(np.float)
+    max_disc = max(a)
+
+    # How many elements each 
+    # list should have 
+    sublist_len = len(ifes_ordered)
+    
+    # using list comprehension 
+    disc_list = [disc_formatted[i:i + sublist_len] for i in range(0, len(disc_formatted), sublist_len)]
+
+    return max_disc, disc_list, row_labels
 
 def build_heatmap_data(distances, ifes_ordered):
     index1 = []
@@ -137,8 +169,13 @@ def build_heatmap_data(distances, ifes_ordered):
         disc = '%.4f' % disc
         disc_formatted.append(disc)
 
+    #cleaned_disc = [x for x in disc_formatted if x != 'nan']
+    #sorted_disc = cleaned_disc.sorted()
+
     a = np.array(disc_formatted)
     a = a.astype(np.float)
+
+    #return sorted_disc, None
 
     # .percentile/mean/mediab/amax doesn't appear to be working
     #percentile = np.percentile(map(float,a), 95)
@@ -237,7 +274,7 @@ def format_pairwise_interactions_table(res_pairs_ref, pairwise_data):
     for chain in chains_list:
         pairwise_interactions_ordered = OrderedDict()
         for unique_res_pair in pairwise_residue_pairs:
-            pairwise_interactions_ordered[unique_res_pair] = ''
+            pairwise_interactions_ordered[unique_res_pair] = ' '
 
         pairwise_interactions_collection[chain] = pairwise_interactions_ordered
 
@@ -304,3 +341,26 @@ def process_query_units(query_units):
     residues = ','.join(residues)
 
     return (pdb, chain, residues)
+
+'''
+def percentile(N, percent, key=lambda x:x):
+    """
+    Find the percentile of a list of values.
+
+    @parameter N - is a list of values. Note N MUST BE already sorted.
+    @parameter percent - a float value from 0.0 to 1.0.
+    @parameter key - optional key function to compute value from each element of N.
+
+    @return - the percentile of the values
+    """
+    if not N:
+        return None
+    k = (len(N)-1) * percent
+    f = math.floor(k)
+    c = math.ceil(k)
+    if f == c:
+        return key(N[int(k)])
+    d0 = key(N[int(f)]) * (c-k)
+    d1 = key(N[int(c)]) * (k-f)
+    return d0+d1
+'''
