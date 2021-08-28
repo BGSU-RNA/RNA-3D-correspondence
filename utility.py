@@ -263,6 +263,33 @@ def format_pairwise_interactions_display(corr_data, res_pairs_ref, pairwise_data
     return display_str, pairwise_residue_pairs
 
 
+def format_pairwise_interactions_single_display(pairwise_interactions, pairwise_residue_pairs, query_units):
+
+    residue_pairs = list(pairwise_residue_pairs)
+    residue_pairs = sorted(residue_pairs, key=lambda x: (x[0], x[1]))
+    #residue_pairs.sort()
+
+    pairwise_interactions_sorted = [pairwise_interactions.get(residue_pair, None) for residue_pair in residue_pairs]
+
+    residue_pairs_annotated = ['Nt'+str(x[0])+'-Nt'+str(x[1]) for x in residue_pairs]
+
+    query_len = len(query_units)
+    header_index = [str(x) for x in range(1, query_len+1)]
+    header_index = '    '.join(header_index)
+    header_res_pairs = '    '.join(residue_pairs_annotated)
+    header = header_index + '   ' + header_res_pairs
+
+    row_part_1  =  '    '.join(query_units)
+    row_part_2  =  '    '.join(pairwise_interactions_sorted)
+    row = row_part_1  +  '    '  + row_part_2
+
+    display_str = ""
+    display_str += header + " </br>"
+    display_str += row 
+
+    return str(display_str)
+
+
 def format_pairwise_interactions_table(res_pairs_ref, pairwise_data):
 
     pairwise_residue_pairs = list(res_pairs_ref)

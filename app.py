@@ -240,6 +240,29 @@ def pairwise_interactions_correspondence():
     return str(pairwise_interactions_display)
 
 
+@app.route('/pairwise_interactions_single')
+def pairwise_interactions_single():
+
+    query_parameters = request.args
+
+    chain_id = query_parameters.get('chain')
+    input_type = query_parameters.get('selection_type')
+    selection = query_parameters.get('selection')
+
+    if input_type == 'res_num' and chain_id is None:
+        return "Please enter the chain parameter"
+
+    query_units = qs.get_query_units_new(input_type, selection, chain_id)
+
+    if input_type == 'unit_id' or input_type == 'loop_id': chain_id = ui.get_chain_id(query_units)
+
+    pairwise_interactions, pairwise_residue_pairs = ps.get_pairwise_interactions_single(query_units)
+
+    pairwise_interactions_display = ui.format_pairwise_interactions_single_display(pairwise_interactions, pairwise_residue_pairs, query_units)
+
+    return str(pairwise_interactions_display)
+
+
 @app.route('/loop')
 def loop_correspondence():
 
