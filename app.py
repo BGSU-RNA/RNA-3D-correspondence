@@ -96,18 +96,19 @@ def geometric_correspondence():
     loop_id = query_parameters.get('loop_id')
     unit_id = query_parameters.get('unit_id')
     res_num = query_parameters.get('res_num')
+    input_type = query_parameters.get('selection_type')
+    selection = query_parameters.get('selection')
 
     if resolution not in accepted_resolutions:
         return 'Please enter a valid resolution. The accepted resolution values \
                 are 1.5, 2.0, 2.5, 3.0, 3.5, 4.0 and all'
 
-    input_type = pi.check_input_type(loop_id, unit_id, res_num)
+    #input_type = pi.check_input_type(loop_id, unit_id, res_num)
 
     if input_type == 'res_num' and chain_id is None:
         return "Please enter the chain parameter"
 
-    query_units = qs.get_query_units_new(input_type, loop_id, unit_id, \
-                                         res_num, chain_id)
+    query_units = qs.get_query_units_new(input_type, selection, chain_id)
 
     query_data = ui.process_query_units(query_units)
 
@@ -116,7 +117,7 @@ def geometric_correspondence():
     exp_method = ui.get_exp_method_name(exp_method)
 
     # Get the equivalence class members that the query ife belongs to
-    members, ec_name, nr_release = ec.get_ec_members(query_units, resolution, exp_method, chain_id)
+    members, ec_name, nr_release = ec.get_ec_members(resolution, exp_method, chain_id)
 
     # Check whether the selection chain has the same exp_method as in the selection
     empty_members, method_equality = ec.check_valid_membership(members, query_data, exp_method)
@@ -157,6 +158,9 @@ def geometric_correspondence():
     # Get discrepancy statistics and build the heatmap data for display
     max_disc, heatmap_data = ui.build_heatmap_data(disc_data, ifes_ordered)
 
+    # new heatmap method
+    #max_disc, heatmap_data, row_labels = ui.build_heatmap_data_new(disc_data, ifes_ordered)
+
     # Build coord data
     coord_data, table_rows = ui.build_coord_data(ifes_ordered, corr_complete)
 
@@ -189,17 +193,21 @@ def pairwise_interactions_correspondence():
     loop_id = query_parameters.get('loop_id')
     unit_id = query_parameters.get('unit_id')
     res_num = query_parameters.get('res_num')
+    input_type = query_parameters.get('selection_type')
+    selection = query_parameters.get('selection')
 
     if resolution not in accepted_resolutions:
         return 'Please enter a valid resolution. The accepted resolution values \
                 are 1.5, 2.0, 2.5, 3.0, 3.5, 4.0 and all'
 
-    input_type = pi.check_input_type(loop_id, unit_id, res_num)
+    #input_type = pi.check_input_type(loop_id, unit_id, res_num)
 
     if input_type == 'res_num' and chain_id is None:
         return "Please enter the chain parameter"
 
-    query_units = qs.get_query_units_new(input_type, loop_id, unit_id, res_num, chain_id)
+    #query_units = qs.get_query_units_new(input_type, loop_id, unit_id, res_num, chain_id)
+
+    query_units = qs.get_query_units_new(input_type, selection, chain_id)
 
     query_data = ui.process_query_units(query_units)
 
@@ -208,7 +216,7 @@ def pairwise_interactions_correspondence():
     exp_method = ui.get_exp_method_name(exp_method)
 
     # Get the equivalence class members that the query ife belongs to
-    members, ec_name, nr_release = ec.get_ec_members(query_units, resolution, exp_method, chain_id)
+    members, ec_name, nr_release = ec.get_ec_members(resolution, exp_method, chain_id)
 
     # Check whether the selection chain has the same exp_method as in the selection
     empty_members, method_equality = ec.check_valid_membership(members, query_data, exp_method)
