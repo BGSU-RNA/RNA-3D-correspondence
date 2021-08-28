@@ -121,7 +121,7 @@ def get_id_type(query_id):
 	return complete_id, id_type, query_id_index
 
 
-def get_ec_members(units, resolution, exp_method, query_id):
+def get_ec_members(resolution, exp_method, query_id):
 	
 	#query_ife = '|'.join(units[0].split('|')[:3])
 	id, id_type, query_id_index = get_id_type(query_id)
