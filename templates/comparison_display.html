@@ -75,8 +75,8 @@
           }
 
           var Info = {
-              width: 370,
-              height: 370,
+              width: 520,
+              height: 400,
               debug: false,
               color: "white",
               addSelectionOptions: false,
@@ -137,14 +137,14 @@
       <div class="block-div resizable" id="annotation-panel">
                         <dl>
 
-                            <dt>Selection PDB:</dt>
-                              <dd id="common_name" class="edit">{{ selection_data[0] }}</dd>
+                            <dt>Selection Structure Information:</dt>
+                              <dd id="common_name" class="edit">{{ selection_data[0] }} (Chain{{selection_data[1]}})</dd>
 
-                            <dt>Selection Chain:</dt>
+                            <!--<dt>Selection Chain:</dt>
                               <dd id="common_name" class="edit">{{ selection_data[1] }}</dd>
 
                             <dt>Selection Residues:</dt>
-                              <dd id="common_name" class="edit">{{ selection_data[2] }}</dd>
+                              <dd id="common_name" class="edit">{{ selection_data[2] }}</dd>-->
 
                             <dt>Maximum Discrepancy:</dt>
                               <dd id="max_disc" class="edit">{{ maxDisc }}</dd>
