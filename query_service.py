@@ -47,18 +47,18 @@ def get_query_units(query_type, query_list, query_ife):
     return complete_units
 
 
-def get_query_units_new(input_type, loop_id, unit_id, res_num, chain_id):
+def get_query_units_new(input_type, selection, chain_id):
 
     if input_type == 'loop_id':
-        loop_id = loop_id
+        loop_id = selection
         unsorted_units = get_loop_units(loop_id)
         complete_units = ui.get_sorted_units(unsorted_units)
 
     elif input_type == 'unit_id':
-        complete_units = unit_id.split(",")
+        complete_units = selection.split(",")
 
     elif input_type == 'res_num':
-        incomplete_units = res_num.split(",")
+        incomplete_units = selection.split(",")
         chain = chain_id + '|%|'
         incomplete_units = [chain + unit for unit in incomplete_units]
         complete_units = get_units(incomplete_units)
