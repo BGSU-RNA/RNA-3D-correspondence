@@ -17,7 +17,7 @@ def get_pairwise_interactions(correspondence_data):
 				for idx2 in range(idx1 + 1, corr_len):
 					pos1 = idx1 + 1
 					pos2 = idx2 + 1
-					key = "Nt" + str(pos1) + "-Nt" + str(pos2)
+					key = "nt" + str(pos1) + "-nt" + str(pos2)
 
 					query = session.query(UnitPairsInteractions) \
 					               .filter(UnitPairsInteractions.unit_id_1 == correspondence[idx1]) \

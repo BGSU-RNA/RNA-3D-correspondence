@@ -271,7 +271,7 @@ def format_pairwise_interactions_single_display(pairwise_interactions, pairwise_
 
     pairwise_interactions_sorted = [pairwise_interactions.get(residue_pair, None) for residue_pair in residue_pairs]
 
-    residue_pairs_annotated = ['Nt'+str(x[0])+'-Nt'+str(x[1]) for x in residue_pairs]
+    residue_pairs_annotated = ['nt'+str(x[0])+'-nt'+str(x[1]) for x in residue_pairs]
 
     query_len = len(query_units)
     header_index = [str(x) for x in range(1, query_len+1)]
