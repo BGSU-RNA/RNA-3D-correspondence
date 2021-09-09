@@ -210,6 +210,17 @@ def build_coord_data(ifes_ordered, corr_data):
   return coord_ordered, table_residue_rows
 
 
+def build_coord_data_unordered(corr_data):
+
+    coord_unordered = OrderedDict()
+
+    for k, v in corr_data.iteritems():
+        correspondence = ','.join(v)
+        coord_unordered[k] = correspondence
+
+    return coord_unordered
+
+
 def get_sorted_units(units):
     unsorted_units = units.split(',')
     # This assumes the last element after the split operation to be an integer
