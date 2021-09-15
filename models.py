@@ -115,4 +115,12 @@ class LoopInfo(Base):
 
 class UnitPairsInteractions(Base):
     __table__ = Base.metadata.tables['unit_pairs_interactions']
+
+
+class UnitPairsDistances(Base):
+    __table__ = Base.metadata.tables['unit_pairs_distances']
+
+
+class ChainInfo(Base):
+    __table__ = Base.metadata.tables['chain_info']
     
