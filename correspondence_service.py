@@ -36,7 +36,6 @@ def get_loop_correspondence(loop_names):
 					   .filter(tuple_(LoopInfo.pdb_id, LoopInfo.loop_name) \
 					   .in_(loop_names))
 
-
 		return [(row.loop_id, row.loop_name) for row in query]	
 
 
