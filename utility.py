@@ -47,6 +47,26 @@ def check_missing_correspondence(corr_complete, corr_std):
 	return missing_correspondence, corr_complete, corr_std
 
 
+def check_missing_correspondence_new(corr_complete, corr_std, chain):
+
+    correspondence_lengths = [len(v) for k,v in corr_std.iteritems()]
+
+    most_common_len = max(correspondence_lengths, key = correspondence_lengths.count)
+
+    entries_to_remove = []
+  
+    for ife, correspondence in corr_std.iteritems():
+        if len(correspondence) != most_common_len:
+            entries_to_remove.append(ife)
+
+    if entries_to_remove:
+        for k in entries_to_remove:
+            corr_std.pop(k, None)
+            corr_complete.pop(k, None)
+
+    return entries_to_remove, corr_complete, corr_std
+
+
 def order_data(rot, ctr):
 
       rot_keys = list(rot.keys())

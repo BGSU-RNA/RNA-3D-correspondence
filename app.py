@@ -225,7 +225,7 @@ def correspondence_without_ordering():
     correspondence, corr_complete, corr_std = cs.get_correspondence(query_units, members, method_equality)
 
     # Remove ec member/s that have missing correspondence
-    missing_data, corr_complete, corr_std = ui.check_missing_correspondence(corr_complete, corr_std)
+    missing_data, corr_complete, corr_std = ui.check_missing_correspondence_new(corr_complete, corr_std, chain_id)
 
     pairwise_data, pairwise_residue_pairs_reference = ps.get_pairwise_interactions(corr_complete)
 
