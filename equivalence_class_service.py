@@ -149,6 +149,10 @@ def check_valid_membership(members, query_data, exp_method):
 	else:
 		method_equality = False
 
+	# Check this logic
+	if exp_method == "all":
+		method_equality = True
+
 	return empty_members, method_equality
 
 
