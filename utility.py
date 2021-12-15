@@ -1,5 +1,5 @@
 from collections import OrderedDict, defaultdict
-from discrepancy import matrix_discrepancy
+from discrepancy import matrix_discrepancy, relative_discrepancy
 import numpy as np
 from ordering import optimalLeafOrder
 from ordering_similarity import treePenalizedPathLength
@@ -82,6 +82,18 @@ def order_data(rot, ctr):
     
       return rotation_ordered, center_ordered, common_keys
 
+def calculate_relative_disc(ife_list, center_data, core_len, query_len):
+    distances = defaultdict(lambda: defaultdict(int))
+
+    for a in range(0, len(ife_list)):
+        for b in range(a + 1, len(ife_list)):
+            disc = relative_discrepancy(center_data[a], center_data[b],
+                                        core_len, query_len)
+            distances[ife_list[a]][ife_list[b]] = disc
+
+    return distances 
+
+
 def calculate_geometric_disc(ife_list, rotation_data, center_data):
     distances = defaultdict(lambda: defaultdict(int))
 
@@ -93,7 +105,7 @@ def calculate_geometric_disc(ife_list, rotation_data, center_data):
 
     return distances 
       
-
+      
 def order_similarity(ife_list, distances):
     '''
     Calculates the order the similarity between the instances

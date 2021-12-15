@@ -98,6 +98,8 @@ def geometric_correspondence():
     res_num = query_parameters.get('res_num')
     input_type = query_parameters.get('selection_type')
     selection = query_parameters.get('selection')
+    disc_method = query_parameters.get('disc_method')
+    core_nts = query_parameters.get('core_res')
 
     if resolution not in accepted_resolutions:
         return 'Please enter a valid resolution. The accepted resolution values \
@@ -108,11 +110,16 @@ def geometric_correspondence():
     if input_type == 'res_num' and chain_id is None:
         return "Please enter the chain parameter"
 
-    query_units = qs.get_query_units_new(input_type, selection, chain_id)
+    if disc_method == 'geometric':
+        complete_query_units = qs.get_query_units_new(input_type, selection, chain_id)
+    elif disc_method == 'relative':
+        query_units = qs.get_query_units_new(input_type, selection, chain_id)
+        core_units = qs.get_query_units_new(input_type, core_nts, chain_id)
+        complete_query_units = core_units + query_units
 
-    query_data = ui.process_query_units(query_units)
+    query_data = ui.process_query_units(complete_query_units)
 
-    if input_type == 'unit_id' or input_type == 'loop_id': chain_id = ui.get_chain_id(query_units)
+    if input_type == 'unit_id' or input_type == 'loop_id': chain_id = ui.get_chain_id(complete_query_units)
 
     exp_method = ui.get_exp_method_name(exp_method)
 
@@ -125,7 +132,7 @@ def geometric_correspondence():
     if empty_members is True and method_equality is False: return "The current selection has no results returned. Please try a different selection"
     
     # Get the correspondences for all the members in the equivalence class
-    correspondence, corr_complete, corr_std = cs.get_correspondence(query_units, members, method_equality)
+    correspondence, corr_complete, corr_std = cs.get_correspondence(complete_query_units, members, method_equality)
 
     # Remove ec member/s that have missing correspondence
     missing_data, corr_complete, corr_std = ui.check_missing_correspondence(corr_complete, corr_std)
@@ -136,7 +143,7 @@ def geometric_correspondence():
 
     correspondence_positions = ui.get_correspondence_positions(corr_complete)
 
-    query_len = len(query_units)
+    query_len = len(complete_query_units)
 
     positions_header = ui.get_positions_header(query_len)
 
@@ -149,8 +156,11 @@ def geometric_correspondence():
     # Order rotation and center data before computing discrepancy
     rotation_ordered, center_ordered, ife_list = ui.order_data(rotation_data, center_data)
 
-    # Calculate geometric discrepancy
-    disc_data = ui.calculate_geometric_disc(ife_list, rotation_ordered, center_ordered)
+    if disc_method == 'geometric':
+        # Calculate geometric discrepancy
+        disc_data = ui.calculate_geometric_disc(ife_list, rotation_ordered, center_ordered)
+    elif disc_method == 'relative':
+        disc_data = ui.calculate_relative_disc(ife_list, center_ordered, len(core_units), len(query_units))
 
     # Get the instances ordered according to similarity
     ifes_ordered = ui.order_similarity(ife_list, disc_data)
