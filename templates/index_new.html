@@ -61,7 +61,12 @@
             <select class="form-control" id="input-type" name="selection_type">
                 <option value="loop_id">loop_id</option>
                 <option value="unit_id">unit_id</option>
+                <option value="res_num">residue_number</option>
             </select>
+            </br>
+
+            <label for="chain_id" style="display: none;">Enter the chain id</label>
+            <input type="text" class="form-control" id="chain_id" style="display: none;" name="chain" placeholder="Enter the chain id ">
             </br>
             
             <label for="selection">Enter Selection</label>
@@ -69,6 +74,17 @@
             <!--<i class="fas fa-check-circle"></i>
             <i class="fas fa-exclamation-circle"></i>
             <small>Error message</small>-->
+            </br>
+
+            <label for="discrepancy-method">Choose Discrepancy Calculation Method</label>
+            <select class="form-control" id="discrepancy-method" name="disc_method">
+                <option value="geometric" selected>Geometric</option>
+                <option value="relative">Relative</option>
+            </select>
+            </br>
+
+            <label for="core" style="display: none;">Enter the core nucleotides for alignment</label>
+            <input type="text" class="form-control" id="core" style="display: none;" name="core_res" placeholder="Enter the core nts ">
             </br>
 
             <label for="structure-resolution">Choose Equivalence Class Resolution Threshold</label>
@@ -118,6 +134,8 @@
                     Anticodon stem-loop in tRNA(Phe) from <i>S. cerevisae</i>
                   </a>
                 </li>
+
+                <button id="example-data3">Fill data</button>
                 
                 <!--<li>
                   <a class="example-data" data-units='2AW7|1|A||580:2AW7|1|A||584,2AW7|1|A||757:2AW7|1|A||761'>
@@ -164,6 +182,38 @@
     <!--<script src="/r3d-2-msa/static/js/form.js"></script>-->
 
     <script type="text/javascript">
+
+        document.getElementById("example-data3").addEventListener("click", simulateLogin("HL_5J7L_001"));
+
+        $('#discrepancy-method').change(function() {
+            let selected = $(this).val();
+            if(selected == 'relative'){
+                $('#core').show();
+                $('label[for="core"]').show();
+            }
+            else{
+                $('#core').hide();
+                $('label[for="core"]').hide();
+            }
+        });
+
+        $('#input-type').change(function() {
+            let selected = $(this).val();
+            if(selected == 'res_num'){
+                $('#chain_id').show();
+                $('label[for="chain_id"]').show();
+            }
+            else{
+                $('#chain_id').hide();
+                $('label[for="chain_id"]').hide();
+            }
+        });
+
+        function simulateLogin(loop_id)
+        {
+            var selection_field = document.getElementById("selection");
+            selection_field.value = loop_id;
+        }
 
       $('#generateCorrespondence').on('submit', function() {
   
