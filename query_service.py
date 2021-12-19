@@ -3,6 +3,7 @@ from models import UnitInfo, LoopInfo
 from database import db_session
 from sqlalchemy import or_
 import utility as ui
+import itertools
 
 def get_units(incomplete_units):
 
@@ -16,6 +17,42 @@ def get_units(incomplete_units):
     
         return complete_units
 
+def get_single_range_units(range_positions, pdb_id, chain):
+
+    with db_session() as session:
+
+        complete_units = []
+        query = session.query(UnitInfo).filter_by(pdb_id=pdb_id) \
+                                       .filter_by(chain=chain) \
+                                       .filter(UnitInfo.chain_index.between(range_positions[0], range_positions[1])) \
+                                       .order_by(UnitInfo.chain_index)
+
+        for row in query:
+            complete_units.append(row.unit_id)
+
+        return complete_units
+
+
+def get_multiple_range_units(range_positions_list, pdb_id, chain):
+
+    with db_session() as session:
+        
+        complete_units = []
+        for single_range in range_positions_list:
+            single_range_units = []
+            query = session.query(UnitInfo).filter_by(pdb_id=pdb_id) \
+                                       .filter_by(chain=chain) \
+                                       .filter(UnitInfo.chain_index.between(single_range[0], single_range[1])) \
+                                       .order_by(UnitInfo.chain_index)
+
+            for row in query:
+                single_range_units.append(row.unit_id)
+
+            complete_units.append(single_range_units)
+
+        #merged_units = list(itertools.chain(*complete_units))
+        # return the flattened list of lists
+        return list(itertools.chain(*complete_units))
 
 def get_loop_units(loop_id):
     
@@ -63,6 +100,16 @@ def get_query_units_new(input_type, selection, chain_id):
         incomplete_units = [chain + unit for unit in incomplete_units]
         complete_units = get_units(incomplete_units)
 
+    elif input_type == 'single_range':
+        pdb_id, model, chain = chain_id.split('|')
+        range_positions = selection.split(':')
+        complete_units = get_single_range_units(range_positions, pdb_id, chain)
+
+    elif input_type == 'multiple_ranges':
+        pdb_id, model, chain = chain_id.split('|')
+        ranges_selection = selection.split(",")
+        range_positions_list = [single_range.split(':') for single_range in ranges_selection]
+        complete_units = get_multiple_range_units(range_positions_list, pdb_id, chain)
 
     return complete_units
 
