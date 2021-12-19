@@ -137,8 +137,11 @@
       <div class="block-div resizable" id="annotation-panel">
                         <dl>
 
-                            <dt>Selection Structure Information:</dt>
+                            <dt>Selection Structure Information</dt>
                               <dd id="common_name" class="edit">{{ selection_data[0] }} (Chain{{selection_data[1]}})</dd>
+
+                              <dt>Source Organism</dt>
+                              <dd id="max_disc" class="edit"><i>{{ organism }}</i></dd>
 
                             <!--<dt>Selection Chain:</dt>
                               <dd id="common_name" class="edit">{{ selection_data[1] }}</dd>
@@ -146,10 +149,7 @@
                             <dt>Selection Residues:</dt>
                               <dd id="common_name" class="edit">{{ selection_data[2] }}</dd>-->
 
-                            <dt>Maximum Discrepancy:</dt>
-                              <dd id="max_disc" class="edit">{{ maxDisc }}</dd>
-
-                            <dt>Equivalence Class:</dt>
+                            <dt>Equivalence Class</dt>
                               <dd id="common_name" class="edit"><a href="http://rna.bgsu.edu/rna3dhub/nrlist/view/{{ ec_name }}" target="_blank">{{ ec_name }}</a></dd>
 
                             <dt>NR Release</dt>
@@ -157,6 +157,12 @@
 
                             <dt>Number of instances</dt>
                               <dd id="common_name" class="edit">{{ coord|length }}</a></dd>
+
+                            <dt>Maximum Discrepancy</dt>
+                              <dd id="max_disc" class="edit">{{ max_disc }}</dd>
+
+                            <dt>95th Percentile Discrepancy</dt>
+                              <dd id="max_disc" class="edit">{{ percentile }}</dd>
 
                         </dl>
       </div>

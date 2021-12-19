@@ -1,7 +1,16 @@
 from database import db_session
-from models import NrChains, NrClasses, NrReleases, IfeInfo, PDBInfo 
+from models import NrChains, NrClasses, NrReleases, IfeInfo, PDBInfo, ChainInfo 
 
 REJECT_LIST = ['5LZE|1|a+5LZE|1|y+5LZE|1|v+5LZE|1|x']
+
+def get_source_organism(chain_id):
+
+	pdb_id, model, chain = chain_id.split('|')
+
+	with db_session() as session:
+		query = session.query(ChainInfo).filter_by(pdb_id=pdb_id) \
+										.filter_by(chain_name=chain)
+		return query[0].source
 
 
 def get_class_id(ife, resolution):
