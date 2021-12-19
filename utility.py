@@ -179,6 +179,10 @@ def build_heatmap_data_new(distances, ifes_ordered):
 
     return max_disc, disc_list, row_labels
 
+def percentile(data, perc):
+    size = len(data)
+    return sorted(data)[int(math.ceil((size * perc) / 100)) - 1]
+
 def build_heatmap_data(distances, ifes_ordered):
     index1 = []
     index2 = []
@@ -207,6 +211,10 @@ def build_heatmap_data(distances, ifes_ordered):
     a = np.array(disc_formatted)
     a = a.astype(np.float)
 
+    disc_filtered = [float(x) for x in disc_formatted if x != 'nan']
+    percentile_score = percentile(disc_filtered, 95)
+    percentile_score = '%.4f' % percentile_score
+
     #return sorted_disc, None
 
     # .percentile/mean/mediab/amax doesn't appear to be working
@@ -221,9 +229,9 @@ def build_heatmap_data(distances, ifes_ordered):
         for if1, if1_index, if2, if2_index, discrepancy in zip(ife1, index1, ife2, index2, disc_formatted)
     ]
 
-    #disc_pairwise = zip(ife1, ife2, disc_formatted)
+    #disc_pairwise = zip(ife1, ife2, disc_filtered)
 
-    return max_disc, heatmap_data
+    return max_disc, heatmap_data, percentile_score
 
 
 def build_coord_data(ifes_ordered, corr_data):
