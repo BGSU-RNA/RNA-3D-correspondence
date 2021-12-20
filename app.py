@@ -110,6 +110,8 @@ def geometric_correspondence():
     if input_type == 'res_num' and chain_id is None:
         return "Please enter the chain parameter"
 
+    #return input_type + " " + selection + " " + chain_id
+
     if disc_method == 'geometric':
         complete_query_units = qs.get_query_units_new(input_type, selection, chain_id)
     elif disc_method == 'relative':
@@ -122,6 +124,8 @@ def geometric_correspondence():
     if input_type == 'unit_id' or input_type == 'loop_id': chain_id = ui.get_chain_id(complete_query_units)
 
     exp_method = ui.get_exp_method_name(exp_method)
+
+    source_organism = ec.get_source_organism(chain_id)
 
     # Get the equivalence class members that the query ife belongs to
     members, ec_name, nr_release = ec.get_ec_members(resolution, exp_method, chain_id)
@@ -166,7 +170,7 @@ def geometric_correspondence():
     ifes_ordered = ui.order_similarity(ife_list, disc_data)
 
     # Get discrepancy statistics and build the heatmap data for display
-    max_disc, heatmap_data = ui.build_heatmap_data(disc_data, ifes_ordered)
+    max_disc, heatmap_data, percentile_score = ui.build_heatmap_data(disc_data, ifes_ordered)
 
     # new heatmap method
     #max_disc, heatmap_data, row_labels = ui.build_heatmap_data_new(disc_data, ifes_ordered)
@@ -184,10 +188,11 @@ def geometric_correspondence():
 
     time_diff = '{0:.2f}'.format(end-start)
 
-    return render_template("comparison_display.html", data=heatmap_data, maxDisc=max_disc, coord=coord_data, ec_name=ec_name, 
+    return render_template("comparison_display.html", data=heatmap_data, max_disc=max_disc, coord=coord_data, ec_name=ec_name, 
                             nr_release=nr_release, code_time=time_diff, res_position=correspondence_positions, 
                             positions_header=positions_header, pairwise_interactions=pairwise_interactions_data,
-                            interactions_header=res_pairs, selection_data=query_data)
+                            interactions_header=res_pairs, selection_data=query_data, percentile=percentile_score,
+                            organism=source_organism)
 
 
 @app.route('/comparison_without_ordering')
