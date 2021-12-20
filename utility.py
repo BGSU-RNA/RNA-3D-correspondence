@@ -79,6 +79,10 @@ def order_data(rot, ctr):
 
       rotation_ordered = [rot.get(k) for k in common_keys]
       center_ordered = [ctr.get(k) for k in common_keys]
+      #rotation_ordered_dict = OrderedDict()
+
+      #for k in common_keys:
+          #rotation_ordered_dict[k] = rot.get(k)
     
       return rotation_ordered, center_ordered, common_keys
 
