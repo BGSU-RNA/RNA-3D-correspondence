@@ -29,12 +29,12 @@
         </div>
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
-            <li><a href="/" target="_blank">BGSU Home</a></li>
+            <li><a href="/" target="_blank">BGSU RNA Home</a></li>
             <!-- OLD HELP LINK
             <li><a href="/main/alignment-server-help/" target="_blank">Help</a></li>
             -->
-            <li><a href="">Help</a></li>
-            <li><a href="">APIs</a></li>
+            <li><a href="https://docs.google.com/document/d/1FZSLPdz89LLXahR7mZQXQmUGWXPVEKqWjcPBFf0vbIE/preview#heading=h.3mnkbpbqzfy1" target="_blank">Help</a></li>
+            <li><a href="https://www.bgsu.edu/research/rna/APIs.html" target="_blank">APIs</a></li>
           </ul>
         </div>
       </div>
@@ -46,7 +46,7 @@
 
         <p align="justify">
           The BGSU RNA group maintains a data pipeline and website that groups
-          together chains from various RNA containing PDB structure files that represent the same molecule from the same organism into <b>Equivalence Classes (EC)</b>. As part of our data annotation pipeline, we compute and store the correspondences between the residues in each pair of structures belonging to an Equivalence Class. The <b>Correspondence Server</b> can be used to query an RNA 3D motif or any set of nucleotides of interest in one RNA-containing PDB structure to find the corresponding nucleotides in each other structure in the equivalence class. The instances are ordered based on the geometric similarity so that instances that are more similar to each other are placed next to each other in the table
+          together chains from various RNA containing PDB structure files that represent the same molecule from the same organism into <b>Equivalence Classes (EC)</b>. As part of our data annotation pipeline, we compute and store the correspondences between the residues in each pair of structures belonging to an Equivalence Class. The <b>Correspondence Server</b> can be used to query an RNA 3D motif or any set of nucleotides of interest in one RNA-containing PDB structure to find the corresponding nucleotides in each other structure in the equivalence class. The instances are ordered based on similarity so that instances that are more similar to each other are placed next to each other in the table
         </p>
       </div>
       </br>
@@ -67,7 +67,7 @@
             </select>    
             </br>
 
-            <label for="chain_id" style="display: none;">Enter the PDB code and chain id</label>
+            <label for="chain_id" style="display: none;">Enter the chain_id</label>
             <input type="text" class="form-control" id="chain_id" style="display: none;" name="chain" placeholder="Enter the chain id ">
             <br id="newline1" style="display: none;">
             
@@ -137,6 +137,10 @@
                   </a>
                 </li>
               -->
+
+                <li>
+                  <a href="#" onClick="autoFillExample4(); return true;" >h18 internal loop in <i>S. cerevisae</i> SSU EM structures</a>
+                </li></br>
 
                 <li>
                   <a href="#" onClick="autoFillExample1(); return true;" >Decoding internal loop in <i>E. coli</i> SSU crystal structures</a>
@@ -319,6 +323,29 @@
         document.getElementById('core').value = "12,23,32,502,543,552,568,882,887,910";
         document.getElementById('structure-resolution').value = "4.0";
         document.getElementById('experimental-method').value = "xray";
+    
+        //var radioElements = document.getElementsByName("input3");
+      }
+
+      function autoFillExample4() {
+        
+        $('#chain_id').hide();
+        $('label[for="chain_id"]').hide();
+        $('#newline1').hide();
+        $('#core').hide();
+        $('label[for="core"]').hide();
+        $('#newline2').hide();
+
+
+        document.getElementById('input-type').value = "multiple_ranges";
+        $('#chain_id').show();
+        $('label[for="chain_id"]').show();
+        $('#newline1').show();
+        document.getElementById('chain_id').value = "5TBW|1|A";
+        document.getElementById('selection').value = "564:568,576:581";
+        document.getElementById('discrepancy-method').value = "geometric";
+        document.getElementById('structure-resolution').value = "4.0";
+        document.getElementById('experimental-method').value = "em";
     
         //var radioElements = document.getElementsByName("input3");
       }
