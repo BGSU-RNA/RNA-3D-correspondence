@@ -76,6 +76,8 @@ def get_chains(members, index_val):
 def process_members(members, id_type, index_val):
 
 	if id_type == 'ife':
+		# remove entries with only single chain
+		members = [elem for elem in members if '+' in elem]
 		members = get_chains(members, index_val)
 
 	members_processed = []
