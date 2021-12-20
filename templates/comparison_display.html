@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>BGSU RNA 3D Motif Correspondence Server</title>
+  <title>R3DMCS: RNA 3D Motif Correspondence Server</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
@@ -10,6 +10,12 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js" type="text/javascript"></script>
   <script src="http://rna.bgsu.edu/rna3dhub/js/jsmol/JSmol.min.nojq.js"></script>
   <script src="http://rna.bgsu.edu/rna3dhub/js/jquery.jmolTools.js"></script>
+  <script src="http://rna.bgsu.edu/rna3dhub/js/MotifAtlas.js" type="text/javascript"></script>
+
+  <script src="http://rna.bgsu.edu/rna3dhub/js/bootstrap-twipsy.js" type="text/javascript"></script>
+  <script src="http://rna.bgsu.edu/rna3dhub/js/bootstrap-popover.js" type="text/javascript"></script>
+
+  <script src="http://rna.bgsu.edu/rna3dhub/js/rcsbPdbImageLib.min.js" type="text/javascript"> </script>
   <!--<script src="http://rna.bgsu.edu/webfr3d/js/data_corr.js"></script>
   <script src="/static/js/jsmol/JSmol.min.nojq.js"></script>
   <script src="/static/js/jquery.jmolTools.js"></script>
@@ -75,7 +81,7 @@
           }
 
           var Info = {
-              width: 520,
+              width: 600,
               height: 400,
               debug: false,
               color: "white",
@@ -119,7 +125,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="/correspondence">Correspondence Server</a>
+      <a class="navbar-brand" href="/correspondence">R3DMCS Correspondence Server</a>
     </div>
     <div class="collapse navbar-collapse" id="myNavbar">
       <ul class="nav navbar-nav">
@@ -190,7 +196,7 @@
                 {% for k, v in coord.items() %}
                   <tr>
                     <td><input type='checkbox' id='{{ loop.index0 }}' class='jmolInline' data-coord = '{{ coord[k] }}' data-quality = '{{ coord[k] }}'>{{ loop.index }}</td>
-                    <td>{{ k }}</td>
+                    <td><a class='pdb'>{{ k }}</a></td>
                     <!--<td> {{ coord[k] }} </td>-->
                       {% for position_num in positions_header %}
                         <td> {{ res_position[k][position_num]}} </td>
@@ -212,18 +218,21 @@
 
   <div class="row content">
     
+    <!---
     <div class="col-sm-4">
       <div id ='chart'>
             <script type="text/javascript">
                 var data = {{ data | tojson | safe }};
             </script>
-            <!--<script type="text/javascript" src="http://rnatest.bgsu.edu/corr-server/static/js/heatmap.js"></script>-->
+            <script type="text/javascript" src="http://rnatest.bgsu.edu/corr-server/static/js/heatmap.js"></script>
       </div>
 
-    </div> 
+    </div>--> 
 
+    <!---
     <div class="col-sm-4">
     </div>
+    -->
     
 
     <div class="col-sm-4">
@@ -307,6 +316,16 @@
 
     </div>
 
+    <div class="col-sm-4">
+      <div id ='chart'>
+            <script type="text/javascript">
+                var data = {{ data | tojson | safe }};
+            </script>
+            <!--<script type="text/javascript" src="http://rnatest.bgsu.edu/corr-server/static/js/heatmap.js"></script>-->
+      </div>
+
+    </div> 
+
   </div>  
 
   
@@ -314,6 +333,12 @@
 </body>
 
 <script src="http://rna.bgsu.edu/webfr3d/js/heatmap.js"></script>
+
+<script>
+  $(function () {
+    $(".pdb").click(LookUpPDBInfo);
+  })
+</script>
 
 <footer class="container-fluid text-center">
   <p>BGSU RNA Home</p>
