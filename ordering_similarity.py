@@ -1,6 +1,12 @@
 import numpy as np
-from scipy.cluster.hierarchy import dendrogram, linkage
-from scipy.spatial.distance import squareform
+
+try:
+    from scipy.cluster.hierarchy import dendrogram, linkage
+    from scipy.spatial.distance import squareform
+    from scipy import linkage, squareform
+except:
+    pass
+
 import random
 import math
 
@@ -122,7 +128,13 @@ def treePenalizedPathLength(distance,repetitions=100,seed=None):
     n = distance.shape[0]
     if n > 2:
         distance = imputeNANValues(distance)
-        penalizedMatrix = distance + treePenalty(distance)
+
+        # in case scipy is not available
+        try:
+            penalizedMatrix = distance + treePenalty(distance)
+        except:
+            penalizedMatrix = distance
+
         order = multipleGreedyInsertionPathLength(penalizedMatrix,repetitions)
         order = orientPath(distance,order)
     else:
@@ -212,5 +224,5 @@ def testOrdering():
     print("Ordering:")
     print(order)
 
-testOrdering()
+#testOrdering()
 #testPenaltyMatrix()

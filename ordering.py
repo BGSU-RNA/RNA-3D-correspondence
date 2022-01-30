@@ -1,3 +1,4 @@
+"""
 import numpy as np
 
 # import scipy.cluster.hierarchy.dendrogram
@@ -28,4 +29,5 @@ def optimalLeafOrder(allvsallmatrix):
             newallvsallmatrix[i][j] = allvsallmatrix[dn['leaves'][i]][dn['leaves'][j]]
 
     return newOrder
+"""
 
