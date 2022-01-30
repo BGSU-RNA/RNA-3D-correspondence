@@ -1,7 +1,7 @@
 from collections import OrderedDict, defaultdict
 from discrepancy import matrix_discrepancy, relative_discrepancy
 import numpy as np
-from ordering import optimalLeafOrder
+#from ordering import optimalLeafOrder
 from ordering_similarity import treePenalizedPathLength
 import math
 
@@ -81,10 +81,43 @@ def order_data(rot, ctr):
       center_ordered = [ctr.get(k) for k in common_keys]
       #rotation_ordered_dict = OrderedDict()
 
+      missing_data = check_missing_rotation_or_center(rotation_ordered, center_ordered)
+
+      #return rotation_ordered, center_ordered, common_keys, missing_data
+
+      if missing_data:
+          rotation_ordered, center_ordered, common_keys = remove_instances_with_missing_data(common_keys, rotation_ordered, center_ordered, missing_data)
       #for k in common_keys:
           #rotation_ordered_dict[k] = rot.get(k)
     
-      return rotation_ordered, center_ordered, common_keys
+      return rotation_ordered, center_ordered, common_keys, missing_data
+
+
+def check_missing_rotation_or_center(rot, ctr):
+
+    missing_rotation_index = set()
+    for sublist in rot:
+        if None in sublist:
+            missing_rotation_index.add(rot.index(sublist))
+
+    missing_center_index = set()
+    for sublist in ctr:
+        if None in sublist:
+            missing_center_index.add(ctr.index(sublist))
+
+    missing_data = missing_rotation_index.union(missing_center_index)
+
+    return list(missing_data)
+
+
+def remove_instances_with_missing_data(common_keys, rot_ordered, ctr_ordered, missing_data_idxs):
+
+    for elem in reversed(missing_data_idxs):
+        del common_keys[elem]
+        del rot_ordered[elem]
+        del ctr_ordered[elem]
+
+    return rot_ordered, ctr_ordered, common_keys
 
 def calculate_relative_disc(ife_list, center_data, core_len, query_len):
     distances = defaultdict(lambda: defaultdict(int))
@@ -112,7 +145,7 @@ def calculate_geometric_disc(ife_list, rotation_data, center_data):
       
 def order_similarity(ife_list, distances):
     '''
-    Calculates the order the similarity between the instances
+    Calculates the order by similarity between the instances
     Input:
     ife_list: a list of ifes
     distances: a nested dictionary containing the discrepancy values between pairs of ifes
