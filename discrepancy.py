@@ -169,6 +169,13 @@ def matrix_discrepancy(centers1, rotations1, centers2, rotations2,
     n = len(centers1)
     discrepancy = np.sqrt(sse + angle_weight * orientation_error) / n
     
+    # suppress green squares in heat map by catching NaN values
+    #if np.isnan(discrepancy):
+    #    discrepancy = 0.0
+
+    # drop any imaginary part from the discrepancy
+    #discrepancy = discrepancy.real
+
     
     return discrepancy
 
