@@ -202,8 +202,12 @@ def geometric_correspondence():
         # Get center data
         center_data = get_center(correspondence, corr_std)
 
+        status_text += "Got %s center and %s rotation data<br>" % (len(center_data),len(rotation_data))
+
         # Order rotation and center data before computing discrepancy
         rotation_ordered, center_ordered, ife_list, missing_data = ui.order_data(rotation_data, center_data)
+
+        status_text += "Ordered center and rotation data<br>"
 
         '''
         rotation_data_length = set()
