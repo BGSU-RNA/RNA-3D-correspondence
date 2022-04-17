@@ -4,6 +4,7 @@ from database import db_session
 from sqlalchemy import or_
 import utility as ui
 import itertools
+import re
 
 def get_units(incomplete_units):
 
@@ -92,7 +93,8 @@ def get_query_units_new(input_type, selection, chain_id):
         complete_units = ui.get_sorted_units(unsorted_units)
 
     elif input_type == 'unit_id':
-        complete_units = selection.split(",")
+        # complete_units = selection.split(",")
+        complete_units = re.split(',|\t', selection)
 
     elif input_type == 'res_num':
         incomplete_units = selection.split(",")
