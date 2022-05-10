@@ -129,7 +129,7 @@ def calculate_relative_disc(ife_list, center_data, core_len, query_len):
                                             core_len, query_len)
                 distances[ife_list[a]][ife_list[b]] = disc
             except:
-                distances[ife_list[a]][ife_list[b]] = disc
+                distances[ife_list[a]][ife_list[b]] = None
 
     return distances 
 
