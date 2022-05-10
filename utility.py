@@ -124,9 +124,12 @@ def calculate_relative_disc(ife_list, center_data, core_len, query_len):
 
     for a in range(0, len(ife_list)):
         for b in range(a + 1, len(ife_list)):
-            disc = relative_discrepancy(center_data[a], center_data[b],
-                                        core_len, query_len)
-            distances[ife_list[a]][ife_list[b]] = disc
+            try:
+                disc = relative_discrepancy(center_data[a], center_data[b],
+                                            core_len, query_len)
+                distances[ife_list[a]][ife_list[b]] = disc
+            except:
+                distances[ife_list[a]][ife_list[b]] = disc
 
     return distances 
 
@@ -136,11 +139,15 @@ def calculate_geometric_disc(ife_list, rotation_data, center_data):
 
     for a in range(0, len(ife_list)):
         for b in range(a + 1, len(ife_list)):
-            disc = matrix_discrepancy(center_data[a], rotation_data[a], center_data[b],
-                                      rotation_data[b])
-            distances[ife_list[a]][ife_list[b]] = disc
+            try:
+                disc = matrix_discrepancy(center_data[a], rotation_data[a], center_data[b],
+                                        rotation_data[b])
+                distances[ife_list[a]][ife_list[b]] = disc
+            except:
+                distances[ife_list[a]][ife_list[b]] = None
 
     return distances 
+
       
       
 def order_similarity(ife_list, distances):
