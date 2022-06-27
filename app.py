@@ -398,6 +398,16 @@ def loop_correspondence():
     return display_str
 
 
+@app.route('/circular')
+def circular_diagram():
+
+    query_parameters = request.args
+
+    chains = query_parameters.get('chains')
+
+    return 'Request to create circular diagram for %s' % chains
+
+
 if __name__ == '__main__':
     app.debug = False
     app.run()
