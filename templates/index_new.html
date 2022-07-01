@@ -4,6 +4,7 @@
   <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     <link rel="shortcut icon" href="http://rnatest.bgsu.edu/rna3dhub/icons/C_icon.png">
     <link rel="stylesheet" type="text/css" href="/r3d-2-msa/static/css/style.css">
     <script src="https://use.fontawesome.com/fa1f25e5ba.js"></script>
@@ -52,7 +53,7 @@
 
         <form class="form-horizontal col-sm-12" id="generateCorrespondence" action="http://rnatest.bgsu.edu/correspondence/comparison">
 
-          <div class="form-group col-sm-5">
+          <div class="form-group col-sm-4">
 
             <label for="ife">Choose selection type</label>
             <select class="form-control" id="input-type" name="selection_type">
@@ -64,8 +65,11 @@
             </select>    
             </br>
 
-            <label for="chain_id" style="display: none;">Enter the chain_id</label>
+            <label for="chain_id" style="display: none;">Enter the PDB id, model number and chain id separated by vertical bars</label>
             <input type="text" class="form-control" id="chain_id" style="display: none;" name="chain" placeholder="Enter the chain id ">
+            <i class="fas fa-check-circle" style="display: none;" id="icon_correct_one"></i>
+            <i class="fas fa-exclamation-circle" style="display: none;" id="icon_false_one"></i>
+            <small style="display: none;">Error message</small>
             <br id="newline1" style="display: none;">
             
             <label for="selection">Enter selection</label>
@@ -162,11 +166,15 @@
                 $('#chain_id').show();
                 $('label[for="chain_id"]').show();
                 $('#newline1').show();
+                $('#icon_correct_one').show();
+                $('#icon_false_one').show();
             }
             else{
                 $('#chain_id').hide();
                 $('label[for="chain_id"]').hide();
                 $('#newline1').hide();
+                $('#icon_correct_one').hide();
+                $('#icon_false_one').hide();
             }
         });
 
