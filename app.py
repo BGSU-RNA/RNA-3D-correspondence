@@ -16,6 +16,8 @@ import numpy as np
 import sys
 import time
 
+#from motif_variability import get_sequence_variability
+
 app = Flask(__name__, template_folder='templates')
 
 accepted_resolutions = ['1.5', '2', '2.0', '2.5', '3', '3.0', '3.5', '4', '4.0', 'all']
@@ -398,14 +400,39 @@ def loop_correspondence():
     return display_str
 
 
-@app.route('/circular')
-def circular_diagram():
+@app.route('/motif_variability')
+def motif_variability():
+
+    #from motif_variability import get_sequence_variability
 
     query_parameters = request.args
 
-    chains = query_parameters.get('chains')
+    loop_id = query_parameters.get('loop_id')
+    output_format = query_parameters.get('output_format')
 
-    return 'Request to create circular diagram for %s' % chains
+    if len(loop_id) > 11:
+        output = 'Invalid loop id %s' % loop_id
+        return output
+
+    #output = get_sequence_variability(loop_id,output_format)
+
+    output = 'New request made for loop_id %s with output format %s' % (loop_id,output_format)
+
+    return output
+
+
+@app.route('/circular')
+def circular_diagram():
+
+    # import circular_diagram_13
+
+    query_parameters = request.args
+
+    chains_string = str(query_parameters.get('chains',default='',type=str))
+
+    # circular_diagram_13.main([None,chains_string])
+
+    return 'Trying to create the circular diagram for %s' % (chains_string)
 
 
 if __name__ == '__main__':
