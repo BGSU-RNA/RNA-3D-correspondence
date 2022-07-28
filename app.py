@@ -424,15 +424,33 @@ def motif_variability():
 @app.route('/circular')
 def circular_diagram():
 
-    # import circular_diagram_13
+    from flask import send_file
+    import os
+    import circular_diagram_14
 
     query_parameters = request.args
 
     chains_string = str(query_parameters.get('chains',default='',type=str))
 
-    # circular_diagram_13.main([None,chains_string])
+    try:
+        filename = ""
+        filename = circular_diagram_14.main([None,chains_string])
+        iii = 3
+    except Exception as e:
+        return str(e)
 
-    return 'Trying to create the circular diagram for %s' % (chains_string)
+    # return 'Trying to create the circular diagram for %s' % (chains_string)
+
+
+    ps_file  = os.path.join('/var/www/correspondence/circular_diagram_pdf',filename+".ps")
+    pdf_file = os.path.join('/var/www/correspondence/circular_diagram_pdf',filename+".pdf")
+
+    os.remove(ps_file)
+
+    try:
+        return send_file(pdf_file, attachment_filename=filename+".pdf")
+    except Exception as e:
+        return str(e)
 
 
 if __name__ == '__main__':
