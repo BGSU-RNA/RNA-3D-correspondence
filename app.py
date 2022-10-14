@@ -16,9 +16,17 @@ import numpy as np
 import sys
 import time
 
+
+#from flask_cors import CORS   # for circular
+
+
 #from motif_variability import get_sequence_variability
 
 app = Flask(__name__, template_folder='templates')
+
+
+#CORS(app,expose_headers=["x-suggested-filename"])  # for circular
+
 
 accepted_resolutions = ['1.5', '2', '2.0', '2.5', '3', '3.0', '3.5', '4', '4.0', 'all']
 
@@ -448,7 +456,13 @@ def circular_diagram():
     os.remove(ps_file)
 
     try:
-        return send_file(pdf_file, attachment_filename=filename+".pdf")
+        #return send_file(pdf_file, attachment_filename=filename+".pdf")  # wrong download name
+        return send_file(pdf_file, attachment_filename=filename+".pdf", as_attachment=True)  # instant download
+
+        #response = send_file(pdf_file, attachment_filename = filename+".pdf")
+        #response.headers["x-suggested-filename"] = filename+".pdf"
+        #response.headers["Access-Control-Expose-Headers"] = 'x-suggested-filename'
+        #return response
     except Exception as e:
         return str(e)
 
