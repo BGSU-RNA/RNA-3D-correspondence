@@ -17,8 +17,10 @@ def get_class_id(ife, resolution):
 
 	with db_session() as session:
 		query = session.query(NrChains).join(NrClasses, NrReleases) \
-	        					       .filter(NrChains.ife_id == ife).filter(NrClasses.resolution == resolution) \
-	                                   .order_by(NrReleases.date.desc()).limit(1)
+	        					       .filter(NrChains.ife_id == ife) \
+	        					       .filter(NrClasses.resolution == resolution) \
+	                                   .order_by(NrReleases.date.desc()) \
+	                                   .limit(1)
 		return query[0].nr_class_id
 
 
@@ -135,14 +137,37 @@ def get_id_type(query_id):
 def get_ec_members(resolution, exp_method, query_id):
 	
 	#query_ife = '|'.join(units[0].split('|')[:3])
-	id, id_type, query_id_index = get_id_type(query_id)
-	class_id = get_class_id(id, resolution)
-	ec_name, nr_release = get_ec_info(class_id)
-	members = get_members(class_id, exp_method)
-	if id in members: members.remove(id)
-	members = process_members(members, id_type, query_id_index)
 
-	return members, ec_name, nr_release
+	error_msg = "No members found in equivalence class"
+
+	try:
+		error_msg = "Query id type not found"
+
+		print("get_ec_members query_id:",query_id)
+
+		id, id_type, query_id_index = get_id_type(query_id)
+
+		print("get_ec_members id, id_type, query_id_index:",id,id_type,query_id_index)
+
+		error_msg = "Equivalence class id not found, check resolution threshold"
+		class_id = get_class_id(id, resolution)
+		error_msg = "Equivalence class name/release not found"
+		ec_name, nr_release = get_ec_info(class_id)
+		error_msg = "Equivalence class members not found"
+		members = get_members(class_id, exp_method)
+		if id in members: members.remove(id)
+
+		members = process_members(members, id_type, query_id_index)
+
+		if len(members) == 0:
+			error_msg = "No members found in equivalence class"
+		else:
+			error_msg = ""
+
+		return members, ec_name, nr_release, error_msg
+
+	except:
+		return [], "", "", error_msg
 
 
 def check_valid_membership(members, query_data, exp_method):

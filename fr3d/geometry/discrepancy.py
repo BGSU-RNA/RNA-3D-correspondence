@@ -131,5 +131,6 @@ def discrepancy(ntlist1, ntlist2, centers=['base'], base_weights=1.0,
             angle = angle_of_rotation(np.dot(np.dot(rotation_matrix,R1), np.transpose(R2)))
             orientationerror += np.square(angle)
     discrepancy = np.sqrt(sse + angleweight*orientationerror) / len(ntlist1)
+
     return discrepancy
     #I must be calculating this part incorrectly, since rotation_matrix is cor
