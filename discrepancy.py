@@ -169,20 +169,21 @@ def matrix_discrepancy(centers1, rotations1, centers2, rotations2,
     n = len(centers1)
     discrepancy = np.sqrt(sse + angle_weight * orientation_error) / n
     
-    
     return discrepancy
 
 
 def relative_discrepancy(centers1, centers2, start_nt, query_len, center_weight=[1.0]):
-
+    # Superimpose core nucleotides in the reference and target structures
     rotation_matrix, new1, mean1, RMSD, sse, mean2 = \
         besttransformation_weighted(centers1[0:start_nt], centers2[0:start_nt], center_weight)
     rotation_matrix = np.transpose(rotation_matrix)
-
+    
+    # Calculated translated and rotated unit centers for structure 1 superimposed on structure 2
     newcenters = {}
     for i in range(start_nt, len(centers1)):
         newcenters[i] = np.dot(rotation_matrix, (centers1[i] - mean1)) + mean2
 
+    # Calculate distance
     d = 0
     for i in range(start_nt, len(centers1)):
         d += np.linalg.norm(newcenters[i] - centers2[i])**2
