@@ -13,7 +13,7 @@ session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 '''
 
-engine = create_engine('mysql://sria:sri@127.0.0.1/rna3dhub-prod', convert_unicode=True, echo=False)
+engine = create_engine('mysql://sria:sria@127.0.0.1/rna3dhub-next', convert_unicode=True, echo=False)
 Base = declarative_base()
 Base.metadata.reflect(engine)
 
