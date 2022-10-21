@@ -19,9 +19,6 @@ import time
 
 #from flask_cors import CORS   # for circular
 
-
-#from motif_variability import get_sequence_variability
-
 app = Flask(__name__, template_folder='templates')
 
 
@@ -485,27 +482,6 @@ def motif_variability():
         return output
 
     # output = get_sequence_variability(loop_id,output_format)
-
-    output = 'New request made for loop_id %s with output format %s' % (loop_id,output_format)
-
-    return output
-
-
-@app.route('/motif_variability')
-def motif_variability():
-
-    #from motif_variability import get_sequence_variability
-
-    query_parameters = request.args
-
-    loop_id = query_parameters.get('loop_id')
-    output_format = query_parameters.get('output_format')
-
-    if len(loop_id) > 11:
-        output = 'Invalid loop id %s' % loop_id
-        return output
-
-    #output = get_sequence_variability(loop_id,output_format)
 
     output = 'New request made for loop_id %s with output format %s' % (loop_id,output_format)
 
