@@ -467,23 +467,68 @@ def loop_correspondence():
 
     return display_str
 
-@app.route('/motif_variability')
-def motif_variability():
+@app.route('/variability')
+def variability():
 
-    #from motif_variability import get_sequence_variability
+    try:
+        from motif_variability import get_sequence_variability
+    except Exception as inst:
+        output = "%s<br>" % type(inst)
+        output += "%s<br>" % inst.args
+        output += "%s<br>" % inst
+        return output
 
     query_parameters = request.args
 
     loop_id = query_parameters.get('loop_id')
-    output_format = query_parameters.get('output_format')
+    unit_id = query_parameters.get('unit_id')       # if not given, value is False
+    extension = query_parameters.get('extension')
+    output_format = query_parameters.get('format')
 
-    if len(loop_id) > 11:
-        output = 'Invalid loop id %s' % loop_id
-        return output
+    to_do = []
 
-    # output = get_sequence_variability(loop_id,output_format)
+    if extension:
+        extension = int(extension)
+    else:
+        extension = 0
 
-    output = 'New request made for loop_id %s with output format %s' % (loop_id,output_format)
+    if not output_format:
+        output_format = "full"
+
+    if unit_id:
+        if not "|" in unit_id:
+            output = 'Invalid loop id %s' % loop_id
+            return output
+        to_do = [unit_id.split(",")]
+        output = 'New request made for unit_id %s with extension %s and output format %s<br>\n' % (to_do,extension,output_format)
+
+    elif loop_id:
+        if not len(loop_id) == 11 or not len(loop_id.split("_")) == 3:
+            output = 'Invalid loop id %s' % loop_id
+            return output
+        to_do = [[loop_id]]
+        output = 'New request made for loop_id %s with extension %s and output format %s<br>\n' % (to_do,extension,output_format)
+
+
+    if output_format in ["full","unique","fasta","top_motif_models"] or "top" in output_format:
+
+        if output_format == "top_motif_models" and not loop_id:
+            output += "<br>\ntop_motif_models only available for loop input"
+
+        try:
+            output_list, families = get_sequence_variability(to_do,extension,output_format)
+
+            # at the moment, output_list is not actually a list
+            output = output_list
+
+        except Exception as inst:
+            output += "%s<br>\n" % type(inst)
+            output += "%s<br>\n" % inst.args
+            output += "%s<br>\n" % inst
+
+    else:
+
+        output += "<br>\nUnknown output format, try full, unique, fasta, top_95_percent, top_20_sequences"
 
     return output
 
