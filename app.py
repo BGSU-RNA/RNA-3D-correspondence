@@ -1,5 +1,6 @@
 from flask import Flask
 from flask import render_template, request
+from flask import make_response              # for motif variability, to return plain text
 import process_input as pi
 import query_service as qs
 import equivalence_class_service as ec
@@ -7,6 +8,7 @@ import correspondence_service as cs
 import pairwise_service as ps
 from rotation import get_rotation
 from center import get_center
+import logging
 import utility as ui
 import json
 import time
@@ -20,8 +22,6 @@ import time
 #from flask_cors import CORS   # for circular
 
 app = Flask(__name__, template_folder='templates')
-
-
 #CORS(app,expose_headers=["x-suggested-filename"])  # for circular
 
 
@@ -54,6 +54,7 @@ def display_correspondence():
     input_type = pi.check_input_type(loop_id, unit_id, res_num)
 
     if input_type == 'res_num' and chain_id is None:
+
         return "Please enter the chain parameter"
 
     query_units = qs.get_query_units_new(input_type, loop_id, unit_id, \
@@ -235,6 +236,8 @@ def geometric_correspondence():
         return status_text + "<br>... and then something went wrong"
 
     #return "Temporary return string" + "<br>" + str(complete_query_units) + "<br>" + str(disc_data)
+
+    return str(disc_data)
 
     # Get the instances ordered according to similarity
     ifes_ordered = ui.order_similarity(ife_list, disc_data)
@@ -473,13 +476,14 @@ def variability():
     try:
         from motif_variability import get_sequence_variability
     except Exception as inst:
-        output = "%s<br>" % type(inst)
-        output += "%s<br>" % inst.args
-        output += "%s<br>" % inst
+        output = "%s" % type(inst)
+        output += "%s" % inst.args
+        output += "%s" % inst
         return output
 
     query_parameters = request.args
 
+    id = query_parameters.get('id')            # better to just allow some kind of id
     loop_id = query_parameters.get('loop_id')
     unit_id = query_parameters.get('unit_id')       # if not given, value is False
     extension = query_parameters.get('extension')
@@ -500,20 +504,25 @@ def variability():
             output = 'Invalid loop id %s' % loop_id
             return output
         to_do = [unit_id.split(",")]
-        output = 'New request made for unit_id %s with extension %s and output format %s<br>\n' % (to_do,extension,output_format)
-
+        output = 'New request made for unit_id %s with extension %s and output format %s\n' % (to_do,extension,output_format)
     elif loop_id:
         if not len(loop_id) == 11 or not len(loop_id.split("_")) == 3:
             output = 'Invalid loop id %s' % loop_id
             return output
         to_do = [[loop_id]]
-        output = 'New request made for loop_id %s with extension %s and output format %s<br>\n' % (to_do,extension,output_format)
+        output = 'New request made for loop_id %s with extension %s and output format %s\n' % (to_do,extension,output_format)
+    elif id:
+        if not "|" in id and not "_" in id:
+            output = 'Invalid id %s' % loop_id
+            return output
+        to_do = [[id]]
+        output = 'New request made for id %s with extension %s and output format %s\n' % (id,extension,output_format)
 
 
     if output_format in ["full","unique","fasta","top_motif_models"] or "top" in output_format:
 
         if output_format == "top_motif_models" and not loop_id:
-            output += "<br>\ntop_motif_models only available for loop input"
+            output += "\ntop_motif_models only available for loop input"
 
         try:
             output_list, families = get_sequence_variability(to_do,extension,output_format)
@@ -522,15 +531,18 @@ def variability():
             output = output_list
 
         except Exception as inst:
-            output += "%s<br>\n" % type(inst)
-            output += "%s<br>\n" % inst.args
-            output += "%s<br>\n" % inst
+            output += "%s\n" % type(inst)
+            #output += "%s\n" % inst.args
+            output += "%s\n" % inst
 
     else:
 
-        output += "<br>\nUnknown output format, try full, unique, fasta, top_95_percent, top_20_sequences"
+        output += "\nUnknown output format, try full, unique, fasta, top_95_percent, top_20_sequences"
 
-    return output
+    response = make_response(output, 200)
+    response.mimetype = "text/plain"
+
+    return response
 
 
 @app.route('/circular')
