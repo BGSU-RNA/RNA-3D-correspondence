@@ -237,7 +237,8 @@ def geometric_correspondence():
 
     #return "Temporary return string" + "<br>" + str(complete_query_units) + "<br>" + str(disc_data)
 
-    return str(disc_data)
+    # debugging purpose
+    # return str(disc_data)
 
     # Get the instances ordered according to similarity
     ifes_ordered = ui.order_similarity(ife_list, disc_data)
