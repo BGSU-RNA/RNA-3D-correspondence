@@ -7,19 +7,15 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+  
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js" type="text/javascript"></script>
   <script src="http://rna.bgsu.edu/rna3dhub/js/jsmol/JSmol.min.nojq.js"></script>
   <script src="http://rna.bgsu.edu/rna3dhub/js/jquery.jmolTools.js"></script>
-  <script src="http://rna.bgsu.edu/rna3dhub/js/MotifAtlas.js" type="text/javascript"></script>
 
   <script src="http://rna.bgsu.edu/rna3dhub/js/bootstrap-twipsy.js" type="text/javascript"></script>
   <script src="http://rna.bgsu.edu/rna3dhub/js/bootstrap-popover.js" type="text/javascript"></script>
-
   <script src="http://rna.bgsu.edu/rna3dhub/js/rcsbPdbImageLib.min.js" type="text/javascript"> </script>
-  <!--<script src="http://rna.bgsu.edu/webfr3d/js/data_corr.js"></script>
-  <script src="/static/js/jsmol/JSmol.min.nojq.js"></script>
-  <script src="/static/js/jquery.jmolTools.js"></script>
-  <script src="/static/js/data_test.js"></script>-->
+
 
   <script src="//d3js.org/d3.v4.min.js"></script>
   <style>
@@ -142,7 +138,6 @@
     <div class="col-sm-2 sidenav" text-left">
       <div class="block-div resizable" id="annotation-panel">
                         <dl>
-
                             <dt>Selection Structure Information</dt>
                               <dd id="common_name" class="edit">{{ selection_data[0] }} (Chain{{selection_data[1]}})</dd>
 
@@ -169,10 +164,8 @@
 
                             <dt>95th Percentile Discrepancy</dt>
                               <dd id="max_disc" class="edit">{{ percentile }}</dd>
-
                         </dl>
       </div>
-
     </div>
 
 
@@ -183,7 +176,6 @@
                 <tr>
                   <th scope="col">View</th>
                   <th scope="col">RNA Chain</th>
-                  <!--<th scope="col" class="text-nowrap">Residues</th>-->
                   {% for position_num in positions_header %}
                     <th scope="col">{{ position_num }}</th>
                   {% endfor %}
@@ -195,9 +187,8 @@
               <tbody class="text-justify">
                 {% for k, v in coord.items() %}
                   <tr>
-                    <td><input type='checkbox' id='{{ loop.index0 }}' class='jmolInline' data-coord = '{{ coord[k] }}' data-quality = '{{ coord[k] }}'>{{ loop.index }}</td>
+                    <td><input type='checkbox' id='{{ loop.index0 }}' class='jmolInline' data-coord = '{{ coord[k] }}'>{{ loop.index }}</td>
                     <td><a class='pdb'>{{ k }}</a></td>
-                    <!--<td> {{ coord[k] }} </td>-->
                       {% for position_num in positions_header %}
                         <td> {{ res_position[k][position_num]}} </td>
                       {% endfor %}
@@ -218,24 +209,7 @@
 
   <div class="row content">
     
-    <!---
-    <div class="col-sm-4">
-      <div id ='chart'>
-            <script type="text/javascript">
-                var data = {{ data | tojson | safe }};
-            </script>
-            <script type="text/javascript" src="http://rnatest.bgsu.edu/corr-server/static/js/heatmap.js"></script>
-      </div>
-
-    </div>--> 
-
-    <!---
-    <div class="col-sm-4">
-    </div>
-    -->
-    
-
-    <div class="col-sm-4">
+    <div class="col-sm-4 viewer">
         <script type="text/javascript">
 
           jmolApplet0 = Jmol.getApplet("jmolApplet0", Info);
@@ -266,79 +240,23 @@
           Coloring options: <select id="colorOPT">
                           <option value="Default" selected>Default</option>
                           <option value="CPK">CPK</option>
-                          <option value="RSR">Real Space R (RSR)</option>
-                          <option value="RSRZ">RSR Z-Score (RSRZ)</option></select>
-
-          <div class='showRSR' style="display:none">
-                    <svg height="30" width="340">
-                        <defs>
-                            <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="0%">
-                                <stop offset="10%" style="stop-color:#0d0887; stop-opacity:1" />
-                                <stop offset="20%" style="stop-color:#6603a5; stop-opacity:1" />
-                                <stop offset="30%" style="stop-color:#8a0da2; stop-opacity:1" />
-                                <stop offset="40%" style="stop-color:#ac2693; stop-opacity:1" />
-                                <stop offset="50%" style="stop-color:#ca457a; stop-opacity:1" />
-                                <stop offset="60%" style="stop-color:#df6264; stop-opacity:1" />
-                                <stop offset="70%" style="stop-color:#f0824d; stop-opacity:1" />
-                                <stop offset="80%" style="stop-color:#faa638; stop-opacity:1" />
-                                <stop offset="90%" style="stop-color:#fbcc27; stop-opacity:1" />
-                                <stop offset="100%" style="stop-color:#f0f921; stop-opacity:1" />
-                            </linearGradient>
-                        </defs>
-                    <rect x="0" y="0" width="300" height="15" fill="url(#grad3)"  />
-                    <text x="0" y="30" font-family="sans-serif" font-size="12px" fill="black">0.0</text>
-                    <text x="70" y="30" font-family="sans-serif" font-size="12px" fill="black">RSR Scale truncated at 0.5</text>
-                    <text x="285" y="30" font-family="sans-serif" font-size="12px" fill="black">0.5</text>
-                    </svg>
-          </div>
-
-          <div class='showRSRZ' style="display:none">
-                    <svg height="45" width="340">
-                        <defs>
-                        <text x="120" y="0" font-family="sans-serif" font-size="12px" fill="black">RSRZ Scale</text>
-                            <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="0%">
-                                <stop offset="25%" style="stop-color:green;stop-opacity:1" />
-                                <stop offset="25%" style="stop-color:yellow;stop-opacity:1" />
-                                <stop offset="50%" style="stop-color:yellow;stop-opacity:1" />
-                                <stop offset="50%" style="stop-color:orange;stop-opacity:1" />
-                                <stop offset="75%" style="stop-color:orange;stop-opacity:1" />
-                                <stop offset="75%" style="stop-color:red;stop-opacity:1" />
-                                <stop offset="100%" style="stop-color:red;stop-opacity:1" />
-                            </linearGradient>
-                        </defs>
-                    <rect x="0" y="0" width="300" height="15" fill="url(#grad2)"  />
-                    <text x="72" y="30" font-family="sans-serif" font-size="12px" fill="black">1</text>
-                    <text x="147" y="30" font-family="sans-serif" font-size="12px" fill="black">2</text>
-                    <text x="223" y="30" font-family="sans-serif" font-size="12px" fill="black">3</text>
-                    <text x="120" y="45" font-family="sans-serif" font-size="12px" fill="black">RSRZ Scale</text>
-                    </svg>
-          </div>
-
     </div>
 
-    <div class="col-sm-4">
+    <div class="col-sm-4 heatmap">
       <div id ='chart'>
             <script type="text/javascript">
-                var data = {{ data | tojson | safe }};
+                const data = {{ data | tojson | safe }};
             </script>
-            <!--<script type="text/javascript" src="http://rnatest.bgsu.edu/corr-server/static/js/heatmap.js"></script>-->
       </div>
-
     </div> 
+
 
   </div>  
 
   
 </div>
 </body>
-
-<script src="http://rna.bgsu.edu/webfr3d/js/heatmap.js"></script>
-
-<script>
-  $(function () {
-    $(".pdb").click(LookUpPDBInfo);
-  })
-</script>
+<script type="text/javascript" src="http://rna.bgsu.edu/webfr3d/js/heatmap.js"></script>
 
 <footer class="container-fluid text-center">
   <p>BGSU RNA Home</p>
