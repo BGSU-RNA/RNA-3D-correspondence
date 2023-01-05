@@ -108,3 +108,32 @@ venv.bak/
 
 #ignore testing files
 test_app.py
+
+#ignore all the following files
+RPFAM.py
+RPFAM_configuration.py
+Rfam.pdb.gz
+align_chains.py
+alignments
+circular_diagram_14.py
+circular_diagram_configuration.py
+circular_diagram_pdf/
+dict.csv
+fr3d_interactions.py
+functional_annotation.py
+get_ligands.py
+get_protein_compounds.py
+interactions/
+js/
+loop_lists/
+motif_variability.py
+pfam_chain_mapping.py
+process_annotation.py
+protein_chain_annotation.csv
+result_example1.txt
+results/
+rfam_chain_mapping.py
+ribosome_chain_annotation.csv
+ribosome_chain_annotation_new.csv
+static/js/heatmap_new.js
+status.txt
