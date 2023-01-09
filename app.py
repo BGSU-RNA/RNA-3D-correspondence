@@ -262,7 +262,7 @@ def geometric_correspondence():
 
     time_diff = '{0:.2f}'.format(end-start)
 
-    return render_template("comparison_display.html", data=heatmap_data, max_disc=max_disc, coord=coord_data, ec_name=ec_name, 
+    return render_template("comparison_test.html", data=heatmap_data, max_disc=max_disc, coord=coord_data, ec_name=ec_name, 
                             nr_release=nr_release, code_time=time_diff, res_position=correspondence_positions, 
                             positions_header=positions_header, pairwise_interactions=pairwise_interactions_data,
                             interactions_header=res_pairs, selection_data=query_data, percentile=percentile_score,
