@@ -142,6 +142,10 @@ def geometric_correspondence():
         if len(complete_query_units) == 0:
             return "Not able to find units in " + str(chain_id) + " " + str(selection)
 
+        complete_query_units_str = ",".join(complete_query_units)
+
+        sequence_count_dict = ui.get_sequence_variability(complete_query_units_str)
+
         query_data = ui.process_query_units(complete_query_units)
 
         status_text += "Got query_data<br>"
@@ -266,7 +270,7 @@ def geometric_correspondence():
                             nr_release=nr_release, code_time=time_diff, res_position=correspondence_positions, 
                             positions_header=positions_header, pairwise_interactions=pairwise_interactions_data,
                             interactions_header=res_pairs, selection_data=query_data, percentile=percentile_score,
-                            organism=source_organism)
+                            organism=source_organism, sequence_count_dict=sequence_count_dict)
 
 
 @app.route('/pairwise_interactions')

@@ -18,9 +18,41 @@
     </style>
 </head>
 <body>
+
+    <nav class="navbar navbar-expand-lg bg-dark" data-bs-theme="dark">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="/correspondence">R3DMCS Correspondence Server</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNavDropdown">
+            <ul class="navbar-nav">
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="http://rna.bgsu.edu/rna3dhub/" target="_blank">BGSU Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="https://docs.google.com/document/d/1FZSLPdz89LLXahR7mZQXQmUGWXPVEKqWjcPBFf0vbIE/preview#heading=h.3mnkbpbqzfy1" target="_blank">Help</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="https://www.bgsu.edu/research/rna/APIs.html" target="_blank">APIs</a>
+              </li>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  Download
+                </a>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="#">Pairwise annotation</a></li>
+                  <li><a class="dropdown-item" href="#">Sequence conservation</a></li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+    </nav>
+
     <div class="container">
         <div class="row">
-          <div class="col-3">
+          <div class="col-4">
             <dl>
                 <dt>Selection Structure Information</dt>
                   <dd id="common_name" class="edit">{{ selection_data[0] }} (Chain{{selection_data[1]}})</dd>
@@ -50,40 +82,55 @@
                   <dd id="max_disc" class="edit">{{ percentile }}</dd>
             </dl>
           </div>
-          <div class="col-9 annotation-table">
-            <table class="table table-bordered">
-                <thead class="text-nowrap text-center">
-                  <tr>
-                    <th scope="col">View</th>
-                    <th scope="col">RNA Chain</th>
-                    {% for position_num in positions_header %}
-                      <th scope="col">{{ position_num }}</th>
-                    {% endfor %}
-                    {% for res_pair in interactions_header %}
-                      <th scope="col">{{ res_pair }}</th>
-                    {% endfor %}
-                  </tr>
-                </thead>
-                <tbody class="text-justify">
-                  {% for k, v in coord.items() %}
-                    <tr>
-                      <td><input type='checkbox' id='{{ loop.index0 }}' class='jmolInline' data-coord = '{{ coord[k] }}'>{{ loop.index }}</td>
-                      <td><a>{{ k }}</a></td>
-                        {% for position_num in positions_header %}
-                          <td> {{ res_position[k][position_num]}} </td>
-                        {% endfor %}
-  
-                        {% for res_pair in interactions_header %}
-                          <td> {{ pairwise_interactions[k][res_pair]}} </td>
-                        {% endfor %}
-                    </tr>  
-                  {% endfor %}
-                </tbody>
-            </table>
+
+          <div class="col-4">
+            <b>Sequence Variability</b></br></br> 
+            {% for item in sequence_count_dict[:10] %}
+                {{ item[0] }}: {{ item[1] }}</br>
+            {% endfor %}
+          </div>
+
+          <div class="col-4">
+            Unique Interaction Partners
           </div>
         </div>
+        
         <div class="row">
-          <div class="col-5">
+            <div class="col-12 annotation-table">
+                <table class="table table-bordered">
+                    <thead class="text-nowrap text-center">
+                      <tr>
+                        <th scope="col">View</th>
+                        <th scope="col">RNA Chain</th>
+                        {% for position_num in positions_header %}
+                          <th scope="col">{{ position_num }}</th>
+                        {% endfor %}
+                        {% for res_pair in interactions_header %}
+                          <th scope="col">{{ res_pair }}</th>
+                        {% endfor %}
+                      </tr>
+                    </thead>
+                    <tbody class="text-justify">
+                      {% for k, v in coord.items() %}
+                        <tr>
+                          <td><input type='checkbox' id='{{ loop.index0 }}' class='jmolInline' data-coord = '{{ coord[k] }}'>{{ loop.index }}</td>
+                          <td><a>{{ k }}</a></td>
+                            {% for position_num in positions_header %}
+                              <td> {{ res_position[k][position_num]}} </td>
+                            {% endfor %}
+      
+                            {% for res_pair in interactions_header %}
+                              <td> {{ pairwise_interactions[k][res_pair]}} </td>
+                            {% endfor %}
+                        </tr>  
+                      {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="row">
+          <div class="col-6">
             <script src="http://rna.bgsu.edu/webfr3d/js/jmolplugin.js" type="text/javascript"></script>
 
             <input type="button" id="neighborhood" value="Show neighborhood">
@@ -98,15 +145,12 @@
                     <option value="CPK">CPK</option>
                 </select>
           </div>
-          <div class="col-5">
+          <div class="col-6">
             <div id ='chart'>
                 <script type="text/javascript">
                     const data = {{ data | tojson | safe }};
                 </script>
             </div> 
-          </div>
-          <div class="col-2">
-            Unique Interaction Partners
           </div>
           <!--<div class="col">
             4 of 4

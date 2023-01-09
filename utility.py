@@ -1,13 +1,34 @@
 from collections import OrderedDict, defaultdict
 from discrepancy import matrix_discrepancy, relative_discrepancy
 import numpy as np
+# import pandas as pd
 #from ordering import optimalLeafOrder
+import io
+import re
 from ordering_similarity import treePenalizedPathLength
 import math
+from operator import itemgetter
+import requests
 
 def get_disc(d, first, second):
     return d.get(second, {}).get(first, 0.0)
 
+def get_sequence_variability(query_units_string):
+    api_url = "http://rna.bgsu.edu/correspondence/variability?id={query}&format=unique".format(query=query_units_string)
+    response = requests.get(api_url)
+    data = response.text
+    lines = list(io.StringIO(data, newline=''))
+    lines = lines[2:]
+    
+    count_dict = {}
+    for line in lines:
+        test = re.split(r'\t+', line)
+        count = test[-1].strip()
+        sequence = "".join(test[:-1])
+        count_dict[sequence] = count
+
+    count_dict = [(str(k),int(v)) for k,v in count_dict.iteritems() if "-" not in k]
+    return sorted(count_dict, key=lambda x: x[1], reverse=True)
 
 def format_correspondence_display(corr):
 
