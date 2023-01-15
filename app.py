@@ -420,8 +420,24 @@ def variability():
     unit_id = query_parameters.get('unit_id')       # if not given, value is False
     extension = query_parameters.get('extension')
     output_format = query_parameters.get('format')
+    domain = query_parameters.get('domain')
+    codon = query_parameters.get('codon')
+
+    #id = id.replace(" ","")                 # in case this helps
+    #loop_id = loop_id.replace(" ","")
+    #unit_id = unit_id.replace(" ","")
 
     to_do = []
+
+    if domain:
+        domain = domain.split(",")
+    else:
+        domain = []
+
+    if codon:
+        codon = codon.split(",")
+    else:
+        codon = []
 
     if extension:
         extension = int(extension)
@@ -457,14 +473,18 @@ def variability():
             output += "\ntop_motif_models only available for loop input"
 
         try:
-            output_list, families = get_sequence_variability(to_do,extension,output_format)
+            output_list, families = get_sequence_variability(to_do,extension,output_format,domain,codon)
 
             # at the moment, output_list is not actually a list
             output = output_list
 
+            if len(output) > 30000000:
+                output = output[:30000000]
+                output += "\nOutput truncated to 30,000,000 characters.  Restrict the domain or count or codon to get more meaningful output."
+
         except Exception as inst:
             output += "%s\n" % type(inst)
-            #output += "%s\n" % inst.args
+            output += "%s\n" % inst.args
             output += "%s\n" % inst
 
     else:
