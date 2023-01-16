@@ -447,49 +447,57 @@ def variability():
     if not output_format:
         output_format = "full"
 
+    output = "Basic usage\nformat=[full,unique,top_95_percent,top_10_sequences,multiplicity_5_or_more]\nextension=1 or 2\ndomain=[A,B,C,E,M] comma separated\ncodon=comma separated list\n\n"
+    problem = False
+
     if unit_id:
+        output += 'New request made for unit_id %s with extension %s and output format %s\n' % (unit_id,extension,output_format)
         if not "|" in unit_id:
-            output = 'Invalid loop id %s' % loop_id
-            return output
-        to_do = [unit_id.split(",")]
-        output = 'New request made for unit_id %s with extension %s and output format %s\n' % (to_do,extension,output_format)
+            output += 'Invalid unit id %s\n' % unit_id
+            problem = True
+        else:
+            to_do = [unit_id.split(",")]
     elif loop_id:
+        output += 'New request made for loop_id %s with extension %s and output format %s\n' % (loop_id,extension,output_format)
         if not len(loop_id) == 11 or not len(loop_id.split("_")) == 3:
-            output = 'Invalid loop id %s' % loop_id
-            return output
-        to_do = [[loop_id]]
-        output = 'New request made for loop_id %s with extension %s and output format %s\n' % (to_do,extension,output_format)
+            output += 'Invalid loop id %s\n' % loop_id
+            problem = True
+        else:
+            to_do = [[loop_id]]
     elif id:
+        output += 'New request made for id %s with extension %s and output format %s\n' % (id,extension,output_format)
         if not "|" in id and not "_" in id:
-            output = 'Invalid id %s' % loop_id
-            return output
-        to_do = [[id]]
-        output = 'New request made for id %s with extension %s and output format %s\n' % (id,extension,output_format)
+            output += 'Invalid id %s\n' % id
+            problem = True
+        else:
+            to_do = [[id]]
 
 
-    if output_format in ["full","unique","fasta","top_motif_models"] or "top" in output_format:
+    if not problem:
+        if output_format in ["full","unique","fasta","top_motif_models"] or "top" in output_format or "multiplicity" in output_format:
 
-        if output_format == "top_motif_models" and not loop_id:
-            output += "\ntop_motif_models only available for loop input"
+            if output_format == "top_motif_models" and not loop_id:
+                output += "top_motif_models only available for loop input\n"
 
-        try:
-            output_list, families = get_sequence_variability(to_do,extension,output_format,domain,codon)
+            try:
+                output_list, families = get_sequence_variability(to_do,extension,output_format,domain,codon)
 
-            # at the moment, output_list is not actually a list
-            output = output_list
+                if len(output_list) > 30000000:
+                    output = output_list[:30000000]
+                    output += "\nOutput truncated to 30,000,000 characters.  Restrict the domain or count or codon to get more meaningful output."
+                else:
+                    # at the moment, output_list is not actually a list
+                    output = output_list
 
-            if len(output) > 30000000:
-                output = output[:30000000]
-                output += "\nOutput truncated to 30,000,000 characters.  Restrict the domain or count or codon to get more meaningful output."
+            except Exception as inst:
+                #output += "%s\n" % type(inst)
+                #output += "%s\n" % inst.args
+                output += "Something went wrong with this request\n"
+                output += "%s\n" % inst
 
-        except Exception as inst:
-            output += "%s\n" % type(inst)
-            output += "%s\n" % inst.args
-            output += "%s\n" % inst
+        else:
 
-    else:
-
-        output += "\nUnknown output format, try full, unique, fasta, top_95_percent, top_20_sequences"
+            output += "Unknown output format"
 
     response = make_response(output, 200)
     response.mimetype = "text/plain"
