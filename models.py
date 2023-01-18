@@ -117,8 +117,8 @@ class UnitPairsInteractions(Base):
     __table__ = Base.metadata.tables['unit_pairs_interactions']
 
 
-class UnitPairsDistances(Base):
-    __table__ = Base.metadata.tables['unit_pairs_distances']
+# class UnitPairsDistances(Base):
+#     __table__ = Base.metadata.tables['unit_pairs_distances']
 
 
 class ChainInfo(Base):
