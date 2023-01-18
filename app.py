@@ -124,7 +124,7 @@ def geometric_correspondence():
     if input_type == 'res_num' and chain_id is None:
         return "Please enter the chain parameter"
 
-    #return input_type + " " + selection + " " + chain_id
+    # return input_type + " " + selection + " " + chain_id
 
     try:
         if disc_method == 'geometric':
@@ -248,7 +248,7 @@ def geometric_correspondence():
     ifes_ordered = ui.order_similarity(ife_list, disc_data)
 
     # Get discrepancy statistics and build the heatmap data for display
-    max_disc, heatmap_data, percentile_score = ui.build_heatmap_data(disc_data, ifes_ordered)
+    heatmap_data, percentile_score, max_disc = ui.build_heatmap_data(disc_data, ifes_ordered)
 
     # new heatmap method
     #max_disc, heatmap_data, row_labels = ui.build_heatmap_data_new(disc_data, ifes_ordered)
