@@ -29,7 +29,7 @@ def get_sequence_variability(query_units_string):
 
     count_dict = [(str(k),int(v)) for k,v in count_dict.iteritems() if "-" not in k]
     return sorted(count_dict, key=lambda x: x[1], reverse=True)
-
+    
 def format_correspondence_display(corr):
 
 	display_str = ""
@@ -267,18 +267,24 @@ def build_heatmap_data(distances, ifes_ordered):
 
     disc_formatted = []
     for disc in disc_ordered:
-        disc = '%.4f' % disc
-        disc_formatted.append(disc)
+        # This will lead to error if not a number
+        if disc:
+            disc = '%.4f' % disc
+            disc_formatted.append(disc)
+        else:
+            disc_formatted.append(disc)
 
-    #cleaned_disc = [x for x in disc_formatted if x != 'nan']
-    #sorted_disc = cleaned_disc.sorted()
 
-    a = np.array(disc_formatted)
-    a = a.astype(np.float)
+    cleaned_disc = [float(x) for x in disc_formatted if x is not None]
+    cleaned_disc.sort()
 
-    disc_filtered = [float(x) for x in disc_formatted if x != 'nan']
-    percentile_score = percentile(disc_filtered, 95)
-    percentile_score = '%.4f' % percentile_score
+    # a = np.array(disc_formatted)
+    # a = a.astype(np.float)
+
+    # disc_filtered = [float(x) for x in disc_formatted if x != 'nan']
+    percentile_score = percentile(cleaned_disc, 95)
+    maximum_disc = max(cleaned_disc)
+    # percentile_score = '%.4f' % percentile_score
 
     #return sorted_disc, None
 
@@ -287,7 +293,7 @@ def build_heatmap_data(distances, ifes_ordered):
     #mean = "{:.3f}".format(np.mean(a))
     #median = "{:.3f}".format(np.median(a))
     #max_disc = "{:.3f}".format(np.amax(a))
-    max_disc = max(a)
+    # max_disc = max(a)
 
     heatmap_data = [
         {"ife1": if1, "ife1_index": if1_index, "ife2": if2, "ife2_index": if2_index, "discrepancy": discrepancy}
@@ -296,7 +302,7 @@ def build_heatmap_data(distances, ifes_ordered):
 
     #disc_pairwise = zip(ife1, ife2, disc_filtered)
 
-    return max_disc, heatmap_data, percentile_score
+    return heatmap_data, percentile_score, maximum_disc
 
 
 def build_coord_data(ifes_ordered, corr_data):
