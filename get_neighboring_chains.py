@@ -97,6 +97,7 @@ def get_xyz_coordinates(unit_ids, pdb_id):
 
 def get_possible_chains_list(neighboring_residues, chain):
     if neighboring_residues:
+        # get a list of tuples where the first element is the pdb id while the second element is the chain id
         return list(set([ (unit.split("|")[0], unit.split("|")[2]) for unit in neighboring_residues if unit.split("|")[2] != chain]))
     else:
         return None
