@@ -1,7 +1,9 @@
+from contextlib import contextmanager
 from models import UnitCenter, ChainInfo
 from database import db_session
 from sqlalchemy import tuple_
 import math
+import timeit
 
 def filter_neighboring_residues(centers_coord, potential_neighboring_units, distance, nt_ids):
     # use the x,y,z coordinates in centers_coord to check if x,y,z coordinates in query results
@@ -129,21 +131,23 @@ def get_chain_name(chains_list):
     """
     if chains_list:
         with db_session() as session:
-            chain_name_dict = {}
+            chain_data_list = []
             for chain in chains_list:
                 pdb_id = chain[0]
                 chain_name = chain [1]
                 query = session.query(ChainInfo) \
                                .filter(ChainInfo.pdb_id == pdb_id) \
                                .filter(ChainInfo.chain_name == chain_name) \
-
+                
                 for row in query:
-                    chain_name_dict[str(row.chain_name)] = str(row.compound)
-            return chain_name_dict
+                    chain_data = (str(row.chain_name), str(row.compound))
+                    chain_data_list.append(chain_data)
+               
+            return chain_data_list
     else:
         return None
 
-def get_neighboring_chains(unit_ids, distance=10):
+def get_chains(unit_ids, distance=10):
     # Starting with unit_ids, find the x,y,z coordinates of their centers,
     # expand by distance to a rectangular box around them,
     # then find other units within that box,
@@ -181,12 +185,25 @@ def get_neighboring_chains(unit_ids, distance=10):
     # calculate distances to units in unit_ids, record the smallest
     neighboring_residues = filter_neighboring_residues(centers_xyz_coord, potential_neighboring_units, distance, unit_ids)
     neighboring_chains = get_possible_chains_list(neighboring_residues, chain)
-    neighboring_chains = get_chain_name(neighboring_chains)
+    neighboring_chains_with_names = get_chain_name(neighboring_chains)
 
     # return neighboring_residues
-    return neighboring_chains
+    return neighboring_chains_with_names
 
 
-test_units = "5J7L|1|AA|G|1491,5J7L|1|AA|A|1492,5J7L|1|AA|A|1493,5J7L|1|AA|G|1494,5J7L|1|AA|U|1495,5J7L|1|AA|C|1496"
-test = get_neighboring_chains(test_units)
-print test
+def test_run(units_list):
+    # start_time = timeit.default_timer()
+    # with terminating(Pool(processes=4)) as pool:
+    #     result = pool.map(get_neighboring_chains, units_list)
+    #     return result
+    result = [get_chains(x) for x in units_list]
+    # elapsed = timeit.default_timer() - start_time
+    return result
+
+
+# units = "5J7L|1|AA|G|1491,5J7L|1|AA|A|1492,5J7L|1|AA|A|1493,5J7L|1|AA|G|1494,5J7L|1|AA|U|1495,5J7L|1|AA|C|1496"
+# test_units = ["5J7L|1|AA|G|1491,5J7L|1|AA|A|1492,5J7L|1|AA|A|1493,5J7L|1|AA|G|1494,5J7L|1|AA|U|1495,5J7L|1|AA|C|1496", "5J7L|1|AA|A|1492,5J7L|1|AA|A|1493"]
+# test_units = [units] * 200
+# # print(len(test_units))
+# result, result_time = test_run(test_units)
+# print result_time
