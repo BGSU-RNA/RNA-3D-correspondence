@@ -17,6 +17,7 @@ from discrepancy import matrix_discrepancy
 import numpy as np
 import sys
 import time
+from get_neighboring_chains import test_run
 
 
 #from flask_cors import CORS   # for circular
@@ -256,6 +257,17 @@ def geometric_correspondence():
     # Build coord data
     coord_data, table_rows = ui.build_coord_data(ifes_ordered, corr_complete)
 
+    units_string = [str(v) for k, v in coord_data.iteritems()]
+
+    # Get the neighboring chains
+    neighboring_chains = test_run(units_string)
+
+    # Get the ordered chains as a list
+    ifes_ordered_keys = list(coord_data.keys())
+
+    # Zip both the chain and neighboring chains lists into a dict 
+    neighboring_chains_dict = OrderedDict(zip(ifes_ordered_keys, neighboring_chains))
+
     #table_cols = zip(*table_rows) 
 
     #return str(correspondence_positions)
@@ -270,7 +282,7 @@ def geometric_correspondence():
                             nr_release=nr_release, code_time=time_diff, res_position=correspondence_positions, 
                             positions_header=positions_header, pairwise_interactions=pairwise_interactions_data,
                             interactions_header=res_pairs, selection_data=query_data, percentile=percentile_score,
-                            organism=source_organism, sequence_count_dict=sequence_count_dict)
+                            organism=source_organism, sequence_count_dict=sequence_count_dict, neighboring_chains=neighboring_chains_dict)
 
 
 @app.route('/pairwise_interactions')
