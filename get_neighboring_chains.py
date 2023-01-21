@@ -95,14 +95,38 @@ def get_xyz_coordinates(unit_ids, pdb_id):
         centers_coord = [given_x, given_y, given_z]
         return centers_coord
 
-def get_possible_chains_list(neighboring_residues, chain):
+def get_possible_chains_list(neighboring_residues, query_chain):
+    """
+    This function takes in a list of neighboring residues and the query chain
+    and returns a list of unique tuples containing the PDB ID and chain id 
+    of all the neighboring residues except from the input chain.
+
+    Input:
+    neighboring_residues: list of neighboring unitids
+    chain: string, the query chain to be excluded from the output list
+
+    Output:
+    A list of tuples containing the PDBID and chain id of the neighboring 
+    chains. If the input list is empty, the function returns None.
+    """
     if neighboring_residues:
         # get a list of tuples where the first element is the pdb id while the second element is the chain id
-        return list(set([ (unit.split("|")[0], unit.split("|")[2]) for unit in neighboring_residues if unit.split("|")[2] != chain]))
+        return list(set([ (unit.split("|")[0], unit.split("|")[2]) for unit in neighboring_residues if unit.split("|")[2] != query_chain]))
     else:
         return None
 
 def get_chain_name(chains_list):
+    """
+    This function takes in a list of chains and returns a dictionary containing the chain names and their 
+    corresponding compounds.
+
+    Input:
+    chains_list: list of tuples, where each tuple contains a PDB ID and a chain name
+
+    Output:
+    chain_name_dict: a dictionary where the key is the chain name and the value is the corresponding compound 
+    name. If the input list is empty, the function returns None.
+    """
     if chains_list:
         with db_session() as session:
             chain_name_dict = {}
@@ -156,9 +180,6 @@ def get_neighboring_chains(unit_ids, distance=10):
     # skipping units already in unit_ids, check distances of potential to centers_xyz_coord
     # calculate distances to units in unit_ids, record the smallest
     neighboring_residues = filter_neighboring_residues(centers_xyz_coord, potential_neighboring_units, distance, unit_ids)
-
-    # neighboring_chains = list(set([ (x.split("|")[0], x.split("|")[2]) for x in neighboring_residues if x.split("|")[2] != chain]))
-    # unique_neighboring_chains = list(set(unique_neighboring_chains))
     neighboring_chains = get_possible_chains_list(neighboring_residues, chain)
     neighboring_chains = get_chain_name(neighboring_chains)
 
