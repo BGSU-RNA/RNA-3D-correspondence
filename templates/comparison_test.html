@@ -102,6 +102,7 @@
                       <tr>
                         <th scope="col">View</th>
                         <th scope="col">RNA Chain</th>
+                        <th scope="col">Neighboring Protein|RNA Chains</th>
                         {% for position_num in positions_header %}
                           <th scope="col">{{ position_num }}</th>
                         {% endfor %}
@@ -115,6 +116,18 @@
                         <tr>
                           <td><input type='checkbox' id='{{ loop.index0 }}' class='jmolInline' data-coord = '{{ coord[k] }}'>{{ loop.index }}</td>
                           <td><a>{{ k }}</a></td>
+                          {% if neighboring_chains[k] is not none %}
+                            <td>
+                              <ol type="i">
+                              {% for v in neighboring_chains[k] %}
+                                <li><b>(Chain {{v[0]}})</b>  {{v[1]}}</li>
+                              {% endfor %}
+                              </ol>
+                            </td>
+                          {% else %}
+                            <td></td>
+                          {% endif %}
+
                             {% for position_num in positions_header %}
                               <td> {{ res_position[k][position_num]}} </td>
                             {% endfor %}
