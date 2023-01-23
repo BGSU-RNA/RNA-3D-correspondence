@@ -192,3 +192,17 @@ def check_valid_membership(members, query_data, exp_method):
 	return empty_members, method_equality
 
 
+def get_pdb_resolution(pdb_list):
+	
+	resolution_dict = {}
+	with db_session() as session:
+		query = session.query(PDBInfo).filter(PDBInfo.pdb_id.in_(pdb_list))
+
+		for row in query:
+			resolution_dict[row.pdb_id] = '{0:.2f}'.format(row.resolution)
+
+		return resolution_dict
+
+
+
+
