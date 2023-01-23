@@ -265,6 +265,15 @@ def geometric_correspondence():
     # Get the ordered chains as a list
     ifes_ordered_keys = list(coord_data.keys())
 
+    # Get the pdb for for all the selected chains in the ec
+    pdb_list = list(set([str(x[1].split("|")[0]) for x in ifes_ordered]))
+
+    # Store the resolution data in a dict
+    resolution_dict = ec.get_pdb_resolution(pdb_list)
+
+    # Order the resolution data according to the chain similarity order
+    resolution_data = ui.get_resolution_data_ordered(ifes_ordered, resolution_dict)
+
     # Zip both the chain and neighboring chains lists into a dict 
     neighboring_chains_dict = OrderedDict(zip(ifes_ordered_keys, neighboring_chains))
 
@@ -282,7 +291,8 @@ def geometric_correspondence():
                             nr_release=nr_release, code_time=time_diff, res_position=correspondence_positions, 
                             positions_header=positions_header, pairwise_interactions=pairwise_interactions_data,
                             interactions_header=res_pairs, selection_data=query_data, percentile=percentile_score,
-                            organism=source_organism, sequence_count_dict=sequence_count_dict, neighboring_chains=neighboring_chains_dict)
+                            organism=source_organism, sequence_count_dict=sequence_count_dict, neighboring_chains=neighboring_chains_dict,
+                            resolution_data=resolution_data)
 
 
 @app.route('/pairwise_interactions')
