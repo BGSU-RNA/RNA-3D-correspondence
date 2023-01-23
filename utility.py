@@ -491,6 +491,14 @@ def process_query_units(query_units):
 
     return (pdb, chain, residues)
 
+def get_resolution_data_ordered(ifes_ordered, resolution_dict):
+    resolution_data = OrderedDict()
+    for ife in ifes_ordered:
+        pdb = ife[1].split("|")[0]
+        resolution_data[str(ife[1])] = resolution_dict.get(pdb, "")
+    return resolution_data
+
+
 '''
 def percentile(N, percent, key=lambda x:x):
     """
