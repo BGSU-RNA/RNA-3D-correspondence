@@ -147,6 +147,8 @@ def geometric_correspondence():
 
         sequence_count_dict = ui.get_sequence_variability(complete_query_units_str)
 
+        sequence_logo_data = ui.generate_sequence_logo_data(sequence_count_dict)
+
         query_data = ui.process_query_units(complete_query_units)
 
         status_text += "Got query_data<br>"
@@ -292,7 +294,7 @@ def geometric_correspondence():
                             positions_header=positions_header, pairwise_interactions=pairwise_interactions_data,
                             interactions_header=res_pairs, selection_data=query_data, percentile=percentile_score,
                             organism=source_organism, sequence_count_dict=sequence_count_dict, neighboring_chains=neighboring_chains_dict,
-                            resolution_data=resolution_data)
+                            resolution_data=resolution_data, sequence_logo=sequence_logo_data)
 
 
 @app.route('/pairwise_interactions')
