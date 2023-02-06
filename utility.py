@@ -1,3 +1,4 @@
+from __future__ import division
 from collections import OrderedDict, defaultdict
 from discrepancy import matrix_discrepancy, relative_discrepancy
 import numpy as np
@@ -12,6 +13,38 @@ import requests
 
 def get_disc(d, first, second):
     return d.get(second, {}).get(first, 0.0)
+
+def generate_sequence_logo_data(data):
+    sequence_dict = OrderedDict()
+    nt_list = ['A', 'C', 'U', 'G']
+    count_list = []
+    total_seq_count = sum(n for seq, n in data)
+
+    for idx, val in enumerate(data[0][0], 1):
+        sequence_dict.setdefault(idx, {})['A'] = 0
+        sequence_dict.setdefault(idx, {})['C'] = 0
+        sequence_dict.setdefault(idx, {})['U'] = 0
+        sequence_dict.setdefault(idx, {})['G'] = 0
+
+    for elem in data:
+        seq = elem[0]
+        count = elem[1]
+        for idx, val in enumerate(seq, 1):
+            if val in nt_list:
+                sequence_dict[idx][val] += count
+
+    for k, v in sequence_dict.iteritems():
+        position_list = []
+        for nt in nt_list:
+            if v[nt] != 0:
+                position_count = int(v[nt])/int(total_seq_count)
+                position_count = "%.1f" % position_count
+                position_list.append(position_count)
+            else:
+                position_list.append(0)
+        count_list.append(position_list)
+
+    return count_list
 
 def get_sequence_variability(query_units_string):
     api_url = "http://rna.bgsu.edu/correspondence/variability?id={query}&format=unique".format(query=query_units_string)
@@ -423,13 +456,13 @@ def format_pairwise_interactions_table(res_pairs_ref, pairwise_data):
     for chain in chains_list:
         pairwise_interactions_ordered = OrderedDict()
         for unique_res_pair in pairwise_residue_pairs:
-            pairwise_interactions_ordered[unique_res_pair] = ' '
+            pairwise_interactions_ordered[unique_res_pair] = ""
 
         pairwise_interactions_collection[chain] = pairwise_interactions_ordered
 
     for chain in chains_list:
         for res_pair in pairwise_residue_pairs:
-            pairwise_interactions_collection[chain][res_pair] = pairwise_data.get(chain, {}).get(res_pair)
+            pairwise_interactions_collection[chain][res_pair] = pairwise_data.get(chain, {}).get(res_pair, "")
 
     return pairwise_interactions_collection, pairwise_residue_pairs            
 
