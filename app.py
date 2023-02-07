@@ -529,6 +529,83 @@ def variability():
     return response
 
 
+@app.route('/map_across_species')
+def map_across_species():
+
+    # http://rna.bgsu.edu/correspondence/map_across_species?id=HL_7K00_033
+    # ln /usr/local/alignment/rpfam/alignments/rfam rfam
+
+    try:
+        from map_across_species import map_across_species as m_a_s
+    except Exception as inst:
+        output = "%s" % type(inst)
+        output += "%s" % inst.args
+        output += "%s" % inst
+        return output
+
+    query_parameters = request.args
+
+    id = query_parameters.get('id')            # better to just allow some kind of id
+
+    scope = query_parameters.get('scope','Rfam')
+    resolution = query_parameters.get('resolution','3.0A')
+    depth = int(query_parameters.get('depth','5'))
+    format = query_parameters.get('format','text')
+
+    output = "Basic usage; defaults indicated in parentheses\nid=loop id or comma-separated list of unit ids\n&scope=[EC,(Rfam),molecule]\n&resolution=[1.5A,2.0A,2.5A,(3.0A),3.5A,4.0A,20.0A,all]\n&depth=integer (5)\n&format=[(text),json]\n\n"
+    problem = False
+
+    to_do = []
+
+    if id:
+        output += 'New request made for id %s with scope %s resolution %s depth %d\n' % (id,scope,resolution,depth)
+        if not "|" in id and not "_" in id:
+            output += 'Invalid id %s\n' % id
+            problem = True
+        else:
+            to_do = [[id]]
+
+
+    if not problem:
+        if scope in ["EC","Rfam","molecule"]:
+            if resolution in ['1.5A','2.0A','2.5A','3.0A','3.5A','4.0A','20.0A','all']:
+
+                try:
+                    results_list = m_a_s(to_do,scope,resolution,depth)
+                    if format == 'text':
+                        output = results_list[0]["text"]
+                    else:
+                        output = json.dumps(results_list[0])
+
+                except Exception as e:
+                    exception_type, exception_object, exception_traceback = sys.exc_info()
+                    line_number = exception_traceback.tb_lineno
+                    output += "\nSomething went wrong with this request on line %s with error type %s\n" % (line_number,exception_type)
+                    output += "%s\n" % type(e)
+                    output += "%s\n" % exception_traceback
+                    #output += "%s\n" % inst.args
+                    output += "%s\n" % e
+                    problem = True
+
+            else:
+                output += "Unknown resolution %s" % resolution
+                problem = True
+
+        else:
+
+            output += "Unknown scope %s" % scope
+            problem = True
+
+    if problem:
+        response = make_response(output, 400)
+    else:
+        response = make_response(output, 200)
+
+    response.mimetype = "text/plain"
+
+    return response
+
+
 @app.route('/circular')
 def circular_diagram():
 
