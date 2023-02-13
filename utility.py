@@ -11,8 +11,32 @@ import math
 from operator import itemgetter
 import requests
 
+EXCLUDE_LIST = ['No alignment', 'Not resolved', 'No chain']
+
 def get_disc(d, first, second):
     return d.get(second, {}).get(first, 0.0)
+
+def get_correspondence_dict(correspondence):
+    correspondence_dict = {}
+    for sublist in correspondence:
+        ife = "|".join(sublist[0].split("|")[:3])
+        correspondence_dict[ife] = sublist
+    return correspondence_dict
+
+def get_correspondence_across_species(loop_id):
+    complete_url = "http://rna.bgsu.edu/correspondence/map_across_species?id=" + str(loop_id) + '&format=json'
+    response = requests.get(complete_url).json()
+
+    query_units = response['query']['unit_id_list']
+    query_details = response['query']['rfam_EC_chain']
+
+    correspondence_list = []
+    for idx, val in enumerate(response["mappings"]):
+        correspondence_list.append(response["mappings"][idx]["unit_id_list"])
+
+    correspondence_list = [sublist for sublist in correspondence_list if not any(x in sublist for x in EXCLUDE_LIST)]
+
+    return query_units, query_details, correspondence_list
 
 def generate_sequence_logo_data(data):
     sequence_dict = OrderedDict()
