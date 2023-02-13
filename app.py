@@ -93,6 +93,73 @@ def pairwise_correspondence():
 
     return corr_display
 
+@app.route('/comparison_across_species')
+def geometric_correspondence_across_species():
+
+    start = time.time()
+
+    query_parameters = request.args
+    
+    loop_id = query_parameters.get('loop_id')
+    
+    query_units, query_data, correspondence_list = ui.get_correspondence_across_species(loop_id)
+
+    query_units = ["|".join(str(unit).split("|")[3:]) for unit in query_units]
+
+    corr_complete = ui.get_correspondence_dict(correspondence_list)
+
+    correspondence = [item for sublist in correspondence_list for item in sublist]
+
+    pairwise_data, pairwise_residue_pairs_reference = ps.get_pairwise_interactions(corr_complete)
+
+    pairwise_interactions_data, res_pairs = ui.format_pairwise_interactions_table(pairwise_residue_pairs_reference, pairwise_data)
+
+    correspondence_positions = ui.get_correspondence_positions(corr_complete)
+
+    positions_header = ui.get_positions_header(len(query_units))
+
+    # Get rotation data
+    rotation_data = get_rotation(correspondence, corr_complete)
+
+    # Get center data
+    center_data = get_center(correspondence, corr_complete)
+
+    # Order rotation and center data before computing discrepancy
+    rotation_ordered, center_ordered, ife_list, missing_data = ui.order_data(rotation_data, center_data)
+
+    # Calculate geometric discrepancy
+    disc_data = ui.calculate_geometric_disc(ife_list, rotation_ordered, center_ordered)
+
+    # Get the instances ordered according to similarity
+    ifes_ordered = ui.order_similarity(ife_list, disc_data)
+
+    # Get discrepancy statistics and build the heatmap data for display
+    heatmap_data, percentile_score, max_disc = ui.build_heatmap_data(disc_data, ifes_ordered)
+
+    # Build coord data
+    coord_data, table_rows = ui.build_coord_data(ifes_ordered, corr_complete)
+
+    # Get the ordered chains as a list
+    ifes_ordered_keys = list(coord_data.keys())
+
+    # Get the pdb for for all the selected chains in the ec
+    pdb_list = list(set([str(x[1].split("|")[0]) for x in ifes_ordered]))
+
+    # Store the resolution data in a dict
+    resolution_dict = ec.get_pdb_resolution(pdb_list)
+
+    # Order the resolution data according to the chain similarity order
+    resolution_data = ui.get_resolution_data_ordered(ifes_ordered, resolution_dict)
+
+    end = time.time() 
+
+    time_diff = '{0:.2f}'.format(end-start)
+
+    return render_template("comparison_test_new.html", data=heatmap_data, max_disc=max_disc, coord=coord_data, 
+                            code_time=time_diff, res_position=correspondence_positions, 
+                            positions_header=positions_header, pairwise_interactions=pairwise_interactions_data,
+                            interactions_header=res_pairs, selection_data=query_data, percentile=percentile_score,
+                            resolution_data=resolution_data, query_units=query_units)
 
 @app.route('/comparison')
 def geometric_correspondence():
@@ -545,7 +612,7 @@ def map_across_species():
 
     query_parameters = request.args
 
-    id = query_parameters.get('id')            # better to just allow some kind of id
+    id = query_parameters.get('id').replace("'","")            # better to just allow some kind of id
 
     scope = query_parameters.get('scope','Rfam')
     resolution = query_parameters.get('resolution','3.0A')
