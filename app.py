@@ -151,6 +151,9 @@ def geometric_correspondence_across_species():
     # Order the resolution data according to the chain similarity order
     resolution_data = ui.get_resolution_data_ordered(ifes_ordered, resolution_dict)
 
+    # Get the organism name for all the chains in the ordered list
+    organism_names = ec.get_organism_name(ifes_ordered)
+
     end = time.time() 
 
     time_diff = '{0:.2f}'.format(end-start)
@@ -159,7 +162,7 @@ def geometric_correspondence_across_species():
                             code_time=time_diff, res_position=correspondence_positions, 
                             positions_header=positions_header, pairwise_interactions=pairwise_interactions_data,
                             interactions_header=res_pairs, selection_data=query_data, percentile=percentile_score,
-                            resolution_data=resolution_data, query_units=query_units)
+                            resolution_data=resolution_data, query_units=query_units, organism_names=organism_names)
 
 @app.route('/comparison')
 def geometric_correspondence():
