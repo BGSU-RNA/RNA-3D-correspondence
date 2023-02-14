@@ -1,5 +1,6 @@
 from database import db_session
 from models import NrChains, NrClasses, NrReleases, IfeInfo, PDBInfo, ChainInfo 
+from collections import OrderedDict
 
 REJECT_LIST = ['5LZE|1|a+5LZE|1|y+5LZE|1|v+5LZE|1|x']
 
@@ -203,6 +204,24 @@ def get_pdb_resolution(pdb_list):
 
 		return resolution_dict
 
+def get_organism_name(ifes_ordered):
 
+	name_dict = OrderedDict()
+	with db_session() as session:
+		for entry in ifes_ordered:
+			ife = entry[1]
+			pdb = ife.split("|")[0]
+			chain = ife.split("|")[2]
+			query = session.query(ChainInfo).filter(ChainInfo.pdb_id == pdb).filter(ChainInfo.chain_name == chain)
 
+			for row in query:
+				organism_name_components = row.source.split(" ")
+				if len(organism_name_components) > 2:
+					organism_name = row.source
+					filtered_organism_name = " ".join(organism_name.split(" ")[:2])
+					name_dict[ife] = str(filtered_organism_name)
+				else:
+					name_dict[ife] = str(row.source)
+
+		return name_dict
 
