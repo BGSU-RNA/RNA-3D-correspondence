@@ -96,13 +96,29 @@ def pairwise_correspondence():
 @app.route('/comparison_across_species')
 def geometric_correspondence_across_species():
 
+    valid_scope_values = ["Rfam", "EC", "molecule"]
+    valid_resolutions = ["1.5A", "2.0A", "2.5A", "3.0A", "3.5A", "4.0A"]
+
     start = time.time()
 
     query_parameters = request.args
     
     loop_id = query_parameters.get('loop_id')
+    scope = query_parameters.get('scope')
+    resolution = query_parameters.get('resolution')
+
+    parameters_dict = {'loop_id': loop_id, 'scope': scope, 'resolution': resolution}
+
+    if None in parameters_dict.values():
+        return "Please specify the values for all the required parameters - id, scope and resolution"
+
+    if parameters_dict['scope'] not in valid_scope_values:
+        return "Please enter a valid scope value. Accepted values are " + ", ".join(valid_scope_values)
+
+    if parameters_dict['resolution'] not in valid_resolutions:
+        return "Please enter a valid resolution value. Accepted values are " + ", ".join(valid_resolutions)
     
-    query_units, query_data, correspondence_list = ui.get_correspondence_across_species(loop_id)
+    query_units, query_data, correspondence_list = ui.get_correspondence_across_species(parameters_dict)
 
     query_units = ["|".join(str(unit).split("|")[3:]) for unit in query_units]
 
