@@ -85,6 +85,14 @@
             </dl>
           </div>
 
+          <div class="col-4">
+            <dt>Unique PDB Species Count</dt>
+                  <!-- <dd id="max_disc" class="edit">{{ name_count }}</dd> -->
+                  {% for species in name_count %}
+                    <i>{{species[0]}}</i> <b>({{species[1]}})</b></br>
+                  {% endfor %}
+          </div>
+
         </div>
 
         <div class="row">
