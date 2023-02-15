@@ -30,8 +30,10 @@ def get_correspondence_dict(correspondence):
         correspondence_dict[ife] = sublist
     return correspondence_dict
 
-def get_correspondence_across_species(loop_id):
-    complete_url = "http://rna.bgsu.edu/correspondence/map_across_species?id=" + str(loop_id) + '&format=json'
+def get_correspondence_across_species(param_dict):
+    base_url = "http://rna.bgsu.edu/correspondence/map_across_species?id="
+    suffix_url = "&format=json"
+    complete_url = base_url + str(param_dict['loop_id']) +  "&scope=" + str(param_dict['scope']) + "&resolution=" + str(param_dict['resolution']) + suffix_url
     response = requests.get(complete_url).json()
 
     query_units = response['query']['unit_id_list']
