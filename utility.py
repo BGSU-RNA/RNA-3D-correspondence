@@ -16,6 +16,13 @@ EXCLUDE_LIST = ['No alignment', 'Not resolved', 'No chain']
 def get_disc(d, first, second):
     return d.get(second, {}).get(first, 0.0)
 
+def get_species_name_count(species_name_list):
+    count_dict = {}
+    for name in species_name_list:
+        count_dict[name] = count_dict.get(name, 0) + 1
+    count_values = [(k,v) for k,v in count_dict.iteritems()]
+    return sorted(count_values, key=lambda x: x[1], reverse=True)
+
 def get_correspondence_dict(correspondence):
     correspondence_dict = {}
     for sublist in correspondence:
