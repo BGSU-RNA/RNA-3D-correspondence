@@ -17,6 +17,7 @@
 
     <style>
         .annotation-table {height: 400px; overflow: scroll;}
+        .sequence-variants-table {height: 400px; overflow: scroll;}
     </style>
 </head>
 <body>
@@ -54,10 +55,13 @@
 
     <div class="container">
         <div class="row">
-          <div class="col-4">
+          <div class="col-3">
             <dl>
-                <dt>Selection Structure Information</dt>
-                  <dd id="common_name" class="edit">{{ selection_data[0] }} (Chain{{selection_data[1]}})</dd>
+                <dt>Query PDBID & Chain</dt>
+                  <dd id="common_name" class="edit">{{ selection_data[0] }} Chain {{selection_data[1]}}</dd>
+
+                  <dt>Query Nucleotides</dt>
+                  <dd id="common_name" class="edit">{{ query_units }}</dd>
 
                   <dt>Source Organism</dt>
                   <dd id="max_disc" class="edit"><i>{{ organism }}</i></dd>
@@ -74,7 +78,7 @@
                 <dt>NR Release</dt>
                   <dd id="common_name" class="edit"><a href="http://rna.bgsu.edu/rna3dhub/nrlist/release/{{ nr_release }}" target="_blank">{{ nr_release }}</a></dd>
 
-                <dt>Number of instances</dt>
+                <dt>Number of structures</dt>
                   <dd id="common_name" class="edit">{{ coord|length }}</a></dd>
 
                 <dt>Maximum Discrepancy</dt>
@@ -85,23 +89,38 @@
             </dl>
           </div>
 
-          <div class="col-4">
-            <b>Sequence Variability</b></br></br> 
-            {% for item in sequence_count_dict[:10] %}
-                {{ item[0] }}: {{ item[1] }}</br>
-            {% endfor %}
+          <div class="col-5 sequence-variants-table">
+            <p style="text-align: center;">Sequence variants from Rfam derived alignment </p>
+            <table class="table table-bordered">
+              <tr>
+                <th class="text-center">Sequence Variant</th>
+                <th class="text-center">Count</th>
+              </tr>
+              {% for row in sequence_count_dict %}
+              <tr>
+                {% for col in row %}
+                  <td class="text-center">{{ col }}</td>
+                {% endfor %}
+              </tr>  
+              {% endfor %}
+            </table>
           </div>
 
-          <div class="col-4">
-            <b>Unique Interaction Partner</b></br></br> 
-            <!-- <div id="logo" style="width:400px"></div>
-              <script type="text/javascript">
-                const RNA_PPM = {{ sequence_logo | tojson | safe }};
-                logojs.embedRNALogo(document.getElementById("logo"), {
-                  ppm: RNA_PPM
-                });
-              </script>
-          </div> -->
+          <div class="col-4 sequence-variants-table">
+            <p style="text-align: center;">Unique Neighboring Chains</p>
+            <table class="table table-bordered">
+              <tr>
+                <th class="text-center">Name</th>
+                <th class="text-center">Count</th>
+              </tr>
+              {% for row in neighboring_chains_count %}
+              <tr>
+                {% for col in row %}
+                  <td class="text-center">{{ col }}</td>
+                {% endfor %}
+              </tr>  
+              {% endfor %}
+            </table>
         </div>
         
         <div class="row">
@@ -178,6 +197,13 @@
             4 of 4
           </div>-->
         </div>
+    
+    </div>
+    <nav class="navbar bg-dark" data-bs-theme="dark">
+      <div class="container-fluid">
+        <p style="color: white; text-align: center;">Page generated in {{code_time}} seconds</p>
+      </div>
+    </nav>
     <script type="text/javascript" src="http://rna.bgsu.edu/webfr3d/js/heatmap.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
 </body>
