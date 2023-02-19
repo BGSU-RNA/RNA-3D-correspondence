@@ -115,7 +115,7 @@ def get_correspondence(units, members, method_equality=True):
 	correspondence = query(units, members)	
 	if method_equality is True: correspondence.extend(units)
 	correspondence_grouped = group_correspondence(correspondence)
-	correspondence_std_grouped = check_modifications(correspondence_grouped)
+	# correspondence_std_grouped = check_modifications(correspondence_grouped)
 
-	return correspondence, correspondence_grouped, correspondence_std_grouped
+	return correspondence, correspondence_grouped, None
 
