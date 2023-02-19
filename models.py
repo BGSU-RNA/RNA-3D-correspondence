@@ -113,6 +113,10 @@ class LoopInfo(Base):
     __table__ = Base.metadata.tables['loop_info']
 
 
+class LoopPositions(Base):
+    __table__ = Base.metadata.tables['loop_positions']
+
+
 class UnitPairsInteractions(Base):
     __table__ = Base.metadata.tables['unit_pairs_interactions']
 
