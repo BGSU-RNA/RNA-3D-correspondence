@@ -172,7 +172,7 @@ def geometric_correspondence_across_species():
 
     species_name_list = list(organism_names.values())
 
-    species_name_count = ui.get_species_name_count(species_name_list)
+    species_name_count = ui.get_name_count(species_name_list)
 
     end = time.time() 
 
@@ -236,6 +236,8 @@ def geometric_correspondence():
 
         complete_query_units_str = ",".join(complete_query_units)
 
+        formatted_query_units = ui.format_query_units(complete_query_units)
+
         sequence_count_dict = ui.get_sequence_variability(complete_query_units_str)
 
         sequence_logo_data = ui.generate_sequence_logo_data(sequence_count_dict)
@@ -282,7 +284,7 @@ def geometric_correspondence():
         status_text += "Got correspondences<br>"
 
         # Remove ec member/s that have missing correspondence
-        missing_data, corr_complete, corr_std = ui.check_missing_correspondence(corr_complete, corr_std)
+        missing_data, corr_complete, corr_std = ui.check_missing_correspondence(corr_complete, corr_complete)
 
         status_text += "Removed missing members<br>"
 
@@ -370,6 +372,10 @@ def geometric_correspondence():
     # Zip both the chain and neighboring chains lists into a dict 
     neighboring_chains_dict = OrderedDict(zip(ifes_ordered_keys, neighboring_chains))
 
+    neighboring_chains_list = [row[1] for _, v in neighboring_chains_dict.iteritems() if v for row in v]
+
+    neighboring_chains_count = ui.get_name_count(neighboring_chains_list)
+
     #table_cols = zip(*table_rows) 
 
     #return str(correspondence_positions)
@@ -385,7 +391,8 @@ def geometric_correspondence():
                             positions_header=positions_header, pairwise_interactions=pairwise_interactions_data,
                             interactions_header=res_pairs, selection_data=query_data, percentile=percentile_score,
                             organism=source_organism, sequence_count_dict=sequence_count_dict, neighboring_chains=neighboring_chains_dict,
-                            resolution_data=resolution_data, sequence_logo=sequence_logo_data)
+                            resolution_data=resolution_data, neighboring_chains_count=neighboring_chains_count,
+                            sequence_logo=sequence_logo_data, query_units=formatted_query_units)
 
 
 @app.route('/pairwise_interactions')
