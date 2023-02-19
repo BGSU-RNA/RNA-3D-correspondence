@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from models import UnitInfo, LoopInfo
+from models import UnitInfo, LoopInfo, LoopPositions
 from database import db_session
 from sqlalchemy import or_
 import utility as ui
@@ -59,9 +59,13 @@ def get_loop_units(loop_id):
     
     with db_session() as session:
 
-        query = session.query(LoopInfo).filter_by(loop_id=loop_id)
+        complete_units = []
+        query = session.query(LoopPositions).filter_by(loop_id=loop_id).order_by(LoopPositions.position_2023)
 
-        return query[0].unit_ids
+        for row in query:
+            complete_units.append(row.unit_id)
+
+        return complete_units
 
 def get_query_units(query_type, query_list, query_ife):
 
@@ -89,8 +93,8 @@ def get_query_units_new(input_type, selection, chain_id):
 
     if input_type == 'loop_id':
         loop_id = selection
-        unsorted_units = get_loop_units(loop_id)
-        complete_units = ui.get_sorted_units(unsorted_units)
+        complete_units = get_loop_units(loop_id)
+        # complete_units = ui.get_sorted_units(unsorted_units)
 
     elif input_type == 'unit_id':
         # complete_units = selection.split(",")
