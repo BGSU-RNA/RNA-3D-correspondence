@@ -138,9 +138,15 @@ def map_across_species(nt_lists,scope,resolution,depth):
 
         # collect mapping information for each unit id
         map_out = []
-        for unit_id,rfam_tuple in unit_id_to_rfam_family_and_chain.items():
+
+        for unit_id in unit_ids_to_map:
+
+        #for unit_id,rfam_tuple in unit_id_to_rfam_family_and_chain.items():
+
             pdb_chain = "|".join(unit_id.split("|")[0:3])
-            rfam_family,rfam_chain = rfam_tuple
+            rfam_family,rfam_chain = unit_id_to_rfam_family_and_chain[unit_id]
+
+            print('checking:',unit_id,rfam_family,rfam_chain)
 
             mapping = {}
             mapping["unit_id"] = unit_id
@@ -197,7 +203,7 @@ def map_across_species(nt_lists,scope,resolution,depth):
             map_out[i]['column'] = column
 
             if column == None:
-                print('Not able to map given unit id %s to a column, so something will go wrong' % unit_id)
+                raise Exception('Not able to map given unit id %s to a column in the alignment' % unit_id)
 
         # for each chain in the unit ids to map, list all pdb chains in the corresponding Rfam family
         pdb_chain_to_alignable_pdb_chains = {}
@@ -245,10 +251,6 @@ def map_across_species(nt_lists,scope,resolution,depth):
 
                         pdb_to_pdb_chain_to_triple_sets[pdb][pdb_chain].append((alignable_pdb_chain,equivalence_class,position))
 
-            # let's try this
-            #return [{"text": "%s" % pdb_chain_to_triple_sets[pdb_chain]}]
-
-
             pdb_chain_to_triple_sets[pdb_chain] = sorted(pdb_chain_to_triple_sets[pdb_chain], key = lambda x : (x[2],x[0]))
             #print(pdb_chain_to_triple_sets[pdb_chain])
 
@@ -265,8 +267,6 @@ def map_across_species(nt_lists,scope,resolution,depth):
         # loop over distinct PDB files to which some alignment can be made
         for pdb in pdb_to_pdb_chain_to_triple_sets.keys():
             print('Time %s. Mapping given units to chains in %s' % (datetime.now(),pdb))
-
-            print("pdb, pdb_to_pdb_chain_to_triple_sets",pdb,pdb_to_pdb_chain_to_triple_sets[pdb])
 
             # assemble sets of alignable chains from the same PDB file
             chain_sets = make_chain_sets(pdb_to_pdb_chain_to_triple_sets[pdb])
@@ -336,11 +336,10 @@ def map_across_species(nt_lists,scope,resolution,depth):
                             missing_unit_id = True
 
                     else:
-                        mapped_unit_ids.append('No map')
+                        mapped_unit_ids.append('No chain')
                         missing_unit_id = True
 
                 missing_unit_id = False  # suppress these warnings
-
 
                 if missing_unit_id:
                     print('Missing at least one unit id for %s in %s in %s' % (ife,equivalence_class,rfam_chain_to_family[rfam_chain]))
@@ -415,7 +414,7 @@ def map_across_species(nt_lists,scope,resolution,depth):
 
             output_list.append(output)
 
-        output_list = [header] + output_list
+        output_list = [header] + sorted(output_list)
 
         result["text"] = "\n".join(output_list)
 
@@ -450,14 +449,15 @@ def main():
     nt_lists = [["IL_6ZMI_178"]]  # eukaryotic 5S symmetric platform motif
     nt_lists = [["5J7L|1|DA|A|1858,5J7L|1|DA|G|1884"]]  # AG tHS in E. coli but GA tSH in T. th.
     nt_lists = [["7K00|1|a|G|1992,7K00|1|a|A|1664"]]
-    nt_lists = [["IL_6ZMI_024"]]  # eukaryotic LSU kink turn
-    nt_lists = [["6ZMI|1|L5|G|16,6ZMI|1|L8|C|141,6ZMI|1|L8|C|26,6ZMI|1|L5|G|348,6ZMI|1|S2|U|120,6ZMI|1|S2|U|344,6ZMI|1|L7|C|95,6ZMI|1|L7|G|81"]] # four chains from human ribosome
-    nt_lists = [["HL_7K00_033"]]                      # tRNA anti-codon loop, slow!  Also fails.
+    nt_lists = [["HL_7K00_033"]]  # tRNA anti-codon loop, slow!  Also fails.
     nt_lists = [["IL_6ZMI_019"]]  # eukaryotic LSU + 5.8S big IL
+    nt_lists = [["6ZMI|1|L5|G|16,6ZMI|1|L8|C|141,6ZMI|1|L8|C|26,6ZMI|1|L5|G|348,6ZMI|1|S2|U|120,6ZMI|1|S2|U|344,6ZMI|1|L7|C|95,6ZMI|1|L7|G|81"]] # four chains from human ribosome
+    nt_lists = [["IL_6ZMI_024"]]  # eukaryotic LSU kink turn
+    nt_lists = [["IL_5J7L_060"]]  # had an ordering problem
 
-    scope = 'Rfam'     # same Rfam family as each individual unit
-    scope = 'EC'       # equivalence class, for each unit
     scope = 'molecule' # same molecule like SSU or LSU where available
+    scope = 'EC'       # equivalence class, for each unit
+    scope = 'Rfam'     # same Rfam family as each individual unit
 
     resolution = '2.5A'   # resolution cutoff for equivalence classes
     resolution = '3.0A'   # resolution cutoff for equivalence classes
