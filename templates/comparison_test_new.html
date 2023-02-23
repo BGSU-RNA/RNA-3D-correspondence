@@ -17,6 +17,7 @@
 
     <style>
         .annotation-table {height: 400px; overflow: scroll;}
+        .sequence-variants-table {height: 400px; overflow: scroll;}
     </style>
 </head>
 <body>
@@ -56,10 +57,10 @@
         <div class="row">
           <div class="col-4">
             <dl>
-                <dt>Query Chain Information</dt>
-                  <dd id="common_name" class="edit">{{ selection_data[0][2] }}</dd>
+                <dt>Query Chain</dt>
+                  <dd id="common_name" class="edit">{{ selection_data[0][2]}}</dd>
 
-                  <dt>Query Units</dt>
+                  <dt>Query Nucleotides</dt>
                   <dd id="common_name" class="edit">{{ query_units }}</dd>
 
                   <dt>Rfam entry</dt>
@@ -85,12 +86,23 @@
             </dl>
           </div>
 
-          <div class="col-4">
-            <dt>Unique PDB Species Count</dt>
-                  <!-- <dd id="max_disc" class="edit">{{ name_count }}</dd> -->
-                  {% for species in name_count %}
-                    <i>{{species[0]}}</i> <b>({{species[1]}})</b></br>
-                  {% endfor %}
+          <div class="col-8 sequence-variants-table">
+            <h4 style="text-align: center;">Unique species count from 3D structures </h4>
+            <table class="table table-bordered">
+              <tr>
+                <th class="text-center">Scientific Name</th>
+                <th class="text-center">Count</th>
+              </tr>
+              {% for row in name_count %}
+              <tr>
+                <!-- {% for col in row %}
+                  <td class="text-center"><i>{{ col }}</i></td>
+                {% endfor %} -->
+                <td class="text-center"><i>{{ row[0] }}</i></td>
+                <td class="text-center">{{ row[1] }}</td>
+              </tr>  
+              {% endfor %}
+            </table>
           </div>
 
         </div>
@@ -105,7 +117,7 @@
                       <th scope="col">View Entry</th>
                       <th scope="col">RNA Chain</th>
                       <th scope="col">Res (<span>&#8491;</span>)</th>
-                      <th scope="col">Species Name</th>
+                      <th scope="col">Scientific Name</th>
                       {% for position_num in positions_header %}
                         <th scope="col">{{ position_num }}</th>
                       {% endfor %}
