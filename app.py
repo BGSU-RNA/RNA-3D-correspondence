@@ -122,6 +122,8 @@ def geometric_correspondence_across_species():
 
     query_units = ["|".join(str(unit).split("|")[3:]) for unit in query_units]
 
+    # query_units = ", ".join(query_units)
+
     corr_complete = ui.get_correspondence_dict(correspondence_list)
 
     correspondence = [item for sublist in correspondence_list for item in sublist]
@@ -177,6 +179,8 @@ def geometric_correspondence_across_species():
     end = time.time() 
 
     time_diff = '{0:.2f}'.format(end-start)
+
+    query_units = ", ".join(query_units)
 
     return render_template("comparison_test_new.html", data=heatmap_data, max_disc=max_disc, coord=coord_data, 
                             code_time=time_diff, res_position=correspondence_positions, 
