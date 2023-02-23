@@ -83,8 +83,9 @@ def get_query_units(query_type, query_list, query_ife):
         
     elif query_type == 'loop_id':
         loop_id = query_list[0][0]
-        unsorted_units = get_loop_units(loop_id)
-        complete_units = ui.get_sorted_units(unsorted_units)
+        # unsorted_units = get_loop_units(loop_id)
+        # complete_units = ui.get_sorted_units(unsorted_units)
+        complete_units = get_loop_units(loop_id)
 
     return complete_units
 
