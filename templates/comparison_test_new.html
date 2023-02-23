@@ -57,32 +57,31 @@
         <div class="row">
           <div class="col-4">
             <dl>
-                <dt>Query Chain</dt>
-                  <dd id="common_name" class="edit">{{ selection_data[0][2]}}</dd>
+                <dt>Query PDBID & Chain</dt>
+                  <dd id="query_chain" class="edit">{{ selection_data[0][2]}}</dd>
 
                   <dt>Query Nucleotides</dt>
-                  <dd id="common_name" class="edit">{{ query_units }}</dd>
+                  <dd id="query_nts" class="edit">{{ query_units }}</dd>
 
-                  <dt>Rfam entry</dt>
-                  <dd id="common_name" class="edit"><a href="https://rfam.org/family/{{ selection_data[0][0] }}" target="_blank">{{ selection_data[0][0] }}</a></dd>
+                  <dt>Resolution Limit</dt>
+                    <dd id="resolution_limit" class="edit">""</dd>
 
-                <!--<dt>Selection Chain:</dt>
-                  <dd id="common_name" class="edit">{{ selection_data[1] }}</dd>
+                  <dt>Rfam Entry</dt>
+                    <dd id="rfam_entry" class="edit"><a href="https://rfam.org/family/{{ selection_data[0][0] }}" target="_blank">{{ selection_data[0][0] }}</a></dd>
+                    <!-- <a class="btn btn-primary btn-sm" href="https://rfam.org/family/{{ selection_data[0][0] }}" target="_blank" role="button">{{ selection_data[0][0] }}</a></br> -->
 
-                <dt>Selection Residues:</dt>
-                  <dd id="common_name" class="edit">{{ selection_data[2] }}</dd>-->
+                  <dt>Rfam Description</dt>
+                    <!-- <dd id="common_name" class="edit"><a href="http://rna.bgsu.edu/rna3dhub/nrlist/view/{{ selection_data[0][1] }}" target="_blank">{{ selection_data[0][1] }}</a></dd> -->
+                    <dd id="rfam_name" class="edit">""</dd>
 
-                <dt>Equivalence Class</dt>
-                  <dd id="common_name" class="edit"><a href="http://rna.bgsu.edu/rna3dhub/nrlist/view/{{ selection_data[0][1] }}" target="_blank">{{ selection_data[0][1] }}</a></dd>
+                  <dt>Number of instances</dt>
+                    <dd id="num_rows" class="edit">{{ coord|length }}</a></dd>
 
-                <dt>Number of instances</dt>
-                  <dd id="common_name" class="edit">{{ coord|length }}</a></dd>
+                  <dt>Maximum Discrepancy</dt>
+                    <dd id="max_disc" class="edit">{{ max_disc }}</dd>
 
-                <dt>Maximum Discrepancy</dt>
-                  <dd id="max_disc" class="edit">{{ max_disc }}</dd>
-
-                <dt>95th Percentile Discrepancy</dt>
-                  <dd id="max_disc" class="edit">{{ percentile }}</dd>
+                  <!-- <dt>95th Percentile Discrepancy</dt>
+                    <dd id="percentile_disc" class="edit">{{ percentile }}</dd> -->
             </dl>
           </div>
 
@@ -91,7 +90,7 @@
             <table class="table table-bordered">
               <tr>
                 <th class="text-center">Scientific Name</th>
-                <th class="text-center">Count</th>
+                <th class="text-center">Number of occurences</th>
               </tr>
               {% for row in name_count %}
               <tr>
@@ -132,7 +131,7 @@
                         <td><input type='checkbox' id='{{ loop.index0 }}' class='jmolInline' data-coord = '{{ coord[k] }}'>{{ loop.index }}</td>
                         <td><a>{{ k }}</a></td>
                         <td><a>{{ resolution_data[k] }}</a></td>
-                        <td><a><i>{{ organism_names[k] }}</i></a></td>
+                        <td style="white-space:nowrap"><a><i>{{ organism_names[k] }}</i></a></td>
                           {% for position_num in positions_header %}
                             <td> {{ res_position[k][position_num]}} </td>
                           {% endfor %}
