@@ -118,9 +118,9 @@ def geometric_correspondence_across_species():
     if parameters_dict['resolution'] not in valid_resolutions:
         return "Please enter a valid resolution value. Accepted values are " + ", ".join(valid_resolutions)
     
-    query_units, query_data, correspondence_list = ui.get_correspondence_across_species(parameters_dict)
+    query_info, equivalence_class_dict, correspondence_list = ui.get_correspondence_across_species(parameters_dict)
 
-    query_units = ["|".join(str(unit).split("|")[3:]) for unit in query_units]
+    # query_units = ["|".join(str(unit).split("|")[3:]) for unit in query_units]
 
     # query_units = ", ".join(query_units)
 
@@ -134,7 +134,7 @@ def geometric_correspondence_across_species():
 
     correspondence_positions = ui.get_correspondence_positions(corr_complete)
 
-    positions_header = ui.get_positions_header(len(query_units))
+    positions_header = ui.get_positions_header(len(query_info['query_nts_list']))
 
     # Get rotation data
     rotation_data = get_rotation(correspondence, corr_complete)
@@ -152,7 +152,10 @@ def geometric_correspondence_across_species():
     ifes_ordered = ui.order_similarity(ife_list, disc_data)
 
     # Get discrepancy statistics and build the heatmap data for display
-    heatmap_data, percentile_score, max_disc = ui.build_heatmap_data(disc_data, ifes_ordered)
+    heatmap_data, percentile_score, max_discepancy = ui.build_heatmap_data(disc_data, ifes_ordered)
+
+    # Update the query info dict
+    query_info['max_discrepancy'] = max_discepancy
 
     # Build coord data
     coord_data, table_rows = ui.build_coord_data(ifes_ordered, corr_complete)
@@ -180,14 +183,11 @@ def geometric_correspondence_across_species():
 
     time_diff = '{0:.2f}'.format(end-start)
 
-    query_units = ", ".join(query_units)
-
-    return render_template("comparison_test_new.html", data=heatmap_data, max_disc=max_disc, coord=coord_data, 
-                            code_time=time_diff, res_position=correspondence_positions, 
+    return render_template("comparison_test_new.html", query_info=query_info, data=heatmap_data, 
+                            coord=coord_data, code_time=time_diff, res_position=correspondence_positions, 
                             positions_header=positions_header, pairwise_interactions=pairwise_interactions_data,
-                            interactions_header=res_pairs, selection_data=query_data, percentile=percentile_score,
-                            resolution_data=resolution_data, query_units=query_units, organism_names=organism_names,
-                            name_count=species_name_count)
+                            interactions_header=res_pairs, percentile=percentile_score, resolution_data=resolution_data, 
+                            organism_names=organism_names, name_count=species_name_count)
 
 @app.route('/comparison')
 def geometric_correspondence():

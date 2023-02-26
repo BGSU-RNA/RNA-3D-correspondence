@@ -37,22 +37,40 @@ def get_correspondence_dict(correspondence):
         correspondence_dict[ife] = sublist
     return correspondence_dict
 
+def get_pdb_and_chain_from_ife(ife):
+    pdb, _, chain = ife.split("|")
+    return pdb, chain
+
 def get_correspondence_across_species(param_dict):
     base_url = "http://rna.bgsu.edu/correspondence/map_across_species?id="
     suffix_url = "&format=json"
     complete_url = base_url + str(param_dict['loop_id']) +  "&scope=" + str(param_dict['scope']) + "&resolution=" + str(param_dict['resolution']) + suffix_url
     response = requests.get(complete_url).json()
 
-    query_units = response['query']['unit_id_list']
-    query_details = response['query']['rfam_EC_chain']
+    query_nts_list = response['query']['unit_id_list']
+    query_nts_str = format_query_units(query_nts_list)
+    rfam_accession = response['query']['rfam_EC_chain'][0][0]
+    query_ife = response['query']['rfam_EC_chain'][0][2]
+    pdb, chain = get_pdb_and_chain_from_ife(query_ife)
+
+    query_info = {
+        "pdb": str(pdb),
+        "chain": str(chain),
+        "resolution_limit": str(param_dict['resolution']),
+        "rfam_accession": str(rfam_accession),
+        "rfam_description": "",
+        "query_nts_list": query_nts_list,
+        "query_nts_str": query_nts_str
+    }
 
     correspondence_list = []
-    for idx, val in enumerate(response["mappings"]):
-        correspondence_list.append(response["mappings"][idx]["unit_id_list"])
+    equivalence_class_dict = {}
+    for entry in response["mappings"]:
+        correspondence_list.append(entry["unit_id_list"])
+        equivalence_class_dict[entry["rfam_EC_chain"][0][2]] = entry["rfam_EC_chain"][0][1]
 
     correspondence_list = [sublist for sublist in correspondence_list if not any(x in sublist for x in EXCLUDE_LIST)]
-
-    return query_units, query_details, correspondence_list
+    return query_info, equivalence_class_dict, correspondence_list
 
 def generate_sequence_logo_data(data):
     sequence_dict = OrderedDict()
