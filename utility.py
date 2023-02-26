@@ -440,45 +440,45 @@ def get_exp_method_name(exp_method):
         return 'all'
 
 
-def format_pairwise_interactions_display(corr_data, res_pairs_ref, pairwise_data, query_len):
+def format_pairwise_interactions_display(corr_data, nt_pairs_positions, pairwise_data, query_len):
 
-    pairwise_residue_pairs = list(res_pairs_ref)
-    pairwise_residue_pairs.sort()
+    nt_pairs = list(nt_pairs_positions)
+    nt_pairs.sort()
 
-    chains_list = pairwise_data.keys()
+    ife_list = pairwise_data.keys()
 
-    pairwise_interactions_collection = {}
-    for chain in chains_list:
+    interactions_dict = {}
+    for chain in ife_list:
         pairwise_interactions_ordered = OrderedDict()
-        for unique_res_pair in pairwise_residue_pairs:
+        for unique_res_pair in nt_pairs:
             pairwise_interactions_ordered[unique_res_pair] = ''
 
-        pairwise_interactions_collection[chain] = pairwise_interactions_ordered
+        interactions_dict[chain] = pairwise_interactions_ordered
 
-    for chain in chains_list:
-        for res_pair in pairwise_residue_pairs:
-            pairwise_interactions_collection[chain][res_pair] = pairwise_data.get(chain, {}).get(res_pair)
+    for chain in ife_list:
+        for res_pair in nt_pairs:
+            interactions_dict[chain][res_pair] = pairwise_data.get(chain, {}).get(res_pair)
 
     header_index = [str(x) for x in range(1, query_len+1)]
     header_index = '    '.join(header_index)
-    header_res_pairs = '    '.join(pairwise_residue_pairs)
+    header_res_pairs = '    '.join(nt_pairs)
     header = header_index + '   ' + header_res_pairs
 
     display_str = ""
     display_str += header + " </br>"
 
-    for ife, interaction_data in pairwise_interactions_collection.iteritems():
+    for ife, interaction_data in interactions_dict.iteritems():
         part_1 = '  '.join(corr_data[ife])
         part_2 = '  '.join(str(interaction) for interaction in interaction_data.values())
         display_str += part_1 + "   " + part_2 + " </br>"
      
 
-    return display_str, pairwise_residue_pairs
+    return display_str, nt_pairs
 
 
-def format_pairwise_interactions_single_display(pairwise_interactions, pairwise_residue_pairs, query_units):
+def format_pairwise_interactions_single_display(pairwise_interactions, nt_pairs, query_units):
 
-    residue_pairs = list(pairwise_residue_pairs)
+    residue_pairs = list(nt_pairs)
     residue_pairs = sorted(residue_pairs, key=lambda x: (x[0], x[1]))
     #residue_pairs.sort()
 
@@ -503,26 +503,21 @@ def format_pairwise_interactions_single_display(pairwise_interactions, pairwise_
     return str(display_str)
 
 
-def format_pairwise_interactions_table(res_pairs_ref, pairwise_data):
+def format_pairwise_interactions(data):
+    pairwise_data, nt_pairs_positions = data
+    nt_pairs = sorted(list(nt_pairs_positions))
+    ifes_list = pairwise_data.keys()
 
-    pairwise_residue_pairs = list(res_pairs_ref)
-    pairwise_residue_pairs.sort()
+    interactions_dict = {}
+    for ife in ifes_list:
+        pairwise_interactions_ordered = OrderedDict.fromkeys(nt_pairs, "")
+        interactions_dict[ife] = pairwise_interactions_ordered
 
-    chains_list = pairwise_data.keys()
+    for ife in ifes_list:
+        for nt_pair in nt_pairs:
+            interactions_dict[ife][nt_pair] = pairwise_data.get(ife, {}).get(nt_pair, "")
 
-    pairwise_interactions_collection = {}
-    for chain in chains_list:
-        pairwise_interactions_ordered = OrderedDict()
-        for unique_res_pair in pairwise_residue_pairs:
-            pairwise_interactions_ordered[unique_res_pair] = ""
-
-        pairwise_interactions_collection[chain] = pairwise_interactions_ordered
-
-    for chain in chains_list:
-        for res_pair in pairwise_residue_pairs:
-            pairwise_interactions_collection[chain][res_pair] = pairwise_data.get(chain, {}).get(res_pair, "")
-
-    return pairwise_interactions_collection, pairwise_residue_pairs            
+    return (nt_pairs, interactions_dict)            
 
 
 def get_chain_id(query_units):

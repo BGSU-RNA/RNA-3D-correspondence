@@ -120,17 +120,13 @@ def geometric_correspondence_across_species():
     
     query_info, equivalence_class_dict, correspondence_list = ui.get_correspondence_across_species(parameters_dict)
 
-    # query_units = ["|".join(str(unit).split("|")[3:]) for unit in query_units]
-
-    # query_units = ", ".join(query_units)
-
     corr_complete = ui.get_correspondence_dict(correspondence_list)
 
     correspondence = [item for sublist in correspondence_list for item in sublist]
 
-    pairwise_data, pairwise_residue_pairs_reference = ps.get_pairwise_interactions(corr_complete)
+    pairwise_data = ps.get_pairwise_interactions(corr_complete)
 
-    pairwise_interactions_data, res_pairs = ui.format_pairwise_interactions_table(pairwise_residue_pairs_reference, pairwise_data)
+    formatted_pairwise_data = ui.format_pairwise_interactions(pairwise_data)
 
     correspondence_positions = ui.get_correspondence_positions(corr_complete)
 
@@ -185,8 +181,8 @@ def geometric_correspondence_across_species():
 
     return render_template("comparison_test_new.html", query_info=query_info, data=heatmap_data, 
                             coord=coord_data, code_time=time_diff, res_position=correspondence_positions, 
-                            positions_header=positions_header, pairwise_interactions=pairwise_interactions_data,
-                            interactions_header=res_pairs, percentile=percentile_score, resolution_data=resolution_data, 
+                            positions_header=positions_header, pairwise_data=formatted_pairwise_data,
+                            percentile=percentile_score, resolution_data=resolution_data, 
                             organism_names=organism_names, name_count=species_name_count)
 
 @app.route('/comparison')
