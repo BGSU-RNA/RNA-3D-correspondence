@@ -132,6 +132,7 @@
                       <th scope="col">RNA Chain</th>
                       <th scope="col">Res (<span>&#8491;</span>)</th>
                       <th scope="col">Scientific Name</th>
+                      <th scope="col">Equivalence Class</th>
                       {% for position_num in positions_header %}
                         <th scope="col">{{ position_num }}</th>
                       {% endfor %}
@@ -145,8 +146,9 @@
                       <tr>
                         <td><input type='checkbox' id='{{ loop.index0 }}' class='jmolInline' data-coord = '{{ coord[k] }}'>{{ loop.index }}</td>
                         <td>{{ k }}</td>
-                        <td><a>{{ resolution_data[k] }}</a></td>
-                        <td style="white-space:nowrap"><a><i>{{ organism_names[k] }}</i></a></td>
+                        <td><a>{{ chain_info[k]['resolution'] }}</a></td>
+                        <td style="white-space:nowrap"><a><i>{{ chain_info[k]['source'] }}</i></a></td>
+                        <td><a href="http://rna.bgsu.edu/rna3dhub/nrlist/view/{{ chain_info[k]['equivalence_class']  }}" class="btn btn-primary btn-sm active" role="button" aria-pressed="true" target="_blank">{{ chain_info[k]['equivalence_class'] }}</a></td>
                           
                         {% for position_num in positions_header %}
                           <td> {{ res_position[k][position_num]}} </td>
