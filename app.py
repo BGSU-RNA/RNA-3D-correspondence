@@ -152,6 +152,7 @@ def geometric_correspondence_across_species():
 
     # Update the query info dict
     query_info['max_discrepancy'] = max_discepancy
+    query_info['percentile_score'] = percentile_score
 
     # Build coord data
     coord_data, table_rows = ui.build_coord_data(ifes_ordered, corr_complete)
@@ -159,19 +160,10 @@ def geometric_correspondence_across_species():
     # Get the ordered chains as a list
     ifes_ordered_keys = list(coord_data.keys())
 
-    # Get the pdb for for all the selected chains in the ec
-    pdb_list = list(set([str(x[1].split("|")[0]) for x in ifes_ordered]))
+    # Get all chain-related information for the entries to be displayed
+    chain_info = ec.get_chain_info_dict(ifes_ordered_keys, equivalence_class_dict)
 
-    # Store the resolution data in a dict
-    resolution_dict = ec.get_pdb_resolution(pdb_list)
-
-    # Order the resolution data according to the chain similarity order
-    resolution_data = ui.get_resolution_data_ordered(ifes_ordered, resolution_dict)
-
-    # Get the organism name for all the chains in the ordered list
-    organism_names = ec.get_organism_name(ifes_ordered) 
-
-    species_name_list = list(organism_names.values())
+    species_name_list = [chain_info[k]['source'] for k, _ in chain_info.iteritems()]
 
     species_name_count = ui.get_name_count(species_name_list)
 
@@ -182,8 +174,7 @@ def geometric_correspondence_across_species():
     return render_template("comparison_test_new.html", query_info=query_info, data=heatmap_data, 
                             coord=coord_data, code_time=time_diff, res_position=correspondence_positions, 
                             positions_header=positions_header, pairwise_data=formatted_pairwise_data,
-                            percentile=percentile_score, resolution_data=resolution_data, 
-                            organism_names=organism_names, name_count=species_name_count)
+                            chain_info=chain_info, name_count=species_name_count)
 
 @app.route('/comparison')
 def geometric_correspondence():

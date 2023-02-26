@@ -16,6 +16,26 @@ EXCLUDE_LIST = ['No alignment', 'Not resolved', 'No chain']
 def get_disc(d, first, second):
     return d.get(second, {}).get(first, 0.0)
 
+# def format_species_name(name_list):
+#     formatted_names = []
+#     for species_name in name_list:
+#         name_components = species_name.split(" ")
+#         if len(name_components) > 2:
+#             formatted_species_name = " ".join(species_name.split(" ")[:2])
+#             formatted_names.append(str(formatted_species_name))
+#         else:
+#             formatted_names.append(str(species_name))
+#     return formatted_names
+
+# def format_species_name(name_list):
+#     return [ " ".join(name.split()[:2]) if len(name.split()) > 2 else name for name in name_list ]
+
+def format_species_name(name):
+    if len(name.split()) > 2:
+        return " ".join(name.split()[:2])
+    else:
+        return name
+
 def get_name_count(data):
     count_dict = {}
     for name in data:
@@ -374,7 +394,7 @@ def build_heatmap_data(distances, ifes_ordered):
 
     # disc_filtered = [float(x) for x in disc_formatted if x != 'nan']
     percentile_score = percentile(cleaned_disc, 95)
-    maximum_disc = max(cleaned_disc)
+    maximum_disc = '{0:.2f}'.format(max(cleaned_disc))
     # percentile_score = '%.4f' % percentile_score
 
     #return sorted_disc, None

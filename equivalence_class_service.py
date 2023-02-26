@@ -1,6 +1,7 @@
 from database import db_session
 from models import NrChains, NrClasses, NrReleases, IfeInfo, PDBInfo, ChainInfo 
 from collections import OrderedDict
+import utility as ui
 
 REJECT_LIST = ['5LZE|1|a+5LZE|1|y+5LZE|1|v+5LZE|1|x']
 
@@ -51,7 +52,6 @@ def get_ec_info(class_id):
 		return query[0].name, query[0].nr_release_id
 	
 
-
 def remove_ife(members, query_ife):
 
 	REJECT_LIST.append(query_ife)
@@ -60,6 +60,29 @@ def remove_ife(members, query_ife):
 		members.remove(ife)
 	
 	return members
+
+
+def get_chain_info_dict(ife_list, ec_dict):
+	result = {}
+	for ife in ife_list:
+		pdb, _, chain = ife.split("|")
+	
+		with db_session() as session:
+			query = session.query(PDBInfo.title, PDBInfo.experimental_technique, PDBInfo.resolution, ChainInfo.source) \
+						   .join(ChainInfo, ChainInfo.pdb_id == PDBInfo.pdb_id) \
+						   .filter(PDBInfo.pdb_id == pdb) \
+						   .filter(ChainInfo.chain_name == chain)
+			for row in query:
+				result[ife] = {
+					"pdb": pdb,
+					"source": ui.format_species_name(row.source),
+					"chain": chain,
+					"title": row.title,
+					"resolution": '{0:.2f}'.format(row.resolution),
+					"exp_technique": row.experimental_technique,
+					"equivalence_class": ec_dict.get(ife, "")
+				}	
+	return result
 
 
 # Potential bug. Consider records with only 1 chain
