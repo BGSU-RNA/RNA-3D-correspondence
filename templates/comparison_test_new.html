@@ -135,8 +135,8 @@
                       {% for position_num in positions_header %}
                         <th scope="col">{{ position_num }}</th>
                       {% endfor %}
-                      {% for res_pair in interactions_header %}
-                        <th scope="col">{{ res_pair }}</th>
+                      {% for nt_pair in pairwise_data[0] %}
+                        <th scope="col">{{ nt_pair }}</th>
                       {% endfor %}
                     </tr>
                   </thead>
@@ -147,13 +147,15 @@
                         <td>{{ k }}</td>
                         <td><a>{{ resolution_data[k] }}</a></td>
                         <td style="white-space:nowrap"><a><i>{{ organism_names[k] }}</i></a></td>
-                          {% for position_num in positions_header %}
-                            <td> {{ res_position[k][position_num]}} </td>
-                          {% endfor %}
+                          
+                        {% for position_num in positions_header %}
+                          <td> {{ res_position[k][position_num]}} </td>
+                        {% endfor %}
     
-                          {% for res_pair in interactions_header %}
-                            <td> {{ pairwise_interactions[k][res_pair]}} </td>
-                          {% endfor %}
+                        {% for nt_pair in pairwise_data[0] %}
+                          <td> {{ pairwise_data[1][k][nt_pair]}} </td>
+                        {% endfor %}
+
                       </tr>  
                     {% endfor %}
                   </tbody>
