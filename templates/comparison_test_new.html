@@ -75,27 +75,25 @@
           <div class="col-4">
             <dl>
                 <dt>Query PDBID & Chain</dt>
-                  <dd id="query_chain" class="edit">{{ selection_data[0][2]}}</dd>
+                  <dd id="query_chain" class="edit">{{ query_info['pdb'] }} Chain {{ query_info['chain'] }}</dd>
 
                   <dt>Query Nucleotides</dt>
-                  <dd id="query_nts" class="edit">{{ query_units }}</dd>
+                  <dd id="query_nts" class="edit">{{ query_info['query_nts_str'] }}</dd>
 
                   <dt>Resolution Limit</dt>
-                    <dd id="resolution_limit" class="edit">""</dd>
+                    <dd id="resolution_limit" class="edit">>= {{ query_info['resolution_limit'] }}</dd>
 
                   <dt>Rfam Accession</dt>
-                    <dd id="rfam_accession" class="edit"><a href="https://rfam.org/family/{{ selection_data[0][0] }}" target="_blank">{{ selection_data[0][0] }}</a></dd>
-                    <!-- <a class="btn btn-primary btn-sm" href="https://rfam.org/family/{{ selection_data[0][0] }}" target="_blank" role="button">{{ selection_data[0][0] }}</a></br> -->
+                    <dd id="rfam_accession" class="edit"><a href="https://rfam.org/family/{{ query_info['rfam_accession'] }}" target="_blank">{{ query_info['rfam_accession'] }}</a></dd>
 
                   <dt>Rfam Description</dt>
-                    <!-- <dd id="common_name" class="edit"><a href="http://rna.bgsu.edu/rna3dhub/nrlist/view/{{ selection_data[0][1] }}" target="_blank">{{ selection_data[0][1] }}</a></dd> -->
                     <dd id="rfam_description" class="edit">""</dd>
 
                   <dt>Number of instances</dt>
                     <dd id="num_instances" class="edit">{{ coord|length }}</a></dd>
 
                   <dt>Maximum Geometric Discrepancy</dt>
-                    <dd id="max_discrepancy" class="edit">{{ max_disc }}</dd>
+                    <dd id="max_discrepancy" class="edit">{{ query_info['max_discrepancy'] }}</dd>
 
                   <!-- <dt>95th Percentile Discrepancy</dt>
                     <dd id="percentile_disc" class="edit">{{ percentile }}</dd> -->
