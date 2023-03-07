@@ -213,16 +213,16 @@ def order_data(rot, ctr):
       center_ordered = [ctr.get(k) for k in common_keys]
       #rotation_ordered_dict = OrderedDict()
 
-      missing_data = check_missing_rotation_or_center(rotation_ordered, center_ordered)
+    #   missing_data = check_missing_rotation_or_center(rotation_ordered, center_ordered)
 
       #return rotation_ordered, center_ordered, common_keys, missing_data
 
-      if missing_data:
-          rotation_ordered, center_ordered, common_keys = remove_instances_with_missing_data(common_keys, rotation_ordered, center_ordered, missing_data)
+    #   if missing_data:
+    #       rotation_ordered, center_ordered, common_keys = remove_instances_with_missing_data(common_keys, rotation_ordered, center_ordered, missing_data)
       #for k in common_keys:
           #rotation_ordered_dict[k] = rot.get(k)
     
-      return rotation_ordered, center_ordered, common_keys, missing_data
+      return rotation_ordered, center_ordered, common_keys, None
 
 
 def check_missing_rotation_or_center(rot, ctr):
