@@ -18,6 +18,18 @@
     <style>
         .annotation-table {height: 400px; overflow: scroll;}
         .sequence-variants-table {height: 400px; overflow: scroll;}
+
+        .footer-section {
+          background-color: #000;
+          height: 40px;
+          padding: 10px;
+          color: #fff;
+          position: relative;
+        }
+
+        .load-time{
+          text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -58,7 +70,7 @@
           <div class="col-4">
             <dl>
                 <dt>Query PDBID & Chain</dt>
-                  <dd id="common_name" class="edit">{{ selection_data[0] }} Chain {{selection_data[1]}}</dd>
+                  <dd id="common_name" class="edit">{{ selection_data[0] }}</dd>
 
                   <dt>Query Nucleotides</dt>
                   <dd id="common_name" class="edit">{{ query_units }}</dd>
@@ -75,8 +87,8 @@
                 <dt>Equivalence Class</dt>
                   <dd id="common_name" class="edit"><a href="http://rna.bgsu.edu/rna3dhub/nrlist/view/{{ ec_name }}" target="_blank">{{ ec_name }}</a></dd>
 
-                <dt>NR Release</dt>
-                  <dd id="common_name" class="edit"><a href="http://rna.bgsu.edu/rna3dhub/nrlist/release/{{ nr_release }}" target="_blank">{{ nr_release }}</a></dd>
+                <!-- <dt>NR Release</dt>
+                  <dd id="common_name" class="edit"><a href="http://rna.bgsu.edu/rna3dhub/nrlist/release/{{ nr_release }}" target="_blank">{{ nr_release }}</a></dd> -->
 
                 <dt>Number of structures</dt>
                   <dd id="common_name" class="edit">{{ coord|length }}</a></dd>
@@ -84,12 +96,12 @@
                 <dt>Maximum Discrepancy</dt>
                   <dd id="max_disc" class="edit">{{ max_disc }}</dd>
 
-                <dt>95th Percentile Discrepancy</dt>
-                  <dd id="max_disc" class="edit">{{ percentile }}</dd>
+                <!-- <dt>95th Percentile Discrepancy</dt>
+                  <dd id="max_disc" class="edit">{{ percentile }}</dd> -->
             </dl>
           </div>
 
-          <div class="col-4 sequence-variants-table">
+          <!-- <div class="col-4 sequence-variants-table">
             <p style="text-align: center;">Sequence variants from Rfam derived alignment </p>
             <table class="table table-bordered">
               <tr>
@@ -104,10 +116,10 @@
               </tr>  
               {% endfor %}
             </table>
-          </div>
+          </div> -->
 
-          <div class="col-4 sequence-variants-table">
-            <p style="text-align: center;">Unique Neighboring Chains</p>
+          <div class="col-8 sequence-variants-table">
+            <h4 style="text-align: center;">Unique Neighboring Chains from 3D structures</h4>
             <table class="table table-bordered">
               <tr>
                 <th class="text-center">Name</th>
@@ -135,8 +147,8 @@
                         {% for position_num in positions_header %}
                           <th scope="col">{{ position_num }}</th>
                         {% endfor %}
-                        {% for res_pair in interactions_header %}
-                          <th scope="col">{{ res_pair }}</th>
+                        {% for nt_pair in pairwise_data[0] %}
+                          <th scope="col">{{ nt_pair }}</th>
                         {% endfor %}
                       </tr>
                     </thead>
@@ -145,7 +157,7 @@
                         <tr>
                           <td><input type='checkbox' id='{{ loop.index0 }}' class='jmolInline' data-coord = '{{ coord[k] }}'>{{ loop.index }}</td>
                           <td><a>{{ k }}</a></td>
-                          <td><a>{{ resolution_data[k] }}</a></td>
+                          <td><a>{{ chain_info[k]['resolution'] }}</a></td>
                           {% if neighboring_chains[k] is not none %}
                             <td>
                               {% for v in neighboring_chains[k] %}
@@ -160,8 +172,8 @@
                               <td> {{ res_position[k][position_num]}} </td>
                             {% endfor %}
       
-                            {% for res_pair in interactions_header %}
-                              <td> {{ pairwise_interactions[k][res_pair]}} </td>
+                            {% for nt_pair in pairwise_data[0] %}
+                              <td> {{ pairwise_data[1][k][nt_pair]}} </td>
                             {% endfor %}
                         </tr>  
                       {% endfor %}
@@ -199,12 +211,14 @@
         </div>
     
     </div>
-    <nav class="navbar bg-dark" data-bs-theme="dark">
-      <div class="container-fluid">
-        <p style="color: white; text-align: center;">Page generated in {{code_time}} seconds</p>
-      </div>
-    </nav>
     <script type="text/javascript" src="http://rna.bgsu.edu/webfr3d/js/heatmap.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
 </body>
+  <section class="footer-section">
+
+    <div class="load-time">
+      <p>Page loaded in {{code_time}} seconds</p>
+    </div>
+
+  </section>
 </html>
