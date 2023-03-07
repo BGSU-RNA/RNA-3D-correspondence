@@ -64,25 +64,43 @@ def remove_ife(members, query_ife):
 
 def get_chain_info_dict(ife_list, ec_dict):
 	result = {}
-	for ife in ife_list:
-		pdb, _, chain = ife.split("|")
-	
-		with db_session() as session:
-			query = session.query(PDBInfo.title, PDBInfo.experimental_technique, PDBInfo.resolution, ChainInfo.source) \
-						   .join(ChainInfo, ChainInfo.pdb_id == PDBInfo.pdb_id) \
-						   .filter(PDBInfo.pdb_id == pdb) \
-						   .filter(ChainInfo.chain_name == chain)
-			for row in query:
-				result[ife] = {
-					"pdb": pdb,
-					"source": ui.format_species_name(row.source),
-					"chain": chain,
-					"title": row.title,
-					"resolution": '{0:.2f}'.format(row.resolution),
-					"exp_technique": row.experimental_technique,
-					"equivalence_class": ec_dict.get(ife, "")
-				}	
-	return result
+	if len(ec_dict) > 1:
+		for ife in ife_list:
+			pdb, _, chain = ife.split("|")
+		
+			with db_session() as session:
+				query = session.query(PDBInfo.title, PDBInfo.experimental_technique, PDBInfo.resolution, ChainInfo.source) \
+							.join(ChainInfo, ChainInfo.pdb_id == PDBInfo.pdb_id) \
+							.filter(PDBInfo.pdb_id == pdb) \
+							.filter(ChainInfo.chain_name == chain)
+				for row in query:
+					result[ife] = {
+						"pdb": pdb,
+						"source": ui.format_species_name(row.source),
+						"chain": chain,
+						"title": row.title,
+						"resolution": '{0:.2f}'.format(row.resolution),
+						"exp_technique": row.experimental_technique,
+						"equivalence_class": ec_dict.get(ife, "")
+					}	
+		return result
+	else:
+		for ife in ife_list:
+			pdb, _, chain = ife.split("|")
+		
+			with db_session() as session:
+				query = session.query(PDBInfo.title, PDBInfo.experimental_technique, PDBInfo.resolution, ChainInfo.source) \
+							.join(ChainInfo, ChainInfo.pdb_id == PDBInfo.pdb_id) \
+							.filter(PDBInfo.pdb_id == pdb) \
+							.filter(ChainInfo.chain_name == chain)
+				for row in query:
+					result[ife] = {
+						"pdb": pdb,
+						"chain": chain,
+						"title": row.title,
+						"resolution": '{0:.2f}'.format(row.resolution),
+					}	
+		return result		
 
 
 # Potential bug. Consider records with only 1 chain
