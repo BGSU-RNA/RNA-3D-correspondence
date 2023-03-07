@@ -195,6 +195,8 @@ def geometric_correspondence():
     disc_method = query_parameters.get('disc_method')
     core_nts = query_parameters.get('core_res')
 
+    equivalence_class_dict = {}
+
     if resolution not in accepted_resolutions:
         return 'Please enter a valid resolution threshold. The accepted resolution values \
                 are 1.5, 2.0, 2.5, 3.0, 3.5, 4.0 and all'
@@ -229,9 +231,9 @@ def geometric_correspondence():
 
         formatted_query_units = ui.format_query_units(complete_query_units)
 
-        sequence_count_dict = ui.get_sequence_variability(complete_query_units_str)
+        # sequence_count_dict = ui.get_sequence_variability(complete_query_units_str)
 
-        sequence_logo_data = ui.generate_sequence_logo_data(sequence_count_dict)
+        # sequence_logo_data = ui.generate_sequence_logo_data(sequence_count_dict)
 
         query_data = ui.process_query_units(complete_query_units)
 
@@ -279,11 +281,11 @@ def geometric_correspondence():
 
         status_text += "Removed missing members<br>"
 
-        pairwise_data, pairwise_residue_pairs_reference = ps.get_pairwise_interactions(corr_complete)
+        pairwise_data = ps.get_pairwise_interactions(corr_complete)
 
         status_text += "Got pairwise interactions<br>"
 
-        pairwise_interactions_data, res_pairs = ui.format_pairwise_interactions_table(pairwise_residue_pairs_reference, pairwise_data)
+        formatted_pairwise_data = ui.format_pairwise_interactions(pairwise_data)
 
         status_text += "Formatted pairwise interactions<br>"
 
@@ -296,10 +298,10 @@ def geometric_correspondence():
         positions_header = ui.get_positions_header(query_len)
 
         # Get rotation data
-        rotation_data = get_rotation(correspondence, corr_std)
+        rotation_data = get_rotation(correspondence, corr_complete)
 
         # Get center data
-        center_data = get_center(correspondence, corr_std)
+        center_data = get_center(correspondence, corr_complete)
 
         status_text += "Got %s center and %s rotation data<br>" % (len(center_data),len(rotation_data))
 
@@ -351,14 +353,8 @@ def geometric_correspondence():
     # Get the ordered chains as a list
     ifes_ordered_keys = list(coord_data.keys())
 
-    # Get the pdb for for all the selected chains in the ec
-    pdb_list = list(set([str(x[1].split("|")[0]) for x in ifes_ordered]))
-
-    # Store the resolution data in a dict
-    resolution_dict = ec.get_pdb_resolution(pdb_list)
-
-    # Order the resolution data according to the chain similarity order
-    resolution_data = ui.get_resolution_data_ordered(ifes_ordered, resolution_dict)
+    # Get all chain-related information for the entries to be displayed
+    chain_info = ec.get_chain_info_dict(ifes_ordered_keys, equivalence_class_dict)
 
     # Zip both the chain and neighboring chains lists into a dict 
     neighboring_chains_dict = OrderedDict(zip(ifes_ordered_keys, neighboring_chains))
@@ -367,23 +363,16 @@ def geometric_correspondence():
 
     neighboring_chains_count = ui.get_name_count(neighboring_chains_list)
 
-    #table_cols = zip(*table_rows) 
-
-    #return str(correspondence_positions)
-
-    #return str(correspondence_positions['4WOI|1|AA']['Nt1'])
-
     end = time.time() 
 
     time_diff = '{0:.2f}'.format(end-start)
 
     return render_template("comparison_test.html", data=heatmap_data, max_disc=max_disc, coord=coord_data, ec_name=ec_name, 
                             nr_release=nr_release, code_time=time_diff, res_position=correspondence_positions, 
-                            positions_header=positions_header, pairwise_interactions=pairwise_interactions_data,
-                            interactions_header=res_pairs, selection_data=query_data, percentile=percentile_score,
-                            organism=source_organism, sequence_count_dict=sequence_count_dict, neighboring_chains=neighboring_chains_dict,
-                            resolution_data=resolution_data, neighboring_chains_count=neighboring_chains_count,
-                            sequence_logo=sequence_logo_data, query_units=formatted_query_units)
+                            positions_header=positions_header, pairwise_data=formatted_pairwise_data,
+                            selection_data=query_data, percentile=percentile_score,
+                            organism=source_organism, neighboring_chains=neighboring_chains_dict, chain_info=chain_info,
+                            neighboring_chains_count=neighboring_chains_count, query_units=formatted_query_units)
 
 
 @app.route('/pairwise_interactions')
