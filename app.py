@@ -629,14 +629,15 @@ def map_across_species():
     resolution = query_parameters.get('resolution','3.0A')
     depth = int(query_parameters.get('depth','5'))
     format = query_parameters.get('format','text')
+    match = query_parameters.get('match','full')
 
-    output = "Basic usage; defaults indicated in parentheses\nid=loop id or comma-separated list of unit ids\n&scope=[EC,(Rfam),molecule]\n&resolution=[1.5A,2.0A,2.5A,(3.0A),3.5A,4.0A,20.0A,all]\n&depth=integer (5)\n&format=[(text),json]\n\n"
+    output = "Basic usage; defaults indicated in parentheses\nid=loop id or comma-separated list of unit ids\n&scope=[EC,(Rfam),molecule]\n&resolution=[1.5A,2.0A,2.5A,(3.0A),3.5A,4.0A,20.0A,all]\n&depth=integer (5)\n&format=[(text),json]\n&match=[(full),partial]\n\n"
     problem = False
 
     to_do = []
 
     if id:
-        output += 'New request made for id %s with scope %s resolution %s depth %d\n' % (id,scope,resolution,depth)
+        output += 'New request made for id %s with scope %s resolution %s depth %d format %s match %s\n' % (id,scope,resolution,depth,format,match)
         if not "|" in id and not "_" in id:
             output += 'Invalid id %s\n' % id
             problem = True
@@ -649,7 +650,7 @@ def map_across_species():
             if resolution in ['1.5A','2.0A','2.5A','3.0A','3.5A','4.0A','20.0A','all']:
 
                 try:
-                    results_list = m_a_s(to_do,scope,resolution,depth)
+                    results_list = m_a_s(to_do,scope,resolution,depth,match)
                     if format == 'text':
                         output = results_list[0]["text"]
                     else:
