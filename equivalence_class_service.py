@@ -1,5 +1,5 @@
 from database import db_session
-from models import NrChains, NrClasses, NrReleases, IfeInfo, PDBInfo, ChainInfo 
+from models import NrChains, NrClasses, NrReleases, IfeInfo, PDBInfo, ChainInfo, ChainPropertyValue 
 from collections import OrderedDict
 import utility as ui
 
@@ -77,6 +77,7 @@ def get_chain_info_dict(ife_list, ec_dict):
 					result[ife] = {
 						"pdb": pdb,
 						"source": ui.format_species_name(row.source),
+						# "source": row.source,
 						"chain": chain,
 						"title": row.title,
 						"resolution": '{0:.2f}'.format(row.resolution),
@@ -266,3 +267,14 @@ def get_organism_name(ifes_ordered):
 
 		return name_dict
 
+def get_chain_standardized_name(query_info_dict):
+	pdb = query_info_dict['pdb']
+	chain = query_info_dict['chain']
+
+	with db_session() as session:
+		query = session.query(ChainPropertyValue) \
+                       .filter(ChainPropertyValue.pdb_id == pdb) \
+					   .filter(ChainPropertyValue.chain == chain) \
+					   .filter(ChainPropertyValue.property == 'standardized_name')
+
+		return query[0].value
