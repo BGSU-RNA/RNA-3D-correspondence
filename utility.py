@@ -5,6 +5,7 @@ import numpy as np
 # import pandas as pd
 #from ordering import optimalLeafOrder
 import io
+import itertools
 import re
 from ordering_similarity import treePenalizedPathLength
 import math
@@ -15,6 +16,19 @@ EXCLUDE_LIST = ['No alignment', 'Not resolved', 'No chain']
 
 def get_disc(d, first, second):
     return d.get(second, {}).get(first, 0.0)
+
+def get_nt_position_index(data):
+    nt_position_index = {}
+    for ife, nt_positions in data.iteritems():
+        for idx, position in enumerate(nt_positions, 1):
+            nt_position_index[position] = idx
+    return nt_position_index
+
+def create_all_nt_pairs(data):
+    nt_pairs_dict = OrderedDict()
+    for ife, nt_positions in data.iteritems():
+        nt_pairs_dict[ife] = list(itertools.permutations(nt_positions, 2))
+    return nt_pairs_dict
 
 # def format_species_name(name_list):
 #     formatted_names = []
@@ -31,12 +45,15 @@ def get_disc(d, first, second):
 #     return [ " ".join(name.split()[:2]) if len(name.split()) > 2 else name for name in name_list ]
 
 def format_species_name(name):
-    if len(name.split()) > 2:
+    if (name is not None) and (len(name.split()) > 2):
         return " ".join(name.split()[:2])
+    elif (name is None) or (name == "synthetic construct"):
+        return " "
     else:
         return name
 
 def get_name_count(data):
+    data = [i for i in data if i.strip()]
     count_dict = {}
     for name in data:
         count_dict[name] = count_dict.get(name, 0) + 1
@@ -64,7 +81,8 @@ def get_pdb_and_chain_from_ife(ife):
 def get_correspondence_across_species(param_dict):
     base_url = "http://rna.bgsu.edu/correspondence/map_across_species?id="
     suffix_url = "&format=json"
-    complete_url = base_url + str(param_dict['loop_id']) +  "&scope=" + str(param_dict['scope']) + "&resolution=" + str(param_dict['resolution']) + suffix_url
+    # depth = param_dict.get('depth', 1)
+    complete_url = base_url + str(param_dict['selection']) +  "&scope=" + str(param_dict['scope']) + "&depth=" + str(param_dict['depth']) + "&resolution=" + str(param_dict['resolution']) + suffix_url
     response = requests.get(complete_url).json()
 
     query_nts_list = response['query']['unit_id_list']
