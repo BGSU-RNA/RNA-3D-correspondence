@@ -77,17 +77,17 @@
                 <dt>Query PDBID & Chain</dt>
                   <dd id="query_chain" class="edit">{{ query_info['pdb'] }} Chain {{ query_info['chain'] }}</dd>
 
+                  <dt>Query Chain Description</dt>
+                    <dd id="rfam_description" class="edit">{{ query_info['chain_name'] }}</dd>
+
                   <dt>Query Nucleotides</dt>
                   <dd id="query_nts" class="edit">{{ query_info['query_nts_str'] }}</dd>
 
                   <dt>Resolution Limit</dt>
-                    <dd id="resolution_limit" class="edit">>= {{ query_info['resolution_limit'] }}</dd>
+                    <dd id="resolution_limit" class="edit">Equal or higher than {{ query_info['resolution_limit'] }}</dd>
 
                   <dt>Rfam Accession</dt>
                     <dd id="rfam_accession" class="edit"><a href="https://rfam.org/family/{{ query_info['rfam_accession'] }}" target="_blank">{{ query_info['rfam_accession'] }}</a></dd>
-
-                  <dt>Rfam Description</dt>
-                    <dd id="rfam_description" class="edit">""</dd>
 
                   <dt>Number of instances</dt>
                     <dd id="num_instances" class="edit">{{ coord|length }}</a></dd>
@@ -148,7 +148,7 @@
                         <td>{{ k }}</td>
                         <td><a>{{ chain_info[k]['resolution'] }}</a></td>
                         <td style="white-space:nowrap"><a><i>{{ chain_info[k]['source'] }}</i></a></td>
-                        <td><a href="http://rna.bgsu.edu/rna3dhub/nrlist/view/{{ chain_info[k]['equivalence_class']  }}" class="btn btn-primary btn-sm active" role="button" aria-pressed="true" target="_blank">{{ chain_info[k]['equivalence_class'] }}</a></td>
+                        <td><a href="http://rna.bgsu.edu/rna3dhub/nrlist/view/{{ chain_info[k]['equivalence_class']  }}" target="_blank">{{ chain_info[k]['equivalence_class'] }}</a></td>
                           
                         {% for position_num in positions_header %}
                           <td> {{ res_position[k][position_num]}} </td>
