@@ -103,14 +103,15 @@ def geometric_correspondence_across_species():
 
     query_parameters = request.args
     
-    loop_id = query_parameters.get('loop_id')
-    scope = query_parameters.get('scope')
-    resolution = query_parameters.get('resolution')
+    selection = query_parameters.get('selection')
+    scope = query_parameters.get('scope', default='Rfam')
+    resolution = query_parameters.get('resolution', default='4.0A')
+    depth = query_parameters.get('depth', default=1)
 
-    parameters_dict = {'loop_id': loop_id, 'scope': scope, 'resolution': resolution}
+    parameters_dict = {'selection': selection, 'scope': scope, 'resolution': resolution, 'depth': depth}
 
-    if None in parameters_dict.values():
-        return "Please specify the values for all the required parameters - id, scope and resolution"
+    # if (None in parameters_dict['loop_id']) or (None in parameters_dict['scope']) or (None in parameters_dict['resolution']):
+    #     return "Please specify the values for all the required parameters - id, scope and resolution"
 
     if parameters_dict['scope'] not in valid_scope_values:
         return "Please enter a valid scope value. Accepted values are " + ", ".join(valid_scope_values)
@@ -120,11 +121,19 @@ def geometric_correspondence_across_species():
     
     query_info, equivalence_class_dict, correspondence_list = ui.get_correspondence_across_species(parameters_dict)
 
+    query_info['chain_name'] = ec.get_chain_standardized_name(query_info)
+
     corr_complete = ui.get_correspondence_dict(correspondence_list)
 
     correspondence = [item for sublist in correspondence_list for item in sublist]
 
-    pairwise_data = ps.get_pairwise_interactions(corr_complete)
+    nt_position_index = ui.get_nt_position_index(corr_complete)
+
+    possible_nt_pairs = ui.create_all_nt_pairs(corr_complete)
+
+    pairwise_data = ps.get_pairwise_interactions_new(possible_nt_pairs, nt_position_index)
+
+    # pairwise_data = ps.get_pairwise_interactions(corr_complete)
 
     formatted_pairwise_data = ui.format_pairwise_interactions(pairwise_data)
 
@@ -166,6 +175,8 @@ def geometric_correspondence_across_species():
     species_name_list = [chain_info[k]['source'] for k, _ in chain_info.iteritems()]
 
     species_name_count = ui.get_name_count(species_name_list)
+
+    # return str(species_name_list)
 
     end = time.time() 
 
@@ -281,7 +292,15 @@ def geometric_correspondence():
 
         status_text += "Removed missing members<br>"
 
-        pairwise_data = ps.get_pairwise_interactions(corr_complete)
+        nt_position_index = ui.get_nt_position_index(corr_complete)
+
+        possible_nt_pairs = ui.create_all_nt_pairs(corr_complete)
+
+        pairwise_data = ps.get_pairwise_interactions_new(possible_nt_pairs, nt_position_index)
+
+        # pairwise_data = ps.get_pairwise_interactions(corr_complete)
+
+        # return str(pairwise_data)
 
         status_text += "Got pairwise interactions<br>"
 
@@ -673,6 +692,62 @@ def map_across_species():
         else:
 
             output += "Unknown scope %s" % scope
+            problem = True
+
+    if problem:
+        response = make_response(output, 400)
+    else:
+        response = make_response(output, 200)
+
+    response.mimetype = "text/plain"
+
+    return response
+
+
+@app.route('/align_chains')
+def align_chains():
+
+    # align two or more chains
+    # use Rfam / Infernal alignment, until other options become available
+
+    # http://rna.bgsu.edu/correspondence/align_chains?chains=4V9F|1|0,1S72|1|0,1K9M|1|A
+    # http://rna.bgsu.edu/correspondence/align_chains?chains=5J7L|1|AA,1J5E|1|A
+    # http://rna.bgsu.edu/correspondence/align_chains?chains=5J7L|1|DA,8B0X|1|a,7K00|1|a  # won't work yet!
+    # http://rna.bgsu.edu/correspondence/align_chains?chains=5J7L|1|AA,1J5E|1|A,6TH6|1|Aa,4V88|1|A6,6ZMI|1|S2
+
+    output = "Making progress"
+
+    try:
+        from align_chains import align_chains as a_c
+    except Exception as inst:
+        output = "%s" % inst
+        return output
+
+    query_parameters = request.args
+
+    chains = query_parameters.get('chains').replace("'","")
+
+    output = "Specify two or more chains separated by commas, for example, 5J7L|1|AA,4Y4O|1|1a\n"
+    problem = False
+
+    if chains:
+        output += 'New request made for chains %s\n' % (chains)
+        if not "|" in chains or not "," in chains:
+            output += 'Invalid chains %s\n' % chains
+            problem = True
+
+    if not problem:
+        try:
+            output = a_c(chains.split(","))
+
+        except Exception as e:
+            exception_type, exception_object, exception_traceback = sys.exc_info()
+            line_number = exception_traceback.tb_lineno
+            output += "\nSomething went wrong with this request on line %s with error type %s\n" % (line_number,exception_type)
+            output += "%s\n" % type(e)
+            output += "%s\n" % exception_traceback
+            #output += "%s\n" % inst.args
+            output += "%s\n" % e
             problem = True
 
     if problem:
