@@ -625,31 +625,33 @@ def main():
     nt_lists = [["6ZMI|1|ZZ|G|12,6ZMI|1|L5|G|16,6ZMI|1|L8|C|141,6ZMI|1|L8|C|26,6ZMI|1|L5|G|348,6ZMI|1|S2|U|120,6ZMI|1|S2|U|344,6ZMI|1|L7|C|95,6ZMI|1|L7|G|81"]] # four chains from human ribosome
     nt_lists = [["6ZMI|1|L5|G|16,6ZMI|1|L5|G|348,6ZMI|1|L8|C|141,6ZMI|1|L8|C|26,6ZMI|1|S2|U|120,6ZMI|1|S2|U|344,6ZMI|1|L7|C|95,6ZMI|1|L7|G|81"]] # four chains from human ribosome
     nt_lists = [["6ZMI|1|L5|G|16,6ZMI|1|L5|G|348,6ZMI|1|L8|C|141,6ZMI|1|L8|C|26,6ZMI|1|S2|U|120,6ZMI|1|S2|U|344,6ZMI|1|L7|C|95,6ZMI|1|L7|G|81"]] # four chains from human ribosome
+    nt_lists = [['HL_3WC2_002']]  # tRNA example
     nt_lists = [['5J7L|1|AA|A|253,5J7L|1|AA|U|273']]
     nt_lists = [['5J7L|1|DA|G|2655,5J7L|1|DA|U|2656,5J7L|1|DA|A|2665']]
     nt_lists = [["IL_4V9F_007"]]  # archaeal LSU
-    nt_lists = [['HL_3WC2_002']]  # tRNA example
+    nt_lists = [["IL_6ME0_015"]]  # RF00029 group II intron
 
-    scope = 'Rfam'     # same Rfam family as each individual unit
-    scope = 'molecule' # same molecule like SSU or LSU where available
     scope = 'EC'       # equivalence class, for each unit
+    scope = 'molecule' # same molecule like SSU or LSU where available
+    scope = 'Rfam'     # same Rfam family as each individual unit
 
     resolution = '3.5A'   # resolution cutoff for equivalence classes
     resolution = '2.5A'   # resolution cutoff for equivalence classes
     resolution = '3.0A'   # resolution cutoff for equivalence classes
+    resolution = '4.0A'   # resolution cutoff for equivalence classes
 
     if not resolution in ['1.5A','2.0A','2.5A','3.0A','3.5A','4.0A','20.0A','all']:
         resolution = '3.0A'
 
     depth = 1        # how many IFEs from the equivalence class to map to
 
-    match = 'partial'  # allow partial matches
     match = 'full'     # only keep instances where every nucleotide is mapped
+    match = 'partial'  # allow partial matches
 
     result_list = map_across_species(nt_lists,scope,resolution,depth,match)
 
     for i, result in enumerate(result_list):
-        #print(result["text"])
+        print(result["text"])
 
         with open('results/map_across_species_%d.txt' % i,write_mode) as f:
             f.write(result["text"])
