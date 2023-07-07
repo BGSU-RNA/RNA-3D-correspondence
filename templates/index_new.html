@@ -51,11 +51,11 @@
 
       <div class="row">
 
-        <form class="form-horizontal col-sm-12" id="generateCorrespondence" action="http://rna.bgsu.edu/correspondence/comparison">
+        <form class="form-horizontal col-sm-12" id="generateCorrespondence">
 
           <div class="form-group col-sm-4">
 
-            <label for="ife">Choose selection type</label>
+            <!-- <label for="ife">Choose selection type</label>
             <select class="form-control" id="input-type" name="selection_type">
                 <option value="loop_id">loop_id</option>
                 <option value="unit_id">unit_id</option>
@@ -63,32 +63,39 @@
                 <option value="single_range">single range</option>
                 <option value="multiple_ranges">multiple ranges</option>
             </select>    
-            </br>
+            </br> -->
 
-            <label for="chain_id" style="display: none;">Enter the PDB id, model number and chain id separated by vertical bars</label>
+            <!-- <label for="chain_id" style="display: none;">Enter the PDB id, model number and chain id separated by vertical bars</label>
             <input type="text" class="form-control" id="chain_id" style="display: none;" name="chain" placeholder="Enter the chain id ">
             <i class="fas fa-check-circle" style="display: none;" id="icon_correct_one"></i>
             <i class="fas fa-exclamation-circle" style="display: none;" id="icon_false_one"></i>
             <small style="display: none;">Error message</small>
-            <br id="newline1" style="display: none;">
+            <br id="newline1" style="display: none;"> -->
             
             <label for="selection">Enter selection</label>
             <input type="text" class="form-control" id="selection" name="selection">
             </br>
 
-            <label for="discrepancy-method">Choose discrepancy calculation method</label>
+            <label for="correspondence_type">Choose correspondence type</label>
+            <select class="form-control" id="correspondence-type" name="corr_type">
+                <option value="ec">Across Equivalence Class</option>
+                <option value="rfam">Across Rfam family</option>
+            </select>
+            </br>
+
+            <!-- <label for="discrepancy-method">Choose discrepancy calculation method</label>
             <select class="form-control" id="discrepancy-method" name="disc_method">
                 <option value="geometric" selected>Geometric</option>
                 <option value="relative">Relative</option>
             </select>
-            </br>
+            </br> -->
 
-            <label for="core" style="display: none;">Enter the core nucleotides for alignment</label>
+            <!-- <label for="core" style="display: none;">Enter the core nucleotides for alignment</label>
             <input type="text" class="form-control" id="core" style="display: none;" name="core_res" placeholder="Enter the core nts ">
-            <br id="newline2" style="display: none;">
+            <br id="newline2" style="display: none;"> -->
 
-            <label for="structure-resolution">Choose equivalence class resolution threshold</label>
-            <select class="form-control" id="structure-resolution" name="resolution_threshold">
+            <label for="structure-resolution">Choose resolution threshold</label>
+            <select class="form-control" id="structure-resolution" name="resolution">
                 <option value="4.0" selected>4.0</option>
                 <option value="1.5">1.5</option>
                 <option value="2.0">2.0</option>
@@ -101,7 +108,7 @@
 
             <label for="experimental-method">Choose experimental technique</label>
             <select class="form-control" id="experimental-method" name="exp_method">
-                <option value="all" selected>Any</option>
+                <option value="all" selected>All</option>
                 <option value="xray">X-ray diffraction</option>
                 <option value="em">Cryo-electron microscopy</option>
             </select>
@@ -110,28 +117,6 @@
             <button type="submit" id="submit_test" class="btn btn-primary">Submit</button>
           </div>
 
-          <div class="col-sm-4 col-sm-offset-3">
-            <h4>Examples</h4>
-            <ul class="list-unstyled">
-                
-                <li>
-                  <a href="#" onClick="autoFillExample1(); return true;" >Decoding internal loop in <i>E. coli</i> SSU crystal structures</a>
-                </li></br>
-
-                <li>
-                  <a href="#" onClick="autoFillExample2(); return true;" >Anticodon stem-loop in tRNA(Phe) from <i>S. cerevisae</i></a>
-                </li></br>
-
-                <li>
-                  <a href="#" onClick="autoFillExample3(); return true;" >Head movement in <i>E. coli</i> SSU crystal structures</a>
-                </li></br>
-
-                <li>
-                  <a href="#" onClick="autoFillExample4(); return true;" >h18 internal loop in <i>S. cerevisae</i> SSU EM structures</a>
-                </li></br>
-                
-            </ul>
-          </div>
 
         </form>    
 
@@ -146,144 +131,24 @@
 
     <script type="text/javascript">
 
-        $('#discrepancy-method').change(function() {
-            let selected = $(this).val();
-            if(selected == 'relative'){
-                $('#core').show();
-                $('label[for="core"]').show();
-                $('#newline2').show();
-            }
-            else{
-                $('#core').hide();
-                $('label[for="core"]').hide();
-                $('#newline2').hide();
-            }
-        });
-
-        $('#input-type').change(function() {
-            let selected = $(this).val();
-            if(selected == 'res_num' || selected == 'single_range' || selected == 'multiple_ranges'){
-                $('#chain_id').show();
-                $('label[for="chain_id"]').show();
-                $('#newline1').show();
-                $('#icon_correct_one').show();
-                $('#icon_false_one').show();
-            }
-            else{
-                $('#chain_id').hide();
-                $('label[for="chain_id"]').hide();
-                $('#newline1').hide();
-                $('#icon_correct_one').hide();
-                $('#icon_false_one').hide();
-            }
-        });
-
-      $('#generateCorrespondence').on('submit', function() {
-  
-        //let id = $('#input-type').val();
-        //let selection = $('#selection').val();
-        //let method = $('#experimental-method').val();
-        //let resolution = $('#structure-resolution').val();
-  
-      if (id == 'loop_id') {
-        let formAction = $('#generateCorrespondence').attr('action');
-        let url = formAction + $('#generateCorrespondence').serialize();
+      document.getElementById("generateCorrespondence").addEventListener("submit", function(event) {
+        event.preventDefault(); // Prevent form submission
+        
+        // Retrieve form values
+        const selection = document.getElementById("selection").value;
+        const exp_method = document.getElementById("experimental-method").value;
+        const resolution = document.getElementById("structure-resolution").value;
+        const corr_type = document.getElementById("correspondence-type").value;
+        
+        // Construct the URL
+        if (corr_type == "ec") {
+          const url = `http://rna.bgsu.edu/correspondence/comparison?selection=${encodeURIComponent(selection)}&exp_method=${encodeURIComponent(exp_method)}&resolution=${encodeURIComponent(resolution)}`;
+          window.location.href = url;
+        } else {
+          const url = `http://rna.bgsu.edu/correspondence/comparison_across_species?selection=${encodeURIComponent(selection)}&exp_method=${encodeURIComponent(exp_method)}&resolution=${encodeURIComponent(resolution)}A`;
+          window.location.href = url;
         }
       });
-      
-
-    </script>
-
-    <script type="text/javascript">
-      function autoFillExample1() {
-        
-        $('#chain_id').hide();
-        $('label[for="chain_id"]').hide();
-        $('#newline1').hide();
-        $('#core').hide();
-        $('label[for="core"]').hide();
-        $('#newline2').hide();
-
-
-        document.getElementById('input-type').value = "multiple_ranges";
-        $('#chain_id').show();
-        $('label[for="chain_id"]').show();
-        $('#newline1').show();
-        document.getElementById('chain_id').value = "5J7L|1|AA";
-        document.getElementById('selection').value = "1405:1409,1491:1496";
-        document.getElementById('discrepancy-method').value = "geometric";
-        document.getElementById('structure-resolution').value = "4.0";
-        document.getElementById('experimental-method').value = "xray";
-    
-        //var radioElements = document.getElementsByName("input3");
-      }
-
-      function autoFillExample2() {
-        
-        $('#chain_id').hide();
-        $('label[for="chain_id"]').hide();
-        $('#newline1').hide();
-        $('#core').hide();
-        $('label[for="core"]').hide();
-        $('#newline2').hide();
-        
-        document.getElementById('input-type').value = "loop_id";
-        document.getElementById('selection').value = "HL_3WC2_002";
-        document.getElementById('discrepancy-method').value = "geometric";
-        document.getElementById('structure-resolution').value = "4.0";
-        document.getElementById('experimental-method').value = "all";
-    
-      }
-
-      function autoFillExample3() {
-        
-        $('#chain_id').hide();
-        $('label[for="chain_id"]').hide();
-        $('#newline1').hide();
-        $('#core').hide();
-        $('label[for="core"]').hide();
-        $('#newline2').hide();
-        
-        
-        document.getElementById('input-type').value = "res_num";
-        $('#chain_id').show();
-        $('label[for="chain_id"]').show();
-        $('#newline1').show();
-        document.getElementById('chain_id').value = "5J7L|1|AA";
-        document.getElementById('selection').value = "962,963,972,973";
-        document.getElementById('discrepancy-method').value = "relative";
-        $('#core').show();
-        $('label[for="core"]').show();
-        $('#newline2').show();
-        document.getElementById('core').value = "12,23,32,502,543,552,568,882,887,910";
-        document.getElementById('structure-resolution').value = "4.0";
-        document.getElementById('experimental-method').value = "xray";
-    
-        //var radioElements = document.getElementsByName("input3");
-      }
-
-      function autoFillExample4() {
-        
-        $('#chain_id').hide();
-        $('label[for="chain_id"]').hide();
-        $('#newline1').hide();
-        $('#core').hide();
-        $('label[for="core"]').hide();
-        $('#newline2').hide();
-
-
-        document.getElementById('input-type').value = "multiple_ranges";
-        $('#chain_id').show();
-        $('label[for="chain_id"]').show();
-        $('#newline1').show();
-        document.getElementById('chain_id').value = "5TBW|1|A";
-        document.getElementById('selection').value = "564:568,576:581";
-        document.getElementById('discrepancy-method').value = "geometric";
-        document.getElementById('structure-resolution').value = "4.0";
-        document.getElementById('experimental-method').value = "em";
-    
-        //var radioElements = document.getElementsByName("input3");
-      }
     </script>
   </body>
 </html>
