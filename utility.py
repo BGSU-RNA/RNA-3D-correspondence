@@ -14,6 +14,13 @@ import requests
 
 EXCLUDE_LIST = ['No alignment', 'Not resolved', 'No chain']
 
+def check_valid_single_chain_query(units):
+    all_chains = [unit.split("|")[2] for unit in units]
+    if len(set(all_chains)) == 1:
+        return True
+    else:
+        return False
+
 def get_disc(d, first, second):
     return d.get(second, {}).get(first, 0.0)
 
@@ -24,10 +31,18 @@ def get_nt_position_index(data):
             nt_position_index[position] = idx
     return nt_position_index
 
+def filter_dict_by_list(data, filter_list):
+    updated_dict = {}
+    for k,v in data.iteritems():
+        pdb = k.split("|")[0]
+        if pdb in filter_list:
+            updated_dict[k] = v
+    return updated_dict
+
 def create_all_nt_pairs(data):
     nt_pairs_dict = OrderedDict()
     for ife, nt_positions in data.iteritems():
-        nt_pairs_dict[ife] = list(itertools.permutations(nt_positions, 2))
+        nt_pairs_dict[ife] = list(itertools.combinations(nt_positions, 2))
     return nt_pairs_dict
 
 # def format_species_name(name_list):
@@ -83,32 +98,37 @@ def get_correspondence_across_species(param_dict):
     suffix_url = "&format=json"
     # depth = param_dict.get('depth', 1)
     complete_url = base_url + str(param_dict['selection']) +  "&scope=" + str(param_dict['scope']) + "&depth=" + str(param_dict['depth']) + "&resolution=" + str(param_dict['resolution']) + suffix_url
-    response = requests.get(complete_url).json()
+    response = requests.get(complete_url)
 
-    query_nts_list = response['query']['unit_id_list']
-    query_nts_str = format_query_units(query_nts_list)
-    rfam_accession = response['query']['rfam_EC_chain'][0][0]
-    query_ife = response['query']['rfam_EC_chain'][0][2]
-    pdb, chain = get_pdb_and_chain_from_ife(query_ife)
+    if response.status_code == 200:
+        response = response.json()
+        query_nts_list = response['query']['unit_id_list']
+        query_nts_str = format_query_units(query_nts_list)
+        rfam_accession = response['query']['rfam_EC_chain'][0][0]
+        query_ife = response['query']['rfam_EC_chain'][0][2]
+        pdb, chain = get_pdb_and_chain_from_ife(query_ife)
 
-    query_info = {
-        "pdb": str(pdb),
-        "chain": str(chain),
-        "resolution_limit": str(param_dict['resolution']),
-        "rfam_accession": str(rfam_accession),
-        "rfam_description": "",
-        "query_nts_list": query_nts_list,
-        "query_nts_str": query_nts_str
-    }
+        query_info = {
+            "pdb": str(pdb),
+            "chain": str(chain),
+            "resolution_limit": str(param_dict['resolution']),
+            "rfam_accession": str(rfam_accession),
+            "rfam_description": "",
+            "query_nts_list": query_nts_list,
+            "query_nts_str": query_nts_str,
+            "query_ife": query_ife
+        }
 
-    correspondence_list = []
-    equivalence_class_dict = {}
-    for entry in response["mappings"]:
-        correspondence_list.append(entry["unit_id_list"])
-        equivalence_class_dict[entry["rfam_EC_chain"][0][2]] = entry["rfam_EC_chain"][0][1]
+        correspondence_list = []
+        equivalence_class_dict = {}
+        for entry in response["mappings"]:
+            correspondence_list.append(entry["unit_id_list"])
+            equivalence_class_dict[entry["rfam_EC_chain"][0][2]] = entry["rfam_EC_chain"][0][1]
 
-    correspondence_list = [sublist for sublist in correspondence_list if not any(x in sublist for x in EXCLUDE_LIST)]
-    return query_info, equivalence_class_dict, correspondence_list
+        correspondence_list = [sublist for sublist in correspondence_list if not any(x in sublist for x in EXCLUDE_LIST)]
+        return query_info, equivalence_class_dict, correspondence_list
+    else:
+        return None, None, None
 
 def generate_sequence_logo_data(data):
     sequence_dict = OrderedDict()
@@ -177,24 +197,32 @@ def format_pairwise_correspondence_display(correspondence):
     return display_str
 
 
-def check_missing_correspondence(corr_complete, corr_std):
+def check_missing_correspondence(data, query_length):
 
-    correspondence_lengths = [len(v) for k,v in corr_std.iteritems()]
+    entries_with_missing_data = [k for k, v in data.iteritems() if len(v) != query_length]
 
-    most_common_len = max(correspondence_lengths, key = correspondence_lengths.count)
+    updated_correspondence = {}
+    for k, v in data.iteritems():
+        if len(v) == int(query_length):
+            updated_correspondence[k] = v
 
-    missing_correspondence = []
+    return entries_with_missing_data, updated_correspondence
+
+    # correspondence_lengths = [len(v) for k,v in corr_std.iteritems()]
+
+    # most_common_len = max(correspondence_lengths, key = correspondence_lengths.count)
+
+    # missing_correspondence = [ife for ife, units in corr_complete.iteritems() if len(units) != query_length]
   
-    for ife, correspondence in corr_std.iteritems():
-        if len(correspondence) != most_common_len:
-            missing_correspondence.append(ife)
+    # for ife, correspondence in corr_std.iteritems():
+    #     if len(correspondence) != most_common_len:
+    #         missing_correspondence.append(ife)
 
-	if missing_correspondence:
-		for ife in missing_correspondence:
-			del corr_complete[ife]
-			del corr_std[ife]
+	# if missing_correspondence:
+	# 	for ife in missing_correspondence:
+	# 		del corr_complete[ife]
+	# 		del corr_std[ife]
 
-	return missing_correspondence, corr_complete, corr_std
 
 
 def check_missing_correspondence_new(corr_complete, corr_std, chain):
@@ -371,11 +399,14 @@ def build_heatmap_data_new(distances, ifes_ordered):
     # using list comprehension 
     disc_list = [disc_formatted[i:i + sublist_len] for i in range(0, len(disc_formatted), sublist_len)]
 
-    return max_disc, disc_list, row_labels
+    return disc_ordered, disc_list, row_labels
 
 def percentile(data, perc):
     size = len(data)
     return sorted(data)[int(math.ceil((size * perc) / 100)) - 1]
+
+def partition_list(lst, n):
+    return [lst[i:i+n] for i in range(0, len(lst), n)]
 
 def build_heatmap_data(distances, ifes_ordered):
     index1 = []
@@ -403,6 +434,8 @@ def build_heatmap_data(distances, ifes_ordered):
         else:
             disc_formatted.append(disc)
 
+    disc_lists = partition_list(disc_formatted, len(ifes_ordered))
+    ife_list = [str(x[1]) for x in ifes_ordered]
 
     cleaned_disc = [float(x) for x in disc_formatted if x is not None]
     cleaned_disc.sort()
@@ -424,12 +457,39 @@ def build_heatmap_data(distances, ifes_ordered):
     #max_disc = "{:.3f}".format(np.amax(a))
     # max_disc = max(a)
 
-    heatmap_data = [
-        {"ife1": if1, "ife1_index": if1_index, "ife2": if2, "ife2_index": if2_index, "discrepancy": discrepancy}
-        for if1, if1_index, if2, if2_index, discrepancy in zip(ife1, index1, ife2, index2, disc_formatted)
-    ]
+    # heatmap_data = [
+    #     {"ife1": if1, "ife1_index": if1_index, "ife2": if2, "ife2_index": if2_index, "discrepancy": discrepancy}
+    #     for if1, if1_index, if2, if2_index, discrepancy in zip(ife1, index1, ife2, index2, disc_formatted)
+    # ]
+
+    heatmap_data = ["#chart", disc_lists, ife_list]
 
     #disc_pairwise = zip(ife1, ife2, disc_filtered)
+
+    return heatmap_data, percentile_score, maximum_disc
+
+def build_heatmap_data_revised(distances, ifes_ordered):
+    ife_indices, ife_values = zip(*ifes_ordered)
+    num_ifes = len(ifes_ordered)
+
+    disc_ordered = []
+    for i in range(num_ifes):
+        for j in range(num_ifes):
+            ife_pair = (ife_values[i], ife_values[j])
+            disc = get_disc(distances, *ife_pair) or get_disc(distances, *ife_pair[::-1])
+            disc_ordered.append(disc)
+
+    disc_formatted = ['%.4f' % d if d is not None else d for d in disc_ordered]
+
+    disc_lists = partition_list(disc_formatted, num_ifes)
+
+    cleaned_disc = [d for d in disc_ordered if d is not None]
+    cleaned_disc.sort()
+
+    percentile_score = percentile(cleaned_disc, 95)
+    maximum_disc = '%.2f' % max(cleaned_disc)
+
+    heatmap_data = ["#chart", disc_lists, [str(x) for x in ife_values]]
 
     return heatmap_data, percentile_score, maximum_disc
 
@@ -609,11 +669,14 @@ def get_positions_header(query_len):
 def process_query_units(query_units):
 
     pdb = query_units[0].split('|')[0]
+    model = query_units[0].split('|')[1]
     chain = query_units[0].split('|')[2]
-    residues = ['|'.join(unit.split('|')[3:]) for unit in query_units]
-    residues = ','.join(residues)
+    ife = "|".join(query_units[0].split('|')[:3])
+    units_str = ['|'.join(unit.split('|')[3:]) for unit in query_units]
+    units_str = ', '.join(units_str)
+    units_length = len(query_units)
 
-    return (pdb, chain, residues)
+    return {"pdb": pdb, "model": model, "chain": chain, "units_list": query_units, "units_str": units_str, "units_length": units_length, "ife": ife}
 
 def get_resolution_data_ordered(ifes_ordered, resolution_dict):
     resolution_data = OrderedDict()
