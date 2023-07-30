@@ -91,33 +91,9 @@ def pairwise_correspondence():
 
     return corr_display
 
-@app.route('/comparison_across_species')
-def geometric_correspondence_across_species():
-
-    valid_scope_values = ["Rfam", "EC", "molecule"]
-    valid_resolutions = ["1.5", "2.0", "2.5", "3.0", "3.5", "4.0"]
+def correspondence_between_species(parameters_dict):
 
     start = time.time()
-
-    query_parameters = request.args
-    
-    selection = query_parameters.get('selection')
-    exp_method = query_parameters.get('exp_method', default='all')
-    scope = query_parameters.get('scope', default='Rfam')
-    resolution = query_parameters.get('resolution', default='4.0')
-    depth = query_parameters.get('depth', default=1)
-    exclude = query_parameters.get('exclude', default=None)
-
-    parameters_dict = {'selection': selection, 'scope': scope, 'resolution': resolution, 'depth': depth}
-
-    # if (None in parameters_dict['loop_id']) or (None in parameters_dict['scope']) or (None in parameters_dict['resolution']):
-    #     return "Please specify the values for all the required parameters - id, scope and resolution"
-
-    if parameters_dict['scope'] not in valid_scope_values:
-        return "Please enter a valid scope value. Accepted values are " + ", ".join(valid_scope_values)
-
-    if parameters_dict['resolution'] not in valid_resolutions:
-        return "Please enter a valid resolution value. Accepted values are " + ", ".join(valid_resolutions)
     
     query_info, equivalence_class_dict, correspondence_list = ui.get_correspondence_across_species(parameters_dict)
 
@@ -132,16 +108,13 @@ def geometric_correspondence_across_species():
 
     unique_pdb_entries = list(set(pdb_entries))
 
-    exp_method = ui.get_exp_method_name(exp_method)
+    exp_method = ui.get_exp_method_name(parameters_dict['exp_method'])
 
     if (exp_method != "all"):
         filtered_members = ec.get_members_across_species(unique_pdb_entries, exp_method)
         if not filtered_members:
             return "No PDB entries matches the given selection. Please try a different query"
         corr_complete = ui.filter_dict_by_list(corr_complete, filtered_members)
-
-    if exclude:
-        corr_complete = ec.exclude_pdb(corr_complete, exclude)
 
     correspondence = [item for sublist in correspondence_list for item in sublist]
 
@@ -202,66 +175,32 @@ def geometric_correspondence_across_species():
 
     neighboring_chains_count = ui.get_name_count(neighboring_chains_list)
 
-    # species_name_list = [chain_info[k]['source'] for k, _ in chain_info.iteritems()]
-
-    # species_name_count = ui.get_name_count(species_name_list)
-
     end = time.time() 
 
     time_diff = '{0:.2f}'.format(end-start)
 
-    return render_template("comparison_rfam.html", query_info=query_info, data=heatmap_data, 
-                            coord=coord_data, code_time=time_diff, res_position=correspondence_positions, 
-                            positions_header=positions_header, pairwise_data=formatted_pairwise_data,
-                            chain_info=chain_info, neighboring_chains=neighboring_chains_dict,
-                            neighboring_chains_count=neighboring_chains_count)
+    output_data = {
+        "query_info": query_info, 
+        "data": heatmap_data,
+        "coord": coord_data, 
+        "res_position": correspondence_positions, 
+        "positions_header": positions_header, 
+        "pairwise_data": formatted_pairwise_data,
+        "chain_info": chain_info, 
+        "neighboring_chains": neighboring_chains_dict,
+        "neighboring_chains_count": neighboring_chains_count,
+        "code_time": time_diff   
+    }
 
-@app.route('/comparison')
-def geometric_correspondence():
+    return output_data
 
-    start = time.time()
-
-    query_parameters = request.args
-
-    disc_method = query_parameters.get('disc_method', default='geometric')
-    exp_method = query_parameters.get('exp_method')
-    resolution = str(query_parameters.get('resolution'))
-    chain_id = query_parameters.get('chain')
-    loop_id = query_parameters.get('loop_id')
-    unit_id = query_parameters.get('unit_id')
-    res_num = query_parameters.get('res_num')
-    input_type = query_parameters.get('selection_type')
-    selection = query_parameters.get('selection')
-    # disc_method = query_parameters.get('disc_method')
-    core_nts = query_parameters.get('core_res')
+def correspondence_within_species(parameters_dict):
 
     equivalence_class_dict = {}
 
-    if resolution not in accepted_resolutions:
-        return 'Please enter a valid resolution threshold. The accepted resolution values \
-                are 1.5, 2.0, 2.5, 3.0, 3.5, 4.0 and all'
+    start = time.time()
 
-    # if disc_method not in accepted_disc_methods:
-    #     return 'Please correct disc_method to be one of %s' % ", ".join(accepted_disc_methods)
-
-    #input_type = pi.check_input_type(loop_id, unit_id, res_num)
-
-    if input_type == 'res_num' and chain_id is None:
-        return "Please enter the chain parameter"
-
-    # return input_type + " " + selection + " " + chain_id
-
-    # return str(selection)
-
-    try:
-        if disc_method == 'geometric':
-            complete_query_units, chain_id = qs.get_query_units_modified(selection)
-        elif disc_method == 'relative':
-            query_units = qs.get_query_units_new(input_type, selection, chain_id)
-            core_units = qs.get_query_units_new(input_type, core_nts, chain_id)
-            complete_query_units = core_units + query_units
-    except:
-        return "Not able to find units in %s" % selection
+    complete_query_units, chain_id = qs.get_query_units_modified(parameters_dict['selection'])
 
     try:
         status_text = "Got units<br>"
@@ -282,12 +221,12 @@ def geometric_correspondence():
 
         status_text += "Got query_info<br>"
 
-        if input_type == 'unit_id' or input_type == 'loop_id':
-            chain_id = ui.get_chain_id(complete_query_units)
+        # if input_type == 'unit_id' or input_type == 'loop_id':
+        #     chain_id = ui.get_chain_id(complete_query_units)
 
-        status_text += "Got chain_id<br>"
+        # status_text += "Got chain_id<br>"
 
-        exp_method = ui.get_exp_method_name(exp_method)
+        exp_method = ui.get_exp_method_name(parameters_dict['exp_method'])
 
         status_text += "Got exp_method<br>"
 
@@ -296,7 +235,7 @@ def geometric_correspondence():
         status_text += "Got source_organism<br>"
 
         # Get the equivalence class members that the query ife belongs to
-        members, ec_name, nr_release, error_msg = ec.get_ec_members(resolution, exp_method, chain_id)
+        members, ec_name, nr_release, error_msg = ec.get_ec_members(parameters_dict['resolution'], exp_method, chain_id)
 
         if len(error_msg) > 0:
             return error_msg
@@ -314,9 +253,6 @@ def geometric_correspondence():
         # Get the correspondences for all the members in the equivalence class
         correspondence, corr_complete, corr_std = cs.get_correspondence(complete_query_units, members, method_equality)
 
-        #correspondence_data_length = set()
-        #for k, v in corr_std.iteritems():
-            #correspondence_data_length.add(len(v))
         status_text += "Got correspondences<br>"
 
         # Remove ec member/s that have missing correspondence
@@ -354,12 +290,9 @@ def geometric_correspondence():
         rotation_ordered, center_ordered, ife_list, missing_data = ui.order_data(rotation_data, center_data)
 
         status_text += "Ordered center and rotation data<br>"
-
-        if disc_method == 'geometric':
-            # Calculate geometric discrepancy
-            disc_data = ui.calculate_geometric_disc(ife_list, rotation_ordered, center_ordered)
-        elif disc_method == 'relative':
-            disc_data = ui.calculate_relative_disc(ife_list, center_ordered, len(core_units), len(query_units))
+    
+        disc_data = ui.calculate_geometric_disc(ife_list, rotation_ordered, center_ordered)
+       
     except:
         return status_text + "<br>... and then something went wrong"
 
@@ -394,12 +327,359 @@ def geometric_correspondence():
 
     time_diff = '{0:.2f}'.format(end-start)
 
-    return render_template("comparison_ec.html", data=heatmap_data, max_disc=max_disc, coord=coord_data, ec_name=ec_name, 
-                            nr_release=nr_release, code_time=time_diff, res_position=correspondence_positions, 
-                            positions_header=positions_header, pairwise_data=formatted_pairwise_data,
-                            selection_data=query_info, percentile=percentile_score,
-                            organism=source_organism, neighboring_chains=neighboring_chains_dict, chain_info=chain_info,
-                            neighboring_chains_count=neighboring_chains_count)
+    output_data = {
+        "data": heatmap_data, 
+        "max_disc": max_disc, 
+        "coord": coord_data, 
+        "ec_name": ec_name, 
+        "nr_release": nr_release, 
+        "code_time": time_diff, 
+        "res_position": correspondence_positions, 
+        "positions_header": positions_header, 
+        "pairwise_data": formatted_pairwise_data,
+        "selection_data": query_info, 
+        "percentile": percentile_score,
+        "organism": source_organism, 
+        "neighboring_chains": neighboring_chains_dict, 
+        "chain_info": chain_info,
+        "neighboring_chains_count": neighboring_chains_count
+    }
+
+    return output_data
+
+
+@app.route('/comparison')
+def geometric_correspondence_new():
+
+    valid_resolutions = ["1.5", "2.0", "2.5", "3.0", "3.5", "4.0"]
+
+    query_parameters = request.args
+
+    selection = query_parameters.get('selection')
+    exp_method = query_parameters.get('exp_method', default='all')
+    scope = query_parameters.get('scope')
+    resolution = query_parameters.get('resolution', default='4.0')
+    depth = query_parameters.get('depth')
+
+    parameters_dict = {'selection': selection, 'scope': scope, 'resolution': resolution, 'depth': depth, 'exp_method': exp_method}
+
+    if parameters_dict['resolution'] not in valid_resolutions:
+        return "Please enter a valid resolution value. Accepted values are " + ", ".join(valid_resolutions)
+
+    if parameters_dict['scope'] == "EC":
+        final_output = correspondence_within_species(parameters_dict)
+        return render_template("comparison_ec.html", **final_output)
+    else:
+        final_output = correspondence_between_species(parameters_dict)
+        return render_template("comparison_rfam.html", **final_output)
+    
+
+# @app.route('/comparison_across_species')
+# def geometric_correspondence_across_species():
+
+#     valid_scope_values = ["Rfam", "EC", "molecule"]
+#     valid_resolutions = ["1.5", "2.0", "2.5", "3.0", "3.5", "4.0"]
+
+#     start = time.time()
+
+#     query_parameters = request.args
+    
+#     selection = query_parameters.get('selection')
+#     exp_method = query_parameters.get('exp_method', default='all')
+#     scope = query_parameters.get('scope', default='Rfam')
+#     resolution = query_parameters.get('resolution', default='4.0')
+#     depth = query_parameters.get('depth', default=1)
+#     exclude = query_parameters.get('exclude', default=None)
+
+#     parameters_dict = {'selection': selection, 'scope': scope, 'resolution': resolution, 'depth': depth}
+
+#     if parameters_dict['scope'] not in valid_scope_values:
+#         return "Please enter a valid scope value. Accepted values are " + ", ".join(valid_scope_values)
+
+#     if parameters_dict['resolution'] not in valid_resolutions:
+#         return "Please enter a valid resolution value. Accepted values are " + ", ".join(valid_resolutions)
+    
+#     query_info, equivalence_class_dict, correspondence_list = ui.get_correspondence_across_species(parameters_dict)
+
+#     if not query_info:
+#         return "Your query returned no results. Please try a different query"
+
+#     query_info['chain_name'] = ec.get_chain_standardized_name(query_info)
+
+#     corr_complete = ui.get_correspondence_dict(correspondence_list)
+
+#     pdb_entries = [k.split("|")[0] for k in corr_complete]
+
+#     unique_pdb_entries = list(set(pdb_entries))
+
+#     exp_method = ui.get_exp_method_name(exp_method)
+
+#     if (exp_method != "all"):
+#         filtered_members = ec.get_members_across_species(unique_pdb_entries, exp_method)
+#         if not filtered_members:
+#             return "No PDB entries matches the given selection. Please try a different query"
+#         corr_complete = ui.filter_dict_by_list(corr_complete, filtered_members)
+
+#     if exclude:
+#         corr_complete = ec.exclude_pdb(corr_complete, exclude)
+
+#     correspondence = [item for sublist in correspondence_list for item in sublist]
+
+#     nt_position_index = ui.get_nt_position_index(corr_complete)
+
+#     possible_nt_pairs = ui.create_all_nt_pairs(corr_complete)
+
+#     pairwise_data = ps.get_pairwise_interactions_new(possible_nt_pairs, nt_position_index)
+
+#     # pairwise_data = ps.get_pairwise_interactions(corr_complete)
+
+#     formatted_pairwise_data = ui.format_pairwise_interactions(pairwise_data)
+
+#     correspondence_positions = ui.get_correspondence_positions(corr_complete)
+
+#     positions_header = ui.get_positions_header(len(query_info['query_nts_list']))
+
+#     # Get rotation data
+#     rotation_data = get_rotation(correspondence, corr_complete)
+
+#     # Get center data
+#     center_data = get_center(correspondence, corr_complete)
+
+#     # Order rotation and center data before computing discrepancy
+#     rotation_ordered, center_ordered, ife_list, missing_data = ui.order_data(rotation_data, center_data)
+
+#     # Calculate geometric discrepancy
+#     disc_data = ui.calculate_geometric_disc(ife_list, rotation_ordered, center_ordered)
+
+#     # Get the instances ordered according to similarity
+#     ifes_ordered = ui.order_similarity(ife_list, disc_data)
+
+#     # Get discrepancy statistics and build the heatmap data for display
+#     heatmap_data, percentile_score, max_discepancy = ui.build_heatmap_data_revised(disc_data, ifes_ordered)
+
+#     # Update the query info dict
+#     query_info['max_discrepancy'] = max_discepancy
+#     query_info['percentile_score'] = percentile_score
+
+#     # Build coord data
+#     coord_data, table_rows = ui.build_coord_data(ifes_ordered, corr_complete)
+
+#     units_string = [str(v) for k, v in coord_data.iteritems()]
+
+#     # Get the neighboring chains
+#     neighboring_chains = test_run(units_string)
+
+#     # Get the ordered chains as a list
+#     ifes_ordered_keys = list(coord_data.keys())
+
+#     # Get all chain-related information for the entries to be displayed
+#     chain_info = ec.get_chain_info_dict(ifes_ordered_keys, equivalence_class_dict)
+
+#     # Zip both the chain and neighboring chains lists into a dict 
+#     neighboring_chains_dict = OrderedDict(zip(ifes_ordered_keys, neighboring_chains))
+
+#     neighboring_chains_list = [row[1] for _, v in neighboring_chains_dict.iteritems() if v for row in v]
+
+#     neighboring_chains_count = ui.get_name_count(neighboring_chains_list)
+
+#     # species_name_list = [chain_info[k]['source'] for k, _ in chain_info.iteritems()]
+
+#     # species_name_count = ui.get_name_count(species_name_list)
+
+#     end = time.time() 
+
+#     time_diff = '{0:.2f}'.format(end-start)
+
+#     return render_template("comparison_rfam.html", query_info=query_info, data=heatmap_data, 
+#                             coord=coord_data, code_time=time_diff, res_position=correspondence_positions, 
+#                             positions_header=positions_header, pairwise_data=formatted_pairwise_data,
+#                             chain_info=chain_info, neighboring_chains=neighboring_chains_dict,
+#                             neighboring_chains_count=neighboring_chains_count)
+
+# @app.route('/comparison')
+# def geometric_correspondence():
+
+#     start = time.time()
+
+#     query_parameters = request.args
+
+#     disc_method = query_parameters.get('disc_method', default='geometric')
+#     exp_method = query_parameters.get('exp_method')
+#     resolution = str(query_parameters.get('resolution'))
+#     chain_id = query_parameters.get('chain')
+#     loop_id = query_parameters.get('loop_id')
+#     unit_id = query_parameters.get('unit_id')
+#     res_num = query_parameters.get('res_num')
+#     input_type = query_parameters.get('selection_type')
+#     selection = query_parameters.get('selection')
+#     # disc_method = query_parameters.get('disc_method')
+#     core_nts = query_parameters.get('core_res')
+
+#     equivalence_class_dict = {}
+
+#     if resolution not in accepted_resolutions:
+#         return 'Please enter a valid resolution threshold. The accepted resolution values \
+#                 are 1.5, 2.0, 2.5, 3.0, 3.5, 4.0 and all'
+
+#     # if disc_method not in accepted_disc_methods:
+#     #     return 'Please correct disc_method to be one of %s' % ", ".join(accepted_disc_methods)
+
+#     #input_type = pi.check_input_type(loop_id, unit_id, res_num)
+
+#     if input_type == 'res_num' and chain_id is None:
+#         return "Please enter the chain parameter"
+
+#     # return input_type + " " + selection + " " + chain_id
+
+#     # return str(selection)
+
+#     try:
+#         if disc_method == 'geometric':
+#             complete_query_units, chain_id = qs.get_query_units_modified(selection)
+#         elif disc_method == 'relative':
+#             query_units = qs.get_query_units_new(input_type, selection, chain_id)
+#             core_units = qs.get_query_units_new(input_type, core_nts, chain_id)
+#             complete_query_units = core_units + query_units
+#     except:
+#         return "Not able to find units in %s" % selection
+
+#     try:
+#         status_text = "Got units<br>"
+
+#         if len(complete_query_units) == 0:
+#             return "Not able to find units in " + str(chain_id) + " " + str(selection)
+
+#         single_chain_query = ui.check_valid_single_chain_query(complete_query_units)
+
+#         if not single_chain_query:
+#             return "Your query contains nucleotide selections from more than a single chain. Please limit your selections to a single chain"
+
+#         complete_query_units_str = ",".join(complete_query_units)
+
+#         query_info = ui.process_query_units(complete_query_units)
+
+#         query_info['chain_name'] = ec.get_chain_standardized_name(query_info)
+
+#         status_text += "Got query_info<br>"
+
+#         if input_type == 'unit_id' or input_type == 'loop_id':
+#             chain_id = ui.get_chain_id(complete_query_units)
+
+#         status_text += "Got chain_id<br>"
+
+#         exp_method = ui.get_exp_method_name(exp_method)
+
+#         status_text += "Got exp_method<br>"
+
+#         source_organism = ec.get_source_organism(chain_id)
+
+#         status_text += "Got source_organism<br>"
+
+#         # Get the equivalence class members that the query ife belongs to
+#         members, ec_name, nr_release, error_msg = ec.get_ec_members(resolution, exp_method, chain_id)
+
+#         if len(error_msg) > 0:
+#             return error_msg
+
+#         status_text += "Got equivalence class members<br>"
+
+#         # Check whether the selection chain has the same exp_method as in the selection
+#         empty_members, method_equality = ec.check_valid_membership(members, query_info, exp_method)
+
+#         status_text += "Checked valid membership<br>"
+
+#         if empty_members is True and method_equality is False:
+#             return "The current selection has no results returned. Please try a different selection"
+
+#         # Get the correspondences for all the members in the equivalence class
+#         correspondence, corr_complete, corr_std = cs.get_correspondence(complete_query_units, members, method_equality)
+
+#         #correspondence_data_length = set()
+#         #for k, v in corr_std.iteritems():
+#             #correspondence_data_length.add(len(v))
+#         status_text += "Got correspondences<br>"
+
+#         # Remove ec member/s that have missing correspondence
+#         entries_with_missing_correspondence, corr_complete = ui.check_missing_correspondence(corr_complete, query_info['units_length'])
+
+#         status_text += "Removed missing members<br>"
+
+#         nt_position_index = ui.get_nt_position_index(corr_complete)
+
+#         possible_nt_pairs = ui.create_all_nt_pairs(corr_complete)
+
+#         pairwise_data = ps.get_pairwise_interactions_new(possible_nt_pairs, nt_position_index)
+
+#         status_text += "Got pairwise interactions<br>"
+
+#         formatted_pairwise_data = ui.format_pairwise_interactions(pairwise_data)
+
+#         status_text += "Formatted pairwise interactions<br>"
+
+#         correspondence_positions = ui.get_correspondence_positions(corr_complete)
+
+#         status_text += "Got correspondence positions<br>"
+
+#         positions_header = ui.get_positions_header(query_info['units_length'])
+
+#         # Get rotation data
+#         rotation_data = get_rotation(correspondence, corr_complete)
+
+#         # Get center data
+#         center_data = get_center(correspondence, corr_complete)
+
+#         status_text += "Got %s center and %s rotation data<br>" % (len(center_data),len(rotation_data))
+
+#         # Order rotation and center data before computing discrepancy
+#         rotation_ordered, center_ordered, ife_list, missing_data = ui.order_data(rotation_data, center_data)
+
+#         status_text += "Ordered center and rotation data<br>"
+
+#         if disc_method == 'geometric':
+#             # Calculate geometric discrepancy
+#             disc_data = ui.calculate_geometric_disc(ife_list, rotation_ordered, center_ordered)
+#         elif disc_method == 'relative':
+#             disc_data = ui.calculate_relative_disc(ife_list, center_ordered, len(core_units), len(query_units))
+#     except:
+#         return status_text + "<br>... and then something went wrong"
+
+#     # Get the instances ordered according to similarity
+#     ifes_ordered = ui.order_similarity(ife_list, disc_data)
+
+#     # Get discrepancy statistics and build the heatmap data for display
+#     heatmap_data, percentile_score, max_disc = ui.build_heatmap_data(disc_data, ifes_ordered)
+
+#     # Build coord data
+#     coord_data, table_rows = ui.build_coord_data(ifes_ordered, corr_complete)
+
+#     units_string = [str(v) for k, v in coord_data.iteritems()]
+
+#     # Get the neighboring chains
+#     neighboring_chains = test_run(units_string)
+
+#     # Get the ordered chains as a list
+#     ifes_ordered_keys = list(coord_data.keys())
+
+#     # Get all chain-related information for the entries to be displayed
+#     chain_info = ec.get_chain_info_dict(ifes_ordered_keys, equivalence_class_dict)
+
+#     # Zip both the chain and neighboring chains lists into a dict 
+#     neighboring_chains_dict = OrderedDict(zip(ifes_ordered_keys, neighboring_chains))
+
+#     neighboring_chains_list = [row[1] for _, v in neighboring_chains_dict.iteritems() if v for row in v]
+
+#     neighboring_chains_count = ui.get_name_count(neighboring_chains_list)
+
+#     end = time.time() 
+
+#     time_diff = '{0:.2f}'.format(end-start)
+
+#     return render_template("comparison_ec.html", data=heatmap_data, max_disc=max_disc, coord=coord_data, ec_name=ec_name, 
+#                             nr_release=nr_release, code_time=time_diff, res_position=correspondence_positions, 
+#                             positions_header=positions_header, pairwise_data=formatted_pairwise_data,
+#                             selection_data=query_info, percentile=percentile_score,
+#                             organism=source_organism, neighboring_chains=neighboring_chains_dict, chain_info=chain_info,
+#                             neighboring_chains_count=neighboring_chains_count)
 
 
 @app.route('/pairwise_interactions')
