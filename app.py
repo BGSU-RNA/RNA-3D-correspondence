@@ -95,7 +95,7 @@ def pairwise_correspondence():
 def geometric_correspondence_across_species():
 
     valid_scope_values = ["Rfam", "EC", "molecule"]
-    valid_resolutions = ["1.5A", "2.0A", "2.5A", "3.0A", "3.5A", "4.0A"]
+    valid_resolutions = ["1.5", "2.0", "2.5", "3.0", "3.5", "4.0"]
 
     start = time.time()
 
@@ -104,7 +104,7 @@ def geometric_correspondence_across_species():
     selection = query_parameters.get('selection')
     exp_method = query_parameters.get('exp_method', default='all')
     scope = query_parameters.get('scope', default='Rfam')
-    resolution = query_parameters.get('resolution', default='4.0A')
+    resolution = query_parameters.get('resolution', default='4.0')
     depth = query_parameters.get('depth', default=1)
     exclude = query_parameters.get('exclude', default=None)
 
