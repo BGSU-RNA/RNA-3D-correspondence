@@ -69,4 +69,8 @@ class ChainInfo(Base):
 class ChainPropertyValue(Base):
     __table__ = Base.metadata.tables['chain_property_value']
 
+
+# class ProteinChainProperty(Base):
+#     __table__ = Base.metadata.tables['protein_chain_property']
+
     
