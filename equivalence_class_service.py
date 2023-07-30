@@ -69,10 +69,13 @@ def get_chain_info_dict(ife_list, ec_dict):
 			pdb, _, chain = ife.split("|")
 		
 			with db_session() as session:
-				query = session.query(PDBInfo.title, PDBInfo.experimental_technique, PDBInfo.resolution, ChainInfo.source) \
+				query = session.query(PDBInfo.title, PDBInfo.experimental_technique, PDBInfo.resolution, ChainInfo.source, ChainPropertyValue.value) \
 							.join(ChainInfo, ChainInfo.pdb_id == PDBInfo.pdb_id) \
+							.join(ChainPropertyValue, ChainInfo.pdb_id == ChainPropertyValue.pdb_id) \
 							.filter(PDBInfo.pdb_id == pdb) \
-							.filter(ChainInfo.chain_name == chain)
+							.filter(ChainInfo.chain_name == chain) \
+							.filter(ChainPropertyValue.chain == chain) \
+							.filter(ChainPropertyValue.property == 'source')
 				for row in query:
 					result[ife] = {
 						"pdb": pdb,
@@ -82,7 +85,8 @@ def get_chain_info_dict(ife_list, ec_dict):
 						"title": row.title,
 						"resolution": '{0:.2f}'.format(row.resolution),
 						"exp_technique": row.experimental_technique,
-						"equivalence_class": ec_dict.get(ife, "")
+						"equivalence_class": ec_dict.get(ife, ""),
+						"taxonomy": row.value
 					}	
 		return result
 	else:
@@ -149,6 +153,16 @@ def get_exp_method(pdbid):
 	with db_session() as session:
 		query = session.query(PDBInfo).filter(PDBInfo.pdb_id == pdbid)
 		return query[0].experimental_technique
+
+def get_exp_method_many(pdb_list):
+
+	with db_session() as session:
+		query = session.query(PDBInfo).filter(PDBInfo.pdb_id.in_(pdb_list))
+		return [(row.pdb_id, row.experimental_technique) for row in query]
+
+def get_members_across_species(pdb_list, exp_method):
+	exp_methods = get_exp_method_many(pdb_list)
+	return [member[0] for member in exp_methods if member[1] == exp_method]
 	
 
 def check_chain_or_ife(id):
@@ -215,7 +229,7 @@ def get_ec_members(resolution, exp_method, query_id):
 
 def check_valid_membership(members, query_data, exp_method):
 	
-	pdbid = query_data[0]
+	pdbid = query_data['pdb']
 	selection_method = get_exp_method(pdbid)
 
 	if not members:
@@ -268,13 +282,33 @@ def get_organism_name(ifes_ordered):
 		return name_dict
 
 def get_chain_standardized_name(query_info_dict):
-	pdb = query_info_dict['pdb']
-	chain = query_info_dict['chain']
+    pdb = query_info_dict['pdb']
+    chain = query_info_dict['chain']
 
-	with db_session() as session:
-		query = session.query(ChainPropertyValue) \
+    with db_session() as session:
+        query = session.query(ChainPropertyValue) \
                        .filter(ChainPropertyValue.pdb_id == pdb) \
-					   .filter(ChainPropertyValue.chain == chain) \
-					   .filter(ChainPropertyValue.property == 'standardized_name')
+                       .filter(ChainPropertyValue.chain == chain) \
+                       .filter(ChainPropertyValue.property == 'standardized_name')
 
-		return query[0].value
+        result = query.first()
+        if result:
+            return result.value
+        else:
+            return "Standardized name not available"
+
+
+def exclude_pdb(corr_complete, param):
+	exclude_list = param.split(",")
+	exclude_list = [item.upper() for item in exclude_list]
+	keys_to_delete = []
+	for k,v in corr_complete.iteritems():
+		pdb = k.split("|")[0]
+		if pdb in exclude_list:
+			keys_to_delete.append(k)
+
+	for key in keys_to_delete:
+		del corr_complete[key]
+
+	return corr_complete
+	
