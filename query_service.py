@@ -6,6 +6,8 @@ import utility as ui
 import itertools
 import re
 
+LOOP_REGEX_PATTERN = r'^(IL|HL|J3)_[0-9A-Z]{4}_\d{3}$'
+
 def get_units(incomplete_units):
 
     with db_session() as session:    
@@ -119,5 +121,19 @@ def get_query_units_new(input_type, selection, chain_id):
         complete_units = get_multiple_range_units(range_positions_list, pdb_id, chain)
 
     return complete_units
+
+def get_query_units_modified(selection):
+
+    complete_units = []
+    for item in selection.split(","):
+        if re.match(LOOP_REGEX_PATTERN, item, re.IGNORECASE):
+            units = get_loop_units(item)
+            complete_units.extend(units)
+        elif  4<=len(item.split("|"))<=9:
+            complete_units.append(item)
+    chain_id = "|".join(complete_units[0].split("|")[:3])
+    return complete_units, chain_id           
+
+
 
 
