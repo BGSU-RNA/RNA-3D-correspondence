@@ -357,7 +357,7 @@ def geometric_correspondence_new():
 
     selection = query_parameters.get('selection')
     exp_method = query_parameters.get('exp_method', default='all')
-    scope = query_parameters.get('scope')
+    scope = query_parameters.get('scope', default='EC')
     resolution = query_parameters.get('resolution', default='4.0')
     depth = query_parameters.get('depth')
 
