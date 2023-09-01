@@ -96,7 +96,7 @@ def get_pdb_and_chain_from_ife(ife):
 def get_correspondence_across_species(param_dict):
     base_url = "http://rna.bgsu.edu/correspondence/map_across_species?id="
     suffix_url = "&format=json"
-    complete_url = base_url + str(param_dict['selection']) +  "&scope=" + str(param_dict['scope']) + "&depth=" + str(param_dict['depth']) + "&resolution=" + str(param_dict['resolution']) + "A" + suffix_url
+    complete_url = base_url + str(",".join(param_dict['selection'])) +  "&scope=" + str(param_dict['scope']) + "&depth=" + str(param_dict['depth']) + "&resolution=" + str(param_dict['resolution']) + "A" + suffix_url
     response = requests.get(complete_url)
 
     if response.status_code == 200:
