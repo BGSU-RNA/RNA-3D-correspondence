@@ -20,6 +20,12 @@ def get_units(incomplete_units):
     
         return complete_units
 
+def get_units_new(incomplete_unit):
+
+    with db_session() as session:
+        query = session.query(UnitInfo).filter(UnitInfo.unit_id.like(incomplete_unit))
+        return query[0].unit_id
+
 def get_single_range_units(range_positions, pdb_id, chain):
 
     with db_session() as session:
@@ -122,17 +128,49 @@ def get_query_units_new(input_type, selection, chain_id):
 
     return complete_units
 
-def get_query_units_modified(selection):
+def is_unit_id(item):
+    if 4<=(len(item.split("|")))<=9:
+        return True
+    else:
+        return False
+
+def is_loop_id(item):
+    if re.match(LOOP_REGEX_PATTERN, item):
+        return True
+    else:
+        return False
+
+def is_residue_num(item):
+    if 1 <= int(item) <= 9999:
+        return True
+    else:
+        return False
+
+def get_query_units_modified(param_dict):
 
     complete_units = []
-    for item in selection.split(","):
-        if re.match(LOOP_REGEX_PATTERN, item, re.IGNORECASE):
-            units = get_loop_units(item)
-            complete_units.extend(units)
-        elif  4<=len(item.split("|"))<=9:
+    error_message = ""
+    range_separator = ":"
+    items = param_dict['selection'].split(",")
+    for item in items:
+        if range_separator in item:
+            if (param_dict['pdb'] is None) or (param_dict['chain'] is None):
+                error_message = "No pdb/chain information provided with the query selection"
+                return None, error_message
+            else:
+                range_positions = item.split(':')
+                complete_units = get_single_range_units(range_positions, param_dict['pdb'], param_dict['chain'])
+        elif is_loop_id(item):
+            loop_units = get_loop_units(item)
+            complete_units.extend(loop_units)
+        elif is_unit_id(item):
             complete_units.append(item)
-    chain_id = "|".join(complete_units[0].split("|")[:3])
-    return complete_units, chain_id           
+        elif is_residue_num(item):
+            # assumption here is that the model num is always 1
+            incomplete_unit = param_dict['pdb'] + "|1|" + param_dict['chain'] + "|%|" + str(item)
+            complete_unit = get_units_new(incomplete_unit)
+            complete_units.append(complete_unit)
+    return complete_units, error_message          
 
 
 
