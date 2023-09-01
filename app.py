@@ -33,6 +33,14 @@ accepted_disc_methods = ['geometric', 'relative']
 def home():
     return render_template("index.html")
 
+@app.route('/SVS')
+def SVS_home():
+    # Manisha: in the future, we will have an argument like "input_form=True"
+    # When that happens on this route, we will process the arguments that are provided
+    # and supply those to the template below.  But we don't know how to do that!
+    # http://rna.bgsu.edu/correspondence/SVS?input_form=True&selection=IL_4V9F_007
+    return render_template("variability.html",input_parameters=request.args)
+
 
 @app.route('/list')
 def display_correspondence():
@@ -68,23 +76,23 @@ def display_correspondence():
     # Note: 2022-01-06 CLZ this has 4 inputs, but the method only takes 3
     # Likely to crash
     members, ec_name, nr_release = ec.get_ec_members(query_units, resolution, exp_method, chain_id)
-    
+
     # Get the correspondences for all the members in the equivalence class
     correspondence, corr_complete, corr_std = cs.get_correspondence(query_units, members)
-    
-    corr_display = ui.format_correspondence_display(corr_complete) 
-    
+
+    corr_display = ui.format_correspondence_display(corr_complete)
+
     return corr_display
 
 
 @app.route('/pairwise_structure')
 def pairwise_correspondence():
-    
+
     query_parameters = request.args
 
     chain1 = query_parameters.get('chain1')
     chain2 = query_parameters.get('chain2')
-    
+
     correspondence = cs.pairwise_structure_correspondence(chain1, chain2)
 
     corr_display = ui.format_pairwise_correspondence_display(correspondence)
@@ -173,28 +181,28 @@ def correspondence_between_species(parameters_dict):
     # Get all chain-related information for the entries to be displayed
     chain_info = ec.get_chain_info_dict(ifes_ordered_keys, equivalence_class_dict)
 
-    # Zip both the chain and neighboring chains lists into a dict 
+    # Zip both the chain and neighboring chains lists into a dict
     neighboring_chains_dict = OrderedDict(zip(ifes_ordered_keys, neighboring_chains))
 
     neighboring_chains_list = [row[1] for _, v in neighboring_chains_dict.iteritems() if v for row in v]
 
     neighboring_chains_count = ui.get_name_count(neighboring_chains_list)
 
-    end = time.time() 
+    end = time.time()
 
     time_diff = '{0:.2f}'.format(end-start)
 
     output_data = {
-        "query_info": query_info, 
+        "query_info": query_info,
         "data": heatmap_data,
-        "coord": coord_data, 
-        "res_position": correspondence_positions, 
-        "positions_header": positions_header, 
+        "coord": coord_data,
+        "res_position": correspondence_positions,
+        "positions_header": positions_header,
         "pairwise_data": formatted_pairwise_data,
-        "chain_info": chain_info, 
+        "chain_info": chain_info,
         "neighboring_chains": neighboring_chains_dict,
         "neighboring_chains_count": neighboring_chains_count,
-        "code_time": time_diff   
+        "code_time": time_diff
     }
 
     return output_data
@@ -298,9 +306,9 @@ def correspondence_within_species(parameters_dict):
         rotation_ordered, center_ordered, ife_list, missing_data = ui.order_data(rotation_data, center_data)
 
         status_text += "Ordered center and rotation data<br>"
-    
+
         disc_data = ui.calculate_geometric_disc(ife_list, rotation_ordered, center_ordered)
-       
+
     except:
         return status_text + "<br>... and then something went wrong"
 
@@ -324,31 +332,31 @@ def correspondence_within_species(parameters_dict):
     # Get all chain-related information for the entries to be displayed
     chain_info = ec.get_chain_info_dict(ifes_ordered_keys, equivalence_class_dict)
 
-    # Zip both the chain and neighboring chains lists into a dict 
+    # Zip both the chain and neighboring chains lists into a dict
     neighboring_chains_dict = OrderedDict(zip(ifes_ordered_keys, neighboring_chains))
 
     neighboring_chains_list = [row[1] for _, v in neighboring_chains_dict.iteritems() if v for row in v]
 
     neighboring_chains_count = ui.get_name_count(neighboring_chains_list)
 
-    end = time.time() 
+    end = time.time()
 
     time_diff = '{0:.2f}'.format(end-start)
 
     output_data = {
-        "data": heatmap_data, 
-        "max_disc": max_disc, 
-        "coord": coord_data, 
-        "ec_name": ec_name, 
-        "nr_release": nr_release, 
-        "code_time": time_diff, 
-        "res_position": correspondence_positions, 
-        "positions_header": positions_header, 
+        "data": heatmap_data,
+        "max_disc": max_disc,
+        "coord": coord_data,
+        "ec_name": ec_name,
+        "nr_release": nr_release,
+        "code_time": time_diff,
+        "res_position": correspondence_positions,
+        "positions_header": positions_header,
         "pairwise_data": formatted_pairwise_data,
-        "selection_data": query_info, 
+        "selection_data": query_info,
         "percentile": percentile_score,
-        "organism": source_organism, 
-        "neighboring_chains": neighboring_chains_dict, 
+        "organism": source_organism,
+        "neighboring_chains": neighboring_chains_dict,
         "chain_info": chain_info,
         "neighboring_chains_count": neighboring_chains_count
     }
@@ -390,7 +398,7 @@ def geometric_correspondence_new():
             return str(final_output)
         else:
             return render_template("comparison_rfam.html", **final_output)
-    
+
 
 # @app.route('/comparison_across_species')
 # def geometric_correspondence_across_species():
@@ -401,7 +409,7 @@ def geometric_correspondence_new():
 #     start = time.time()
 
 #     query_parameters = request.args
-    
+
 #     selection = query_parameters.get('selection')
 #     exp_method = query_parameters.get('exp_method', default='all')
 #     scope = query_parameters.get('scope', default='Rfam')
@@ -416,7 +424,7 @@ def geometric_correspondence_new():
 
 #     if parameters_dict['resolution'] not in valid_resolutions:
 #         return "Please enter a valid resolution value. Accepted values are " + ", ".join(valid_resolutions)
-    
+
 #     query_info, equivalence_class_dict, correspondence_list = ui.get_correspondence_across_species(parameters_dict)
 
 #     if not query_info:
@@ -493,7 +501,7 @@ def geometric_correspondence_new():
 #     # Get all chain-related information for the entries to be displayed
 #     chain_info = ec.get_chain_info_dict(ifes_ordered_keys, equivalence_class_dict)
 
-#     # Zip both the chain and neighboring chains lists into a dict 
+#     # Zip both the chain and neighboring chains lists into a dict
 #     neighboring_chains_dict = OrderedDict(zip(ifes_ordered_keys, neighboring_chains))
 
 #     neighboring_chains_list = [row[1] for _, v in neighboring_chains_dict.iteritems() if v for row in v]
@@ -504,12 +512,12 @@ def geometric_correspondence_new():
 
 #     # species_name_count = ui.get_name_count(species_name_list)
 
-#     end = time.time() 
+#     end = time.time()
 
 #     time_diff = '{0:.2f}'.format(end-start)
 
-#     return render_template("comparison_rfam.html", query_info=query_info, data=heatmap_data, 
-#                             coord=coord_data, code_time=time_diff, res_position=correspondence_positions, 
+#     return render_template("comparison_rfam.html", query_info=query_info, data=heatmap_data,
+#                             coord=coord_data, code_time=time_diff, res_position=correspondence_positions,
 #                             positions_header=positions_header, pairwise_data=formatted_pairwise_data,
 #                             chain_info=chain_info, neighboring_chains=neighboring_chains_dict,
 #                             neighboring_chains_count=neighboring_chains_count)
@@ -681,19 +689,19 @@ def geometric_correspondence_new():
 #     # Get all chain-related information for the entries to be displayed
 #     chain_info = ec.get_chain_info_dict(ifes_ordered_keys, equivalence_class_dict)
 
-#     # Zip both the chain and neighboring chains lists into a dict 
+#     # Zip both the chain and neighboring chains lists into a dict
 #     neighboring_chains_dict = OrderedDict(zip(ifes_ordered_keys, neighboring_chains))
 
 #     neighboring_chains_list = [row[1] for _, v in neighboring_chains_dict.iteritems() if v for row in v]
 
 #     neighboring_chains_count = ui.get_name_count(neighboring_chains_list)
 
-#     end = time.time() 
+#     end = time.time()
 
 #     time_diff = '{0:.2f}'.format(end-start)
 
-#     return render_template("comparison_ec.html", data=heatmap_data, max_disc=max_disc, coord=coord_data, ec_name=ec_name, 
-#                             nr_release=nr_release, code_time=time_diff, res_position=correspondence_positions, 
+#     return render_template("comparison_ec.html", data=heatmap_data, max_disc=max_disc, coord=coord_data, ec_name=ec_name,
+#                             nr_release=nr_release, code_time=time_diff, res_position=correspondence_positions,
 #                             positions_header=positions_header, pairwise_data=formatted_pairwise_data,
 #                             selection_data=query_info, percentile=percentile_score,
 #                             organism=source_organism, neighboring_chains=neighboring_chains_dict, chain_info=chain_info,
@@ -743,7 +751,7 @@ def pairwise_interactions_correspondence():
     empty_members, method_equality = ec.check_valid_membership(members, query_data, exp_method)
 
     if empty_members is True and method_equality is False: return "The current selection has no results returned. Please try a different selection"
-    
+
     # Get the correspondences for all the members in the equivalence class
     correspondence, corr_complete, corr_std = cs.get_correspondence(query_units, members, method_equality)
 
@@ -754,7 +762,7 @@ def pairwise_interactions_correspondence():
 
     pairwise_interactions_display, res_pairs = ui.format_pairwise_interactions_display(corr_complete, pairwise_residue_pairs_reference, pairwise_data, len(query_units))
 
-    end = time.time() 
+    end = time.time()
 
     time_diff = '{0:.2f}'.format(end-start)
 
