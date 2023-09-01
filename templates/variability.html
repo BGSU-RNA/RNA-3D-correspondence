@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>R3DMCS: RNA 3D Motif Correspondence Server</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <link rel="shortcut icon" href="http://rna.bgsu.edu/rna3dhub/icons/C_icon.png">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/js/all.min.js"></script>
+  </head>
+
+  <body>
+    <nav class="navbar navbar-expand-lg bg-dark" data-bs-theme="dark">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="/correspondence">R3DMCS Correspondence Server</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="http://rna.bgsu.edu/rna3dhub/" target="_blank">RNA 3D Hub</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://docs.google.com/document/d/1FZSLPdz89LLXahR7mZQXQmUGWXPVEKqWjcPBFf0vbIE/preview#heading=h.3mnkbpbqzfy1" target="_blank">Help</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://www.bgsu.edu/research/rna/APIs.html" target="_blank">APIs</a>
+            </li>
+            <!-- <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Download
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#">Pairwise annotation</a></li>
+                <li><a class="dropdown-item" href="#">Sequence conservation</a></li>
+              </ul>
+            </li> -->
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+      <div class="page_header">
+        <h1>R3DSVS: RNA 3D Motif Sequence Variability Server</h1>
+
+        <p align="justify" class="lead">
+          The RNA 3D Motif Sequence Variability Server maps the given nucleotides to columns of a sequence alignment and returns that. Under Construction
+        </p>
+      </div>
+
+      <div class="row">
+
+        <form class="form-horizontal col-sm-12" id="generateCorrespondence">
+
+          <div class="form-group col-sm-4">
+
+            <!-- <label for="selection">Enter selection &nbsp</label><span id="popup-icon" class="fa fa-question-circle" aria-hidden="true"></span> -->
+            <label for="selection">Enter Selection &nbsp</label>
+            <!-- <i class="fa fa-question-circle" aria-hidden="true"></i> -->
+            <input type="text" class="form-control" id="selection" name="selection">
+            </br>
+
+            <label for="correspondence_type">Choose Correspondence Type</label>
+            <select class="form-control" id="correspondence-type" name="corr_type">
+                <option value="EC">Same species</option>
+                <option value="Rfam">Different species</option>
+            </select>
+            </br>
+
+            <div id="depth-input-container" style="display: none;">
+              <label for="depth">Depth</label>
+              <input type="text" class="form-control" id="depth" name="depth", value=1>
+              </br>
+            </div>
+
+            <label for="structure-resolution">Choose Resolution Threshold</label>
+            <select class="form-control" id="structure-resolution" name="resolution">
+                <option value="4.0" selected>4.0</option>
+                <option value="3.5">3.5</option>
+                <option value="3.0">3.0</option>
+                <option value="2.5">2.5</option>
+                <option value="2.0">2.0</option>
+                <option value="1.5">1.5</option>
+                <option value="all">all</option>
+            </select>
+            </br>
+
+            <label for="experimental-method">Choose Experimental Technique</label>
+            <select class="form-control" id="experimental-method" name="exp_method">
+                <option value="all" selected>All</option>
+                <option value="xray">X-ray diffraction</option>
+                <option value="em">Cryo-electron microscopy</option>
+            </select>
+            </br>
+
+            <button type="submit" id="submit_test" class="btn btn-primary" onclick="showLoading()">Submit</button>
+            <button type="button" id="clear_form" class="btn btn-light" onclick="clearForm()">Clear</button>
+            <span id="loading" style="display: none;"><i class="fa fa-spinner fa-spin"></i> Loading... </span>
+          </div>
+        </form>
+
+      </div>
+      <hr>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+
+    <script type="text/javascript">
+
+      function showLoading() {
+        document.getElementById("loading").style.display = "inline";
+      }
+
+      // Function to hide the loading message
+      function hideLoading() {
+        document.getElementById("loading").style.display = "none";
+      }
+
+      function clearForm() {
+        document.getElementById("generateCorrespondence").reset();
+      }
+
+      // Function to set depth value based on scope and user input
+      function getDepthValue(scope, userInputDepth) {
+        if (scope === "EC") {
+          return null; // If scope is "EC", set depth to null
+        } else if (scope === "Rfam") {
+          return userInputDepth ? userInputDepth : 1; // If scope is "Rfam" and userInputDepth is not provided, use 1 as default
+        } else {
+          return userInputDepth ? userInputDepth : null; // For other cases, use userInputDepth if provided, else set depth to null
+        }
+      }
+
+      const convertToCommaSeparated = (inputString) => {
+        const splitList = inputString.split(/\t+|\s+/);
+        const commaSeparatedString = splitList.join(',');
+        return commaSeparatedString;
+      };
+
+      document.getElementById('correspondence-type').addEventListener('change', function() {
+        var depthInputContainer = document.getElementById('depth-input-container');
+        var correspondenceTypeValue = this.value;
+
+        // Show/hide the "Depth" input based on the selected option
+        if (correspondenceTypeValue === 'Rfam') {
+          depthInputContainer.style.display = 'block';
+        } else {
+          depthInputContainer.style.display = 'none';
+        }
+      });
+
+      document.getElementById("generateCorrespondence").addEventListener("submit", function(event) {
+        event.preventDefault(); // Prevent form submission
+
+        showLoading(); // Show loading message
+
+        // Retrieve form values
+        const selection = document.getElementById("selection").value;
+        const formatted_selection = convertToCommaSeparated(selection)
+        const exp_method = document.getElementById("experimental-method").value;
+        const resolution = document.getElementById("structure-resolution").value;
+        const scope = document.getElementById("correspondence-type").value;
+        const userInputDepth = document.getElementById("depth").value;
+
+        // Get the depth value based on the selected scope and user input
+        const species_depth = getDepthValue(scope, userInputDepth);
+
+        const url = `http://rna.bgsu.edu/correspondence/comparison?selection=${encodeURIComponent(formatted_selection)}&exp_method=${encodeURIComponent(exp_method)}&resolution=${encodeURIComponent(resolution)}&depth=${encodeURIComponent(species_depth)}&scope=${encodeURIComponent(scope)}`;
+        window.location.href = url;
+
+      });
+
+      // Add an event listener to the browser's "pageshow" event
+      window.addEventListener("pageshow", function(event) {
+        // Check if the page is loaded from the cache
+        if (event.persisted) {
+          // Hide the loading message when the page is loaded from the cache
+          hideLoading();
+        }
+      });
+
+    </script>
+  </body>
+</html>
+
+
