@@ -5,13 +5,11 @@ import utility as ui
 
 REJECT_LIST = ['5LZE|1|a+5LZE|1|y+5LZE|1|v+5LZE|1|x']
 
-def get_source_organism(chain_id):
-
-	pdb_id, model, chain = chain_id.split('|')
+def get_source_organism(pdb_id, chain_id):
 
 	with db_session() as session:
 		query = session.query(ChainInfo).filter_by(pdb_id=pdb_id) \
-										.filter_by(chain_name=chain)
+										.filter_by(chain_name=chain_id)
 		return query[0].source
 
 
