@@ -94,7 +94,12 @@ def pairwise_correspondence():
 def correspondence_between_species(parameters_dict):
 
     start = time.time()
-    
+
+    parameters_dict['selection'], query_error_message = qs.get_query_units_modified(parameters_dict)
+
+    if query_error_message:
+        return str(query_error_message)
+
     query_info, equivalence_class_dict, correspondence_list = ui.get_correspondence_across_species(parameters_dict)
 
     if not query_info:
@@ -200,13 +205,16 @@ def correspondence_within_species(parameters_dict):
 
     start = time.time()
 
-    complete_query_units, chain_id = qs.get_query_units_modified(parameters_dict['selection'])
+    complete_query_units, query_error_message = qs.get_query_units_modified(parameters_dict)
 
     try:
+        if query_error_message:
+            return query_error_message
+
         status_text = "Got units<br>"
 
         if len(complete_query_units) == 0:
-            return "Not able to find units in " + str(chain_id) + " " + str(selection)
+            return "Not able to find units in " + str(selection)
 
         single_chain_query = ui.check_valid_single_chain_query(complete_query_units)
 
@@ -230,12 +238,12 @@ def correspondence_within_species(parameters_dict):
 
         status_text += "Got exp_method<br>"
 
-        source_organism = ec.get_source_organism(chain_id)
+        source_organism = ec.get_source_organism(query_info['pdb'], query_info['chain'])
 
         status_text += "Got source_organism<br>"
 
         # Get the equivalence class members that the query ife belongs to
-        members, ec_name, nr_release, error_msg = ec.get_ec_members(parameters_dict['resolution'], exp_method, chain_id)
+        members, ec_name, nr_release, error_msg = ec.get_ec_members(parameters_dict['resolution'], exp_method, query_info['ife'])
 
         if len(error_msg) > 0:
             return error_msg
@@ -356,22 +364,32 @@ def geometric_correspondence_new():
     query_parameters = request.args
 
     selection = query_parameters.get('selection')
+    pdb_id = query_parameters.get('pdb', default=None)
+    if pdb_id is not None:
+        pdb_id = pdb_id.upper()
+    chain_id = query_parameters.get('chain', default=None)
     exp_method = query_parameters.get('exp_method', default='all')
     scope = query_parameters.get('scope', default='EC')
     resolution = query_parameters.get('resolution', default='4.0')
     depth = query_parameters.get('depth')
 
-    parameters_dict = {'selection': selection, 'scope': scope, 'resolution': resolution, 'depth': depth, 'exp_method': exp_method}
+    parameters_dict = {'selection': selection, 'pdb': pdb_id, 'chain': chain_id, 'scope': scope, 'resolution': resolution, 'depth': depth, 'exp_method': exp_method}
 
     if parameters_dict['resolution'] not in valid_resolutions:
         return "Please enter a valid resolution value. Accepted values are " + ", ".join(valid_resolutions)
 
     if parameters_dict['scope'] == "EC":
         final_output = correspondence_within_species(parameters_dict)
-        return render_template("comparison_ec.html", **final_output)
+        if isinstance(final_output, str):
+            return str(final_output)
+        else:
+            return render_template("comparison_ec.html", **final_output)
     else:
         final_output = correspondence_between_species(parameters_dict)
-        return render_template("comparison_rfam.html", **final_output)
+        if isinstance(final_output, str):
+            return str(final_output)
+        else:
+            return render_template("comparison_rfam.html", **final_output)
     
 
 # @app.route('/comparison_across_species')
