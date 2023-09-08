@@ -2,9 +2,9 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="X-UA-Compatible" content="Center">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>R3DMCS: RNA 3D Motif Correspondence Server</title>
+    <title>R3DSVS: RNA 3D Motif Sequence Variability Server</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
     <link rel="shortcut icon" href="http://rna.bgsu.edu/rna3dhub/icons/C_icon.png">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/js/all.min.js"></script>
@@ -13,7 +13,7 @@
   <body>
     <nav class="navbar navbar-expand-lg bg-dark" data-bs-theme="dark">
       <div class="container-fluid">
-        <a class="navbar-brand" href="/correspondence">R3DMCS Correspondence Server</a>
+        <a class="navbar-brand" href="/correspondence">R3DSVS Sequence Variability Server</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
@@ -53,18 +53,18 @@
 
       <div class="row">
 
-        <form class="form-horizontal col-sm-12" id="generateCorrespondence">
+        <form class="form-horizontal mx-auto" style="width: 50%;" id="generateMotifSequenceVariabilityServer">
 
-          <div class="form-group col-sm-4">
+          <div class="form-group">
 
-            <!-- <label for="selection">Enter selection &nbsp</label><span id="popup-icon" class="fa fa-question-circle" aria-hidden="true"></span> -->
-            <label for="selection">Enter Selection &nbsp</label>
+            <!-- <label for="selection">Enter Unit ID &nbsp</label><span id="popup-icon" class="fa fa-question-circle" aria-hidden="true"></span> -->
+            <label for="selection">Enter Unit ID &nbsp</label>
             <!-- <i class="fa fa-question-circle" aria-hidden="true"></i> -->
-            <input type="text" class="form-control" id="selection" name="selection">
+            <input type="text" class="form-control" id="Unit-ID" name="Unit_ID">
             </br>
 
-            <label for="correspondence_type">Choose Correspondence Type</label>
-            <select class="form-control" id="correspondence-type" name="corr_type">
+            <label for="correspondence_type">Choose PDB ID </label>
+            <select class="form-control" id="PDB-ID" name="PDB_ID">
                 <option value="EC">Same species</option>
                 <option value="Rfam">Different species</option>
             </select>
@@ -76,8 +76,8 @@
               </br>
             </div>
 
-            <label for="structure-resolution">Choose Resolution Threshold</label>
-            <select class="form-control" id="structure-resolution" name="resolution">
+            <label for="structure-resolution">Choose Sequence_ID </label>
+            <select class="form-control" id="Sequence-ID" name="Sequence-ID">
                 <option value="4.0" selected>4.0</option>
                 <option value="3.5">3.5</option>
                 <option value="3.0">3.0</option>
@@ -121,7 +121,7 @@
       }
 
       function clearForm() {
-        document.getElementById("generateCorrespondence").reset();
+        document.getElementById("generateMotifSequenceVariabilityServer").reset();
       }
 
       // Function to set depth value based on scope and user input
