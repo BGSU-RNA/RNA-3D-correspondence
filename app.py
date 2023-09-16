@@ -38,7 +38,7 @@ def SVS_home():
     # Manisha: in the future, we will have an argument like "input_form=True"
     # When that happens on this route, we will process the arguments that are provided
     # and supply those to the template below.  But we don't know how to do that!
-    # http://rna.bgsu.edu/correspondence/SVS?input_form=True&selection=IL_4V9F_007
+    # http://rna.bgsu.edu/correspondence/SVS?input_form=True&selection=IL_4V9F_007 
     return render_template("variability.html",input_parameters=request.args)
 
 
@@ -851,12 +851,13 @@ def variability():
     query_parameters = request.args
 
     id = query_parameters.get('id')            # better to just allow some kind of id
-    loop_id = query_parameters.get('loop_id')
-    unit_id = query_parameters.get('unit_id')       # if not given, value is False
+    #loop_id = query_parameters.get('loop_id')
+    #unit_id = query_parameters.get('unit_id')       # if not given, value is False
     extension = query_parameters.get('extension')
     output_format = query_parameters.get('format')
     domain = query_parameters.get('domain')
     codon = query_parameters.get('codon')
+    count = query_parameters.get('count')
 
     #id = id.replace(" ","")                 # in case this helps
     #loop_id = loop_id.replace(" ","")
@@ -882,24 +883,31 @@ def variability():
     if not output_format:
         output_format = "full"
 
-    output = "Basic usage\nformat=[full,unique,top_95_percent,top_10_sequences,multiplicity_5_or_more]\nextension=1 or 2\ndomain=[A,B,C,E,M] comma separated\ncodon=comma separated list\n\n"
+    if not count:
+        count = ""
+
+    # error checking, prevent code injection
+    # if not "top" in count and not "multiplicity" in count and not "_" in count:
+    #     count = ""
+
+    output = "Basic usage\nformat=[full,unique,fasta]\ncount=top_90_percent,top_80_percent,top_10_sequences,top_10_sequences,multiplicity_5_or_more,multiplicity_9_or_more\nextension=1 or 2\ndomain=[A,B,C,E,M,V] comma separated\ncodon=comma separated list\n\n"
     problem = False
 
-    if unit_id:
-        output += 'New request made for unit_id %s with extension %s and output format %s\n' % (unit_id,extension,output_format)
-        if not "|" in unit_id:
-            output += 'Invalid unit id %s\n' % unit_id
-            problem = True
-        else:
-            to_do = [unit_id.split(",")]
-    elif loop_id:
-        output += 'New request made for loop_id %s with extension %s and output format %s\n' % (loop_id,extension,output_format)
-        if not len(loop_id) == 11 or not len(loop_id.split("_")) == 3:
-            output += 'Invalid loop id %s\n' % loop_id
-            problem = True
-        else:
-            to_do = [[loop_id]]
-    elif id:
+    # if unit_id:
+    #     output += 'New request made for unit_id %s with extension %s and output format %s\n' % (unit_id,extension,output_format)
+    #     if not "|" in unit_id:
+    #         output += 'Invalid unit id %s\n' % unit_id
+    #         problem = True
+    #     else:
+    #         to_do = [unit_id.split(",")]
+    # elif loop_id:
+    #     output += 'New request made for loop_id %s with extension %s and output format %s\n' % (loop_id,extension,output_format)
+    #     if not len(loop_id) == 11 or not len(loop_id.split("_")) == 3:
+    #         output += 'Invalid loop id %s\n' % loop_id
+    #         problem = True
+    #     else:
+    #         to_do = [[loop_id]]
+    if id:
         output += 'New request made for id %s with extension %s and output format %s\n' % (id,extension,output_format)
         if not "|" in id and not "_" in id:
             output += 'Invalid id %s\n' % id
@@ -907,26 +915,31 @@ def variability():
         else:
             to_do = [[id]]
 
+    #count = "top_10_sequences"
+    source = "Rfam"
 
     if not problem:
-        if output_format in ["full","unique","fasta","top_motif_models"] or "top" in output_format or "multiplicity" in output_format:
+        if output_format in ["full","unique","fasta","top_motif_models"]:
 
             if output_format == "top_motif_models" and not loop_id:
                 output += "top_motif_models only available for loop input\n"
 
             try:
-                output_list, families = get_sequence_variability(to_do,extension,output_format,domain,codon)
+                output_list = get_sequence_variability(to_do,extension,output_format,count,domain,codon,source)
 
-                if len(output_list) > 30000000:
-                    output = output_list[:30000000]
+                output += "output_list length %d\n" % len(output_list)
+                output += "output_list[0] length %d\n" % len(output_list[0])
+
+                output = output_list[0][0]
+                #family = output_list[0][1]
+
+                if len(output) > 30000000:
+                    output = output[:30000000]
                     output += "\nOutput truncated to 30,000,000 characters.  Restrict the domain or count or codon to get more meaningful output."
-                else:
-                    # at the moment, output_list is not actually a list
-                    output = output_list
 
             except Exception as inst:
-                #output += "%s\n" % type(inst)
-                #output += "%s\n" % inst.args
+                output += "%s\n" % type(inst)
+                output += "%s\n" % inst.args
                 output += "Something went wrong with this request\n"
                 output += "%s\n" % inst
 
