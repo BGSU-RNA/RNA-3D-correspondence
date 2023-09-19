@@ -380,8 +380,12 @@ def geometric_correspondence_new():
     scope = query_parameters.get('scope', default='EC')
     resolution = query_parameters.get('resolution', default='4.0')
     depth = query_parameters.get('depth')
+    input_form = query_parameters.get('input_form', default='false')
 
     parameters_dict = {'selection': selection, 'pdb': pdb_id, 'chain': chain_id, 'scope': scope, 'resolution': resolution, 'depth': depth, 'exp_method': exp_method}
+
+    if input_form.lower() == 'true':
+        return render_template("index_form.html", input_parameters=parameters_dict)
 
     if parameters_dict['resolution'] not in valid_resolutions:
         return "Please enter a valid resolution value. Accepted values are " + ", ".join(valid_resolutions)
