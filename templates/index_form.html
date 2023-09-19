@@ -28,15 +28,6 @@
             <li class="nav-item">
               <a class="nav-link" href="https://www.bgsu.edu/research/rna/APIs.html" target="_blank">APIs</a>
             </li>
-            <!-- <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Download
-              </a>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="#">Pairwise annotation</a></li>
-                <li><a class="dropdown-item" href="#">Sequence conservation</a></li>
-              </ul>
-            </li> -->
           </ul>
         </div>
       </div>
@@ -121,9 +112,9 @@
 
       function disableSubmitButton() {
         var submitButton = document.getElementById("submit_test");
-        submitButton.disabled = true; // Disable the button
+        submitButton.disabled = true; 
         setTimeout(function() {
-            submitButton.disabled = false; // Enable the button after 20 seconds
+            submitButton.disabled = false; 
         }, 20000); 
       }
 
@@ -133,25 +124,20 @@
         console.log(object)
         // Check if the object is not empty and present
         if (object && Object.keys(object).length > 0) {
-          // this is the id of the form
           const form = document.getElementById('generateCorrespondence');
 
-          // Loop through the object keys
           for (const key in object) {
             if (object.hasOwnProperty(key)) {
               const value = object[key];
 
-              // Find the input element(s) with the same name as the key
               const inputs = form.querySelectorAll(`[name="${key}"]`);
 
               if (inputs.length > 0) {
                 // Loop through all matching input elements (in case of radio buttons or multiple elements with the same name)
                 inputs.forEach((input) => {
                   if (input.type === 'checkbox') {
-                    // If it's a checkbox, update its checked status based on the value in the object
                     input.checked = value;
                   } else {
-                    // For other input types, update their value
                     input.value = value;
                   }
 
@@ -173,7 +159,6 @@
         document.getElementById("loading").style.display = "inline";
       }
 
-      // Function to hide the loading message
       function hideLoading() {
         document.getElementById("loading").style.display = "none";
       }
@@ -193,11 +178,11 @@
       // Function to set depth value based on scope and user input
       function getDepthValue(scope, userInputDepth) {
         if (scope === "EC") {
-          return null; // If scope is "EC", set depth to null
+          return null; 
         } else if (scope === "Rfam") {
-          return userInputDepth ? userInputDepth : 1; // If scope is "Rfam" and userInputDepth is not provided, use 1 as default
+          return userInputDepth ? userInputDepth : 1; 
         } else {
-          return userInputDepth ? userInputDepth : null; // For other cases, use userInputDepth if provided, else set depth to null
+          return userInputDepth ? userInputDepth : null; 
         }
       }
 
@@ -221,8 +206,6 @@
 
       document.getElementById("generateCorrespondence").addEventListener("submit", function(event) {
         event.preventDefault(); // Prevent form submission
-
-        // showLoading(); // Show loading message
         
         // Retrieve form values
         const pdbInput = document.getElementById("pdb").value;
@@ -240,16 +223,13 @@
         // Get the depth value based on the selected scope and user input
         const species_depth = getDepthValue(scope, userInputDepth);
 
-        // const url = `http://rna.bgsu.edu/correspondence/comparison?pdb=${encodeURIComponent(pdb)}&chain=${encodeURIComponent(chain)}&selection=${encodeURIComponent(formatted_selection)}&exp_method=${encodeURIComponent(exp_method)}&resolution=${encodeURIComponent(resolution)}&depth=${encodeURIComponent(species_depth)}&scope=${encodeURIComponent(scope)}`;
-        // window.location.href = url;
-
         if (selection.trim() !== "") {
-          showLoading(); // Show loading message only if selection is not empty
+          showLoading(); 
 
           const url = `http://rna.bgsu.edu/correspondence/comparison?pdb=${encodeURIComponent(pdb)}&chain=${encodeURIComponent(chain)}&selection=${encodeURIComponent(formatted_selection)}&exp_method=${encodeURIComponent(exp_method)}&resolution=${encodeURIComponent(resolution)}&depth=${encodeURIComponent(species_depth)}&scope=${encodeURIComponent(scope)}`;
           window.location.href = url;
         } else {
-          hideLoading(); // Hide loading message if selection is empty
+          hideLoading(); 
         }
 
       });
