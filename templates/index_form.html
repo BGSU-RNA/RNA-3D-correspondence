@@ -55,7 +55,7 @@
             <label for="selection">Enter Chain ID (optional)</label>
             <input type="text" class="form-control" id="chain" name="chain">
             </br>
-            
+
             <!-- <label for="selection">Enter selection &nbsp</label><span id="popup-icon" class="fa fa-question-circle" aria-hidden="true"></span> -->
             <label for="selection">Enter Selection &nbsp</label>
             <!-- <i class="fa fa-question-circle" aria-hidden="true"></i> -->
@@ -99,7 +99,7 @@
             <button type="button" id="clear_form" class="btn btn-light" onclick="clearForm()">Clear</button>
             <span id="loading" style="display: none;"><i class="fa fa-spinner fa-spin"></i> Loading... </span>
           </div>
-        </form>    
+        </form>
 
       </div>
       <hr>
@@ -112,10 +112,10 @@
 
       function disableSubmitButton() {
         var submitButton = document.getElementById("submit_test");
-        submitButton.disabled = true; 
+        submitButton.disabled = true;
         setTimeout(function() {
-            submitButton.disabled = false; 
-        }, 20000); 
+            submitButton.disabled = false;
+        }, 2000);
       }
 
       window.onload = function () {
@@ -154,7 +154,7 @@
           }
         }
       }
-  
+
       function showLoading() {
         document.getElementById("loading").style.display = "inline";
       }
@@ -178,11 +178,11 @@
       // Function to set depth value based on scope and user input
       function getDepthValue(scope, userInputDepth) {
         if (scope === "EC") {
-          return null; 
+          return null;
         } else if (scope === "Rfam") {
-          return userInputDepth ? userInputDepth : 1; 
+          return userInputDepth ? userInputDepth : 1;
         } else {
-          return userInputDepth ? userInputDepth : null; 
+          return userInputDepth ? userInputDepth : null;
         }
       }
 
@@ -206,7 +206,7 @@
 
       document.getElementById("generateCorrespondence").addEventListener("submit", function(event) {
         event.preventDefault(); // Prevent form submission
-        
+
         // Retrieve form values
         const pdbInput = document.getElementById("pdb").value;
         const chainInput = document.getElementById("chain").value;
@@ -218,18 +218,18 @@
         const exp_method = document.getElementById("experimental-method").value;
         const resolution = document.getElementById("structure-resolution").value;
         const scope = document.getElementById("scope").value;
-        
+
         const userInputDepth = document.getElementById("depth").value;
         // Get the depth value based on the selected scope and user input
         const species_depth = getDepthValue(scope, userInputDepth);
 
         if (selection.trim() !== "") {
-          showLoading(); 
+          showLoading();
 
           const url = `http://rna.bgsu.edu/correspondence/comparison?pdb=${encodeURIComponent(pdb)}&chain=${encodeURIComponent(chain)}&selection=${encodeURIComponent(formatted_selection)}&exp_method=${encodeURIComponent(exp_method)}&resolution=${encodeURIComponent(resolution)}&depth=${encodeURIComponent(species_depth)}&scope=${encodeURIComponent(scope)}`;
           window.location.href = url;
         } else {
-          hideLoading(); 
+          hideLoading();
         }
 
       });
