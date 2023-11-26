@@ -14,6 +14,11 @@ import requests
 
 EXCLUDE_LIST = ['No alignment', 'Not resolved', 'No chain']
 
+def filter_exclude_ids(data, exclude_str):
+    exclude_list = exclude_str.split(",")
+    exclude_list = [item.lower() for item in exclude_list]
+    return [item for item in data if item[0].lower() not in exclude_list]
+
 def check_valid_single_chain_query(units):
     all_chains = [unit.split("|")[2] for unit in units]
     if len(set(all_chains)) == 1:
