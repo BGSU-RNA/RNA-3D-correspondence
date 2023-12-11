@@ -8,18 +8,16 @@ import correspondence_service as cs
 import pairwise_service as ps
 from rotation import get_rotation
 from center import get_center
-#import logging
+import logging
 import utility as ui
 import json
 import time
 from collections import OrderedDict, defaultdict
-#from discrepancy import matrix_discrepancy
+from discrepancy import matrix_discrepancy
 import numpy as np
 import sys
 import time
 from get_neighboring_chains import test_run
-
-import datetime
 
 
 #from flask_cors import CORS   # for circular
@@ -40,17 +38,12 @@ def SVS_home():
     # Manisha: in the future, we will have an argument like "input_form=True"
     # When that happens on this route, we will process the arguments that are provided
     # and supply those to the template below.  But we don't know how to do that!
-    # http://rna.bgsu.edu/correspondence/SVS?input_form=True&selection=IL_4V9F_007
+    # http://rna.bgsu.edu/correspondence/SVS?input_form=True&selection=IL_4V9F_007 
     return render_template("variability.html",input_parameters=request.args)
 
 
 @app.route('/list')
 def display_correspondence():
-
-    # simple logging
-    current_datetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    with open('/var/www/correspondence/flask.log', 'a') as f:
-        f.write("%s list route requested\n" % current_datetime)
 
     query_parameters = request.args
 
@@ -95,12 +88,6 @@ def display_correspondence():
 @app.route('/pairwise_structure')
 def pairwise_correspondence():
 
-    # simple logging
-    current_datetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    with open('/var/www/correspondence/flask.log', 'a') as f:
-        f.write("%s pairwise_correspondence route requested\n" % current_datetime)
-
-
     query_parameters = request.args
 
     chain1 = query_parameters.get('chain1')
@@ -113,11 +100,6 @@ def pairwise_correspondence():
     return corr_display
 
 def correspondence_between_species(parameters_dict):
-
-    # simple logging
-    c_datetime = str(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))  # freeze the timestamp so we know it's the same run
-    with open('/var/www/correspondence/flask.log', 'a') as f:
-        f.write("%s correspondence between species route requested\n" % c_datetime)
 
     start = time.time()
 
@@ -196,11 +178,6 @@ def correspondence_between_species(parameters_dict):
     # Get the ordered chains as a list
     ifes_ordered_keys = list(coord_data.keys())
 
-    # simple logging
-    c_datetime = str(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))  # freeze the timestamp so we know it's the same run
-    with open('/var/www/correspondence/flask.log', 'a') as f:
-        f.write("%s calling get_chain_info_dict\n" % c_datetime)
-
     # Get all chain-related information for the entries to be displayed
     chain_info = ec.get_chain_info_dict(ifes_ordered_keys, equivalence_class_dict)
 
@@ -232,12 +209,6 @@ def correspondence_between_species(parameters_dict):
 
 def correspondence_within_species(parameters_dict):
 
-    # simple logging
-    current_datetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    with open('/var/www/correspondence/flask.log', 'a') as f:
-        f.write("%s correspondence within species route requested\n" % current_datetime)
-
-
     equivalence_class_dict = {}
 
     start = time.time()
@@ -251,8 +222,7 @@ def correspondence_within_species(parameters_dict):
         status_text = "Got units<br>"
 
         if len(complete_query_units) == 0:
-            return "Not able to find units in the selection"
-            # return "Not able to find units in " + str(selection)
+            return "Not able to find units in " + str(selection)
 
         single_chain_query = ui.check_valid_single_chain_query(complete_query_units)
 
@@ -287,10 +257,6 @@ def correspondence_within_species(parameters_dict):
             return error_msg
 
         status_text += "Got equivalence class members<br>"
-
-        # Remove entries in the exclude parameter
-        if parameters_dict['exclude'] is not None:
-            members = ui.filter_exclude_ids(members, parameters_dict['exclude'])
 
         # Check whether the selection chain has the same exp_method as in the selection
         empty_members, method_equality = ec.check_valid_membership(members, query_info, exp_method)
@@ -401,12 +367,6 @@ def correspondence_within_species(parameters_dict):
 @app.route('/comparison')
 def geometric_correspondence_new():
 
-    # simple logging
-    current_datetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    with open('/var/www/correspondence/flask.log', 'a') as f:
-        f.write("%s geometric correspondence new route requested\n" % current_datetime)
-
-
     valid_resolutions = ["1.5", "2.0", "2.5", "3.0", "3.5", "4.0"]
 
     query_parameters = request.args
@@ -421,9 +381,8 @@ def geometric_correspondence_new():
     resolution = query_parameters.get('resolution', default='4.0')
     depth = query_parameters.get('depth')
     input_form = query_parameters.get('input_form', default='false')
-    exclude = query_parameters.get('exclude', default=None)
 
-    parameters_dict = {'selection': selection, 'pdb': pdb_id, 'chain': chain_id, 'scope': scope, 'resolution': resolution, 'depth': depth, 'exp_method': exp_method, 'exclude': exclude}
+    parameters_dict = {'selection': selection, 'pdb': pdb_id, 'chain': chain_id, 'scope': scope, 'resolution': resolution, 'depth': depth, 'exp_method': exp_method}
 
     if input_form.lower() == 'true':
         return render_template("index_form.html", input_parameters=parameters_dict)
@@ -433,29 +392,12 @@ def geometric_correspondence_new():
 
     if parameters_dict['scope'] == "EC":
         final_output = correspondence_within_species(parameters_dict)
-
-        # simple logging
-        c_datetime = str(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))  # freeze the timestamp so we know it's the same run
-        with open('/var/www/correspondence/flask.log', 'a') as f:
-            f.write("%s ran correspondence_within_species\n" % c_datetime)
-            # f.write(str(sorted(final_output.keys()))+"\n")
-
-
         if isinstance(final_output, str):
             return str(final_output)
         else:
             return render_template("comparison_ec.html", **final_output)
-
     else:
         final_output = correspondence_between_species(parameters_dict)
-
-        # simple logging
-        c_datetime = str(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))  # freeze the timestamp so we know it's the same run
-        with open('/var/www/correspondence/flask.log', 'a') as f:
-            f.write("%s ran correspondence_between_species\n" % c_datetime)
-            # f.write(str(final_output)+"\n")
-            # f.write(str(sorted(final_output.keys()))+"\n")
-
         if isinstance(final_output, str):
             return str(final_output)
         else:
@@ -773,12 +715,6 @@ def geometric_correspondence_new():
 @app.route('/pairwise_interactions')
 def pairwise_interactions_correspondence():
 
-    # simple logging
-    current_datetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    with open('/var/www/correspondence/flask.log', 'a') as f:
-        f.write("%s pairwise interactions correspondence route requested\n" % current_datetime)
-
-
     start = time.time()
 
     query_parameters = request.args
@@ -840,12 +776,6 @@ def pairwise_interactions_correspondence():
 @app.route('/pairwise_interactions_single')
 def pairwise_interactions_single():
 
-    # simple logging
-    current_datetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    with open('/var/www/correspondence/flask.log', 'a') as f:
-        f.write("%s pairwise interactions single route requested\n" % current_datetime)
-
-
     query_parameters = request.args
 
     chain_id = query_parameters.get('chain')
@@ -868,12 +798,6 @@ def pairwise_interactions_single():
 
 @app.route('/loop')
 def loop_correspondence():
-
-    # simple logging
-    current_datetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    with open('/var/www/correspondence/flask.log', 'a') as f:
-        f.write("%s loop correspondence route requested\n" % current_datetime)
-
 
     start = time.time()
 
@@ -920,12 +844,6 @@ def loop_correspondence():
 @app.route('/variability')
 def variability():
 
-    # simple logging
-    current_datetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    with open('/var/www/correspondence/flask.log', 'a') as f:
-        f.write("%s variability route requested\n" % current_datetime)
-
-
     try:
         from motif_variability import get_sequence_variability
     except Exception as inst:
@@ -941,11 +859,9 @@ def variability():
     #unit_id = query_parameters.get('unit_id')       # if not given, value is False
     extension = query_parameters.get('extension')
     output_format = query_parameters.get('format')
-    source = query_parameters.get('source')
-    domain = query_parameters.get('domain')          # old key for source (A,B,C,E,M,V)
+    domain = query_parameters.get('domain')
     codon = query_parameters.get('codon')
     count = query_parameters.get('count')
-    data_source = query_parameters.get('data_source')
 
     #id = id.replace(" ","")                 # in case this helps
     #loop_id = loop_id.replace(" ","")
@@ -953,12 +869,10 @@ def variability():
 
     to_do = []
 
-    if source:
-        source = source.split(",")
-    elif domain:
-        source = domain.split(",")
+    if domain:
+        domain = domain.split(",")
     else:
-        source = []
+        domain = []
 
     if codon:
         codon = codon.split(",")
@@ -975,16 +889,6 @@ def variability():
 
     if not count:
         count = ""
-
-    if data_source:
-        if data_source.lower() == 'pdb':
-            data_source = 'pdb'
-        elif data_source.lower() == 'rfam':
-            data_source = 'Rfam'
-        else:
-            data_source = ''
-    else:
-        data_source = ''
 
     # error checking, prevent code injection
     # if not "top" in count and not "multiplicity" in count and not "_" in count:
@@ -1009,10 +913,6 @@ def variability():
     #         to_do = [[loop_id]]
     if id:
         output += 'New request made for id %s with extension %s and output format %s\n' % (id,extension,output_format)
-
-        with open('/var/www/correspondence/variability.log','a') as f:
-            f.write('New request made for id %s with extension %s and output format %s\n' % (id,extension,output_format))
-
         if not "|" in id and not "_" in id:
             output += 'Invalid id %s\n' % id
             problem = True
@@ -1020,6 +920,7 @@ def variability():
             to_do = [[id]]
 
     #count = "top_10_sequences"
+    source = "Rfam"
 
     if not problem:
         if output_format in ["full","unique","fasta","top_motif_models"]:
@@ -1028,7 +929,7 @@ def variability():
                 output += "top_motif_models only available for loop input\n"
 
             try:
-                output_list = get_sequence_variability(to_do,extension,output_format,count,source,codon,data_source)
+                output_list = get_sequence_variability(to_do,extension,output_format,count,domain,codon,source)
 
                 output += "output_list length %d\n" % len(output_list)
                 output += "output_list[0] length %d\n" % len(output_list[0])
@@ -1058,19 +959,9 @@ def variability():
 
 @app.route('/map_across_species')
 def map_across_species():
-    """
-    Map a loop or unit ids across many species
-    http://rna.bgsu.edu/correspondence/map_across_species?id=HL_7K00_033
-    http://rna.bgsu.edu/correspondence/map_across_species?id=IL_4V9F_007
+
+    # http://rna.bgsu.edu/correspondence/map_across_species?id=HL_7K00_033
     # ln /usr/local/alignment/rpfam/alignments/rfam rfam
-    """
-
-    # simple logging
-    current_datetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    with open('/var/www/correspondence/flask.log', 'a') as f:
-        f.write("%s map across species route requested\n" % current_datetime)
-
-
 
     try:
         from map_across_species import map_across_species as m_a_s
@@ -1086,7 +977,7 @@ def map_across_species():
 
     scope = query_parameters.get('scope','Rfam')
     resolution = query_parameters.get('resolution','3.0A')
-    depth = int(query_parameters.get('depth','1'))             # default depth is 1
+    depth = int(query_parameters.get('depth','5'))
     format = query_parameters.get('format','text')
     match = query_parameters.get('match','full')
 
@@ -1147,12 +1038,6 @@ def map_across_species():
 @app.route('/align_chains')
 def align_chains():
 
-    # simple logging
-    current_datetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    with open('/var/www/correspondence/flask.log', 'a') as f:
-        f.write("%s align chains route requested\n" % current_datetime)
-
-
     # align two or more chains
     # use Rfam / Infernal alignment, until other options become available
 
@@ -1165,7 +1050,6 @@ def align_chains():
 
     try:
         from align_chains import align_chains as a_c
-        #print(crashnow)
     except Exception as inst:
         output = "%s" % inst
         return output
@@ -1185,7 +1069,8 @@ def align_chains():
 
     if not problem:
         try:
-            output, output2 = a_c(chains.split(","))
+            output = a_c(chains.split(","))
+
         except Exception as e:
             exception_type, exception_object, exception_traceback = sys.exc_info()
             line_number = exception_traceback.tb_lineno
@@ -1209,12 +1094,6 @@ def align_chains():
 
 @app.route('/circular')
 def circular_diagram():
-
-    # simple logging
-    current_datetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    with open('/var/www/correspondence/flask.log', 'a') as f:
-        f.write("%s circular diagram route requested\n" % current_datetime)
-
 
     from flask import send_file
     import os
@@ -1249,104 +1128,6 @@ def circular_diagram():
         #return response
     except Exception as e:
         return str(e)
-
-
-if __name__ == '__main__':
-    app.debug = False
-    app.run()
-
-@app.route('/basepair_bar_diagram')
-def basepair_bar_diagram():
-    """
-    User inputs chains, gets PDF in return
-    http://rna.bgsu.edu/correspondence/basepair_bar_diagram?chains=8GLP|1|S2,4V88|1|A6
-    http://rna.bgsu.edu/correspondence/basepair_bar_diagram?chains=4TNA|1|A,3Q1Q|1|C
-    http://rna.bgsu.edu/correspondence/basepair_bar_diagram?chains=4V9F|1|9,1S72|1|9
-
-    """
-
-    from flask import send_file
-    import os
-
-    # try:
-    #     os.environ['MPLBACKEND'] = 'agg'
-    #     os.environ['MPLCONFIGDIR'] = '/var/www/correspondence/basepair_bar_diagrams'
-    #     os.environ['LANG'] = 'en_US.UTF-8'    # why would this work?
-    #     os.environ['LC_ALL'] = 'en_US.UTF-8'
-
-    #     #from basepair_bar_diagram import basepair_bar_diagram
-    # except Exception as e:
-    #     return str(e)
-
-
-    query_parameters = request.args
-
-    chains_string = str(query_parameters.get('chains',default='',type=str))
-
-    # remove some characters that might cause problems
-    chains_string = chains_string.replace("@","")
-    chains_string = chains_string.replace("#","")
-    chains_string = chains_string.replace("$","")
-    chains_string = chains_string.replace("%","")
-    chains_string = chains_string.replace("^","")
-    chains_string = chains_string.replace("&","")
-    chains_string = chains_string.replace("*","")
-    chains_string = chains_string.replace(":","")
-    chains_string = chains_string.replace(" ","")
-
-    chains = ["4V9F|1|0", "6SKG|1|BA"]     # archaeal LSU
-    chains = ["5J7L|1|AA", "4V88|1|A6"]    # SSU bacterial to eukaryotic
-    chains = ["6ZMI|1|L5", "5TBW|1|1"]     # Eukaryotic LSU
-    chains = ["8GLP|1|S2", "4V88|1|A6"]    # Eukaryotic SSU
-    chains = ["8B0X|1|a", "8GLP|1|L5"]      # LSU bacterial to eukaryotic
-    chains = ["4TNA|1|A", "3Q1Q|1|C"]       # tRNA
-    #chains_string = "_".join(chains).replace("|","_")
-
-    chains = chains_string.split(",")
-
-    filename = 'basepair_bar_diagram_'+chains_string.replace("|","_").replace(",","_") + ".pdf"
-    path_filename = os.path.join('/var','www','correspondence','basepair_bar_diagrams',filename)
-
-    pairs_file = "/var/www/html/pairs/"   # where the pipeline stores these files
-
-    #return filename + " " + path_filename
-
-    command = ''
-
-    if not os.path.exists(path_filename):
-        # python problem with matplotlib prevents us from running this directly
-
-        # run from command line
-        command = 'export MPLBACKEND=agg; python /var/www/correspondence/basepair_bar_diagram.py "%s" "%s"' % (chains[0],chains[1])
-        command = 'python /var/www/correspondence/basepair_bar_diagram.py "%s" "%s" --output "%s"' % (chains[0],chains[1],path_filename)
-        command = 'python /var/www/correspondence/basepair_bar_diagram.py "%s" "%s" --output "%s" --pairs "%s" > /var/www/correspondence/bbd.txt' % (chains[0],chains[1],path_filename,pairs_file)
-        # command = '/opt/rh/python27/root/usr/bin/python /var/www/correspondence/basepair_bar_diagram.py "%s" "%s" --output "%s" --pairs "%s" > /var/www/correspondence/bbd.txt' % (chains[0],chains[1],path_filename,pairs_file)
-
-        # command = '/opt/rh/python27/root/usr/bin/python /var/www/correspondence/basepair_bar_diagram_mock.py > /var/www/correspondence/bbd.txt'
-
-        # command = 'python -m pip list > /var/www/correspondence/bbd.txt'
-        # command = 'which python > /var/www/correspondence/bbd.txt'
-        # command = 'python /var/www/correspondence/basepair_bar_diagram_mock.py > /var/www/correspondence/bbd.txt'
-
-        #os.system('touch %s' % path_filename)
-        #os.system('export MPLBACKEND=agg')
-        try:
-            # os.environ['MPLBACKEND'] = 'agg'
-            # os.environ['MPLCONFIGDIR'] = '/var/www/correspondence/basepair_bar_diagrams'
-            # os.environ['LANG'] = 'en_US.UTF-8'    # why would this work?
-            # os.environ['LC_ALL'] = 'en_US.UTF-8'
-            # from basepair_bar_diagram import basepair_bar_diagram
-            # basepair_bar_diagram(chains,filename,pairs_file)
-
-            os.system(command)
-        except Exception as e:
-            return str(e) + " but we tried this command here: " + " " + command
-
-    try:
-        #return send_file(pdf_file, attachment_filename=filename+".pdf")  # wrong download name
-        return send_file(path_filename, attachment_filename=filename, as_attachment=True)  # instant download
-    except Exception as e:
-        return str(e) + " but we tried this command: " + " " + command
 
 
 if __name__ == '__main__':
