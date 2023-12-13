@@ -266,6 +266,10 @@ def correspondence_within_species(parameters_dict):
         if empty_members is True and method_equality is False:
             return "The current selection has no results returned. Please try a different selection"
 
+        # Filter out PDB entries in the exclude parameter if any
+        if parameters_dict['exclude'] is not None:
+            members = ui.filter_exclude_ids(members, parameters_dict['exclude'])
+
         # Get the correspondences for all the members in the equivalence class
         correspondence, corr_complete, corr_std = cs.get_correspondence(complete_query_units, members, method_equality)
 
@@ -380,9 +384,10 @@ def geometric_correspondence_new():
     scope = query_parameters.get('scope', default='EC')
     resolution = query_parameters.get('resolution', default='4.0')
     depth = query_parameters.get('depth')
+    exclude = query_parameters.get('exclude', default=None)
     input_form = query_parameters.get('input_form', default='false')
 
-    parameters_dict = {'selection': selection, 'pdb': pdb_id, 'chain': chain_id, 'scope': scope, 'resolution': resolution, 'depth': depth, 'exp_method': exp_method}
+    parameters_dict = {'selection': selection, 'pdb': pdb_id, 'chain': chain_id, 'scope': scope, 'resolution': resolution, 'depth': depth, 'exp_method': exp_method, 'exclude': exclude}
 
     if input_form.lower() == 'true':
         return render_template("index_form.html", input_parameters=parameters_dict)
