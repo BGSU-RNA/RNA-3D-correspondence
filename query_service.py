@@ -159,7 +159,7 @@ def get_query_units_modified(param_dict):
                 return None, error_message
             else:
                 range_positions = item.split(':')
-                complete_units = get_single_range_units(range_positions, param_dict['pdb'], param_dict['chain'])
+                complete_units.extend(get_single_range_units(range_positions, param_dict['pdb'], param_dict['chain']))
         elif is_loop_id(item):
             loop_units = get_loop_units(item)
             complete_units.extend(loop_units)
