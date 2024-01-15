@@ -371,7 +371,7 @@ def correspondence_within_species(parameters_dict):
 @app.route('/comparison')
 def geometric_correspondence_new():
 
-    valid_resolutions = ["1.5", "2.0", "2.5", "3.0", "3.5", "4.0"]
+    valid_resolutions = ["1.5", "2.0", "2.5", "3.0", "3.5", "4.0", "20.0", "all"]
 
     query_parameters = request.args
 
