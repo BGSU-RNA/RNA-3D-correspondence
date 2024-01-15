@@ -1,5 +1,5 @@
 from database import db_session
-from models import NrChains, NrClasses, NrReleases, IfeInfo, PDBInfo, ChainInfo, ChainPropertyValue 
+from models import NrChains, NrClasses, NrReleases, IfeInfo, PDBInfo, ChainInfo, ChainPropertyValue
 from collections import OrderedDict
 import utility as ui
 
@@ -27,7 +27,7 @@ def get_class_id(ife, resolution):
 def get_members(class_id, exp_method):
 
 	if exp_method != 'all':
-	
+
 		with db_session() as session:
 			query = session.query(NrChains) \
 						   .join(IfeInfo, NrChains.ife_id == IfeInfo.ife_id) \
@@ -44,11 +44,11 @@ def get_members(class_id, exp_method):
 
 
 def get_ec_info(class_id):
-	
+
 	with db_session() as session:
 		query = session.query(NrClasses).filter_by(nr_class_id=class_id)
 		return query[0].name, query[0].nr_release_id
-	
+
 
 def remove_ife(members, query_ife):
 
@@ -56,7 +56,7 @@ def remove_ife(members, query_ife):
 
 	for ife in REJECT_LIST:
 		members.remove(ife)
-	
+
 	return members
 
 
@@ -65,7 +65,7 @@ def get_chain_info_dict(ife_list, ec_dict):
 	if len(ec_dict) > 1:
 		for ife in ife_list:
 			pdb, _, chain = ife.split("|")
-		
+
 			with db_session() as session:
 				query = session.query(PDBInfo.title, PDBInfo.experimental_technique, PDBInfo.resolution, ChainInfo.source, ChainPropertyValue.value) \
 							.join(ChainInfo, ChainInfo.pdb_id == PDBInfo.pdb_id) \
@@ -74,23 +74,43 @@ def get_chain_info_dict(ife_list, ec_dict):
 							.filter(ChainInfo.chain_name == chain) \
 							.filter(ChainPropertyValue.chain == chain) \
 							.filter(ChainPropertyValue.property == 'source')
-				for row in query:
-					result[ife] = {
-						"pdb": pdb,
-						"source": ui.format_species_name(row.source),
-						# "source": row.source,
-						"chain": chain,
-						"title": row.title,
-						"resolution": '{0:.2f}'.format(row.resolution),
-						"exp_technique": row.experimental_technique,
-						"equivalence_class": ec_dict.get(ife, ""),
-						"taxonomy": row.value
-					}	
+
+				if len([row for row in query]) > 0:
+					for row in query:
+						result[ife] = {
+							"pdb": pdb,
+							"source": ui.format_species_name(row.source),
+							# "source": row.source,
+							"chain": chain,
+							"title": row.title,
+							"resolution": '{0:.2f}'.format(row.resolution),
+							"exp_technique": row.experimental_technique,
+							"equivalence_class": ec_dict.get(ife, ""),
+							"taxonomy": row.value
+						}
+				else:
+					with db_session() as session:
+						query = session.query(PDBInfo.title, PDBInfo.experimental_technique, PDBInfo.resolution, ChainInfo.source) \
+									.join(ChainInfo, ChainInfo.pdb_id == PDBInfo.pdb_id) \
+									.filter(PDBInfo.pdb_id == pdb) \
+									.filter(ChainInfo.chain_name == chain)
+						for row in query:
+							result[ife] = {
+								"pdb": pdb,
+								"source": ui.format_species_name(row.source),
+								"chain": chain,
+								"title": row.title,
+								"resolution": '{0:.2f}'.format(row.resolution),
+								"exp_technique": row.experimental_technique,
+								"equivalence_class": ec_dict.get(ife, ""),
+								"taxonomy": "Unknown"
+							}
+
 		return result
 	else:
 		for ife in ife_list:
 			pdb, _, chain = ife.split("|")
-		
+
 			with db_session() as session:
 				query = session.query(PDBInfo.title, PDBInfo.experimental_technique, PDBInfo.resolution, ChainInfo.source) \
 							.join(ChainInfo, ChainInfo.pdb_id == PDBInfo.pdb_id) \
@@ -102,8 +122,8 @@ def get_chain_info_dict(ife_list, ec_dict):
 						"chain": chain,
 						"title": row.title,
 						"resolution": '{0:.2f}'.format(row.resolution),
-					}	
-		return result		
+					}
+		return result
 
 
 # Potential bug. Consider records with only 1 chain
@@ -161,7 +181,7 @@ def get_exp_method_many(pdb_list):
 def get_members_across_species(pdb_list, exp_method):
 	exp_methods = get_exp_method_many(pdb_list)
 	return [member[0] for member in exp_methods if member[1] == exp_method]
-	
+
 
 def check_chain_or_ife(id):
 
@@ -190,7 +210,7 @@ def get_id_type(query_id):
 
 
 def get_ec_members(resolution, exp_method, query_id):
-	
+
 	#query_ife = '|'.join(units[0].split('|')[:3])
 
 	error_msg = "No members found in equivalence class"
@@ -226,7 +246,7 @@ def get_ec_members(resolution, exp_method, query_id):
 
 
 def check_valid_membership(members, query_data, exp_method):
-	
+
 	pdbid = query_data['pdb']
 	selection_method = get_exp_method(pdbid)
 
@@ -248,7 +268,7 @@ def check_valid_membership(members, query_data, exp_method):
 
 
 def get_pdb_resolution(pdb_list):
-	
+
 	resolution_dict = {}
 	with db_session() as session:
 		query = session.query(PDBInfo).filter(PDBInfo.pdb_id.in_(pdb_list))
@@ -309,4 +329,4 @@ def exclude_pdb(corr_complete, param):
 		del corr_complete[key]
 
 	return corr_complete
-	
+
