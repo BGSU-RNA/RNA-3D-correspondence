@@ -277,11 +277,10 @@ def map_across_species(nt_lists,scope='Rfam',resolution='3.0A',depth=1,match='fu
             if 'alignment_name' in pdb_rfam_list[i]:
                 alignment_name = pdb_rfam_list[i]['alignment_name']
                 if not alignment_name in alignment.keys():
-                    if alignment_name == 'RF00005':
-                        filename = os.path.join(RFAM_ALIGNMENT_DIRECTORY,"%s_PDB_chains.sto" % alignment_name)
-                    else:
-                        filename = os.path.join(RFAM_ALIGNMENT_DIRECTORY,"%s_PDB_chains.sto" % alignment_name)
-                    accession_list, NCBI_taxid_list, domain_list, description_list, sequence_list, codon_list = load_alignment(alignment_name,filename)
+
+                    filename = os.path.join(RFAM_ALIGNMENT_DIRECTORY,"%s_PDB_chains.fa" % alignment_name)
+
+                    accession_list, NCBI_taxid_list, domain_list, description_list, sequence_list, codon_list = load_fasta_alignment(alignment_name,filename)
 
                     alignment[alignment_name] = {}
                     alignment[alignment_name]["accession"] = accession_list
@@ -592,7 +591,7 @@ def map_across_species(nt_lists,scope='Rfam',resolution='3.0A',depth=1,match='fu
 
     return result_list
 
-    
+
 def main():
 
     nt_lists = [['7K00|1|A|G|1405:7K00|1|A|U|1406:7K00|1|A|5MC|1407:7K00|1|A|A|1408:7K00|1|A|C|1409', '7K00|1|A|G|1491:7K00|1|A|A|1492:7K00|1|A|A|1493:7K00|1|A|G|1494:7K00|1|A|U|1495:7K00|1|A|C|1496']]
@@ -628,11 +627,11 @@ def main():
     nt_lists = [['HL_3WC2_002']]  # tRNA example
     nt_lists = [['5J7L|1|AA|A|253,5J7L|1|AA|U|273']]
     nt_lists = [['5J7L|1|DA|G|2655,5J7L|1|DA|U|2656,5J7L|1|DA|A|2665']]
-    nt_lists = [["IL_4V9F_007"]]  # archaeal LSU
     nt_lists = [["IL_6ME0_015"]]  # RF00029 group II intron
+    nt_lists = [["IL_4V9F_007"]]  # archaeal LSU
 
-    scope = 'EC'       # equivalence class, for each unit
     scope = 'molecule' # same molecule like SSU or LSU where available
+    scope = 'EC'       # equivalence class, for each unit
     scope = 'Rfam'     # same Rfam family as each individual unit
 
     resolution = '3.5A'   # resolution cutoff for equivalence classes
@@ -643,7 +642,7 @@ def main():
     if not resolution in ['1.5A','2.0A','2.5A','3.0A','3.5A','4.0A','20.0A','all']:
         resolution = '3.0A'
 
-    depth = 1        # how many IFEs from the equivalence class to map to
+    depth = 2        # how many IFEs from the equivalence class to map to
 
     match = 'full'     # only keep instances where every nucleotide is mapped
     match = 'partial'  # allow partial matches
@@ -653,7 +652,9 @@ def main():
     for i, result in enumerate(result_list):
         print(result["text"])
 
-        with open('results/map_across_species_%d.txt' % i,write_mode) as f:
+        identifier = nt_lists[i][0].replace("|","_")
+
+        with open('results/map_across_species_%s.txt' % identifier,write_mode) as f:
             f.write(result["text"])
 
     return
