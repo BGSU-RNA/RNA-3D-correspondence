@@ -149,6 +149,8 @@ def get_chain_name(chains_list):
                 for row in query:
                     chain_data = (str(row.chain_name), str(row.compound))
                     chain_data_list.append(chain_data)
+
+
                
             return chain_data_list
     else:
