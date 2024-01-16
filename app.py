@@ -38,7 +38,7 @@ def SVS_home():
     # Manisha: in the future, we will have an argument like "input_form=True"
     # When that happens on this route, we will process the arguments that are provided
     # and supply those to the template below.  But we don't know how to do that!
-    # http://rna.bgsu.edu/correspondence/SVS?input_form=True&selection=IL_4V9F_007 
+    # http://rna.bgsu.edu/correspondence/SVS?input_form=True&selection=IL_4V9F_007
     return render_template("variability.html",input_parameters=request.args)
 
 
@@ -1095,6 +1095,99 @@ def align_chains():
 
     return response
 
+
+@app.route('/basepair_bar_diagram')
+def basepair_bar_diagram():
+    """
+    User inputs chains, gets PDF in return
+    http://rna.bgsu.edu/correspondence/basepair_bar_diagram?chains=8GLP|1|S2,4V88|1|A6
+    http://rna.bgsu.edu/correspondence/basepair_bar_diagram?chains=4TNA|1|A,3Q1Q|1|C
+    http://rna.bgsu.edu/correspondence/basepair_bar_diagram?chains=4V9F|1|9,1S72|1|9
+
+    """
+
+    from flask import send_file
+    import os
+
+    # try:
+    #     os.environ['MPLBACKEND'] = 'agg'
+    #     os.environ['MPLCONFIGDIR'] = '/var/www/correspondence/basepair_bar_diagrams'
+    #     os.environ['LANG'] = 'en_US.UTF-8'    # why would this work?
+    #     os.environ['LC_ALL'] = 'en_US.UTF-8'
+
+    #     #from basepair_bar_diagram import basepair_bar_diagram
+    # except Exception as e:
+    #     return str(e)
+
+
+    query_parameters = request.args
+
+    chains_string = str(query_parameters.get('chains',default='',type=str))
+
+    # remove some characters that might cause problems
+    chains_string = chains_string.replace("@","")
+    chains_string = chains_string.replace("#","")
+    chains_string = chains_string.replace("$","")
+    chains_string = chains_string.replace("%","")
+    chains_string = chains_string.replace("^","")
+    chains_string = chains_string.replace("&","")
+    chains_string = chains_string.replace("*","")
+    chains_string = chains_string.replace(":","")
+    chains_string = chains_string.replace(" ","")
+
+    chains = ["4V9F|1|0", "6SKG|1|BA"]     # archaeal LSU
+    chains = ["5J7L|1|AA", "4V88|1|A6"]    # SSU bacterial to eukaryotic
+    chains = ["6ZMI|1|L5", "5TBW|1|1"]     # Eukaryotic LSU
+    chains = ["8GLP|1|S2", "4V88|1|A6"]    # Eukaryotic SSU
+    chains = ["8B0X|1|a", "8GLP|1|L5"]      # LSU bacterial to eukaryotic
+    chains = ["4TNA|1|A", "3Q1Q|1|C"]       # tRNA
+    #chains_string = "_".join(chains).replace("|","_")
+
+    chains = chains_string.split(",")
+
+    filename = 'basepair_bar_diagram_'+chains_string.replace("|","_").replace(",","_") + ".pdf"
+    path_filename = os.path.join('/var','www','correspondence','basepair_bar_diagrams',filename)
+
+    pairs_file = "/var/www/html/pairs/"   # where the pipeline stores these files
+
+    #return filename + " " + path_filename
+
+    command = ''
+
+    if not os.path.exists(path_filename):
+        # python problem with matplotlib prevents us from running this directly
+
+        # run from command line
+        command = 'export MPLBACKEND=agg; python /var/www/correspondence/basepair_bar_diagram.py "%s" "%s"' % (chains[0],chains[1])
+        command = 'python /var/www/correspondence/basepair_bar_diagram.py "%s" "%s" --output "%s"' % (chains[0],chains[1],path_filename)
+        command = 'python /var/www/correspondence/basepair_bar_diagram.py "%s" "%s" --output "%s" --pairs "%s" > /var/www/correspondence/bbd.txt' % (chains[0],chains[1],path_filename,pairs_file)
+        # command = '/opt/rh/python27/root/usr/bin/python /var/www/correspondence/basepair_bar_diagram.py "%s" "%s" --output "%s" --pairs "%s" > /var/www/correspondence/bbd.txt' % (chains[0],chains[1],path_filename,pairs_file)
+
+        # command = '/opt/rh/python27/root/usr/bin/python /var/www/correspondence/basepair_bar_diagram_mock.py > /var/www/correspondence/bbd.txt'
+
+        # command = 'python -m pip list > /var/www/correspondence/bbd.txt'
+        # command = 'which python > /var/www/correspondence/bbd.txt'
+        # command = 'python /var/www/correspondence/basepair_bar_diagram_mock.py > /var/www/correspondence/bbd.txt'
+
+        #os.system('touch %s' % path_filename)
+        #os.system('export MPLBACKEND=agg')
+        try:
+            # os.environ['MPLBACKEND'] = 'agg'
+            # os.environ['MPLCONFIGDIR'] = '/var/www/correspondence/basepair_bar_diagrams'
+            # os.environ['LANG'] = 'en_US.UTF-8'    # why would this work?
+            # os.environ['LC_ALL'] = 'en_US.UTF-8'
+            # from basepair_bar_diagram import basepair_bar_diagram
+            # basepair_bar_diagram(chains,filename,pairs_file)
+
+            os.system(command)
+        except Exception as e:
+            return str(e) + " but we tried this command here: " + " " + command
+
+    try:
+        #return send_file(pdf_file, attachment_filename=filename+".pdf")  # wrong download name
+        return send_file(path_filename, attachment_filename=filename, as_attachment=True)  # instant download
+    except Exception as e:
+        return str(e) + " but we tried this command: " + " " + command
 
 
 @app.route('/circular')
