@@ -1,7 +1,11 @@
+from collections import OrderedDict
+import logging
+
 from database import db_session
 from models import NrChains, NrClasses, NrReleases, IfeInfo, PDBInfo, ChainInfo, ChainPropertyValue
-from collections import OrderedDict
 import utility as ui
+
+logging.basicConfig(filename='/var/www/correspondence/flask.log', encoding='utf-8', level=logging.DEBUG, format='%(asctime)s %(message)s')
 
 REJECT_LIST = ['5LZE|1|a+5LZE|1|y+5LZE|1|v+5LZE|1|x']
 
@@ -10,8 +14,13 @@ def get_source_organism(pdb_id, chain_id):
 	with db_session() as session:
 		query = session.query(ChainInfo).filter_by(pdb_id=pdb_id) \
 										.filter_by(chain_name=chain_id)
-		return query[0].source
 
+		result = [row.source for row in query]
+
+	if len(result) > 0:
+		return result[0]
+	else:
+		return None
 
 def get_class_id(ife, resolution):
 
@@ -21,8 +30,13 @@ def get_class_id(ife, resolution):
 	        					       .filter(NrClasses.resolution == resolution) \
 	                                   .order_by(NrReleases.date.desc()) \
 	                                   .limit(1)
-		return query[0].nr_class_id
 
+		result = [row.nr_class_id for row in query]
+
+	if len(result) > 0:
+		return result[0]
+	else:
+		return None
 
 def get_members(class_id, exp_method):
 
@@ -108,8 +122,11 @@ def get_chain_info_dict(ife_list, ec_dict):
 
 		return result
 	else:
+		logging.info("equivalence_class_service: get_chain_info_dict: doing queries")
 		for ife in ife_list:
 			pdb, _, chain = ife.split("|")
+
+			logging.info("equivalence_class_service: get_chain_info_dict: query for %s, %s, %s" % (ife,pdb,chain))
 
 			with db_session() as session:
 				query = session.query(PDBInfo.title, PDBInfo.experimental_technique, PDBInfo.resolution, ChainInfo.source) \
@@ -117,11 +134,12 @@ def get_chain_info_dict(ife_list, ec_dict):
 							.filter(PDBInfo.pdb_id == pdb) \
 							.filter(ChainInfo.chain_name == chain)
 				for row in query:
+					logging.info("equivalence_class_service: get_chain_info_dict: resolution is %s" % row.resolution)
 					result[ife] = {
 						"pdb": pdb,
 						"chain": chain,
 						"title": row.title,
-						"resolution": '{0:.2f}'.format(row.resolution),
+						"resolution": row.resolution,
 					}
 		return result
 
@@ -213,36 +231,53 @@ def get_ec_members(resolution, exp_method, query_id):
 
 	#query_ife = '|'.join(units[0].split('|')[:3])
 
-	error_msg = "No members found in equivalence class"
+	logging.info("equivalence_class_service: get_ec_members: query_id: %s",query_id)
 
-	try:
-		error_msg = "Query id type not found"
+	id, id_type, query_id_index = get_id_type(query_id)
 
-		print("get_ec_members query_id:",query_id)
+	logging.info("equivalence_class_service: get_ec_members: id %s, id_type %s, query_id_index %s" % (id,id_type,query_id_index))
 
-		id, id_type, query_id_index = get_id_type(query_id)
-
-		print("get_ec_members id, id_type, query_id_index:",id,id_type,query_id_index)
-
-		error_msg = "Equivalence class id not found, check resolution threshold"
-		class_id = get_class_id(id, resolution)
-		error_msg = "Equivalence class name/release not found"
-		ec_name, nr_release = get_ec_info(class_id)
-		error_msg = "Equivalence class members not found"
-		members = get_members(class_id, exp_method)
-		if id in members: members.remove(id)
-
-		members = process_members(members, id_type, query_id_index)
-
-		if len(members) == 0:
-			error_msg = "No members found in equivalence class"
-		else:
-			error_msg = ""
-
-		return members, ec_name, nr_release, error_msg
-
-	except:
+	if not id or not id_type:
+		# make sure to return a string!
+		error_msg = "Query id type not found for query_id %s, got %s, %s, %s" % (str(query_id),str(id),str(id_type),str(query_id_index))
 		return [], "", "", error_msg
+
+	class_id = get_class_id(id, resolution)
+
+	logging.info("equivalence_class_service: get_ec_members: class_id is %s" % class_id)
+
+	if class_id is None:
+		error_msg = "Equivalence class id not found at resolution %s, raise resolution threshold" % str(resolution)
+		return [], "", "", error_msg
+
+	# class_id = class_id.replace("all",resolution)
+
+	error_msg = "Equivalence class name/release not found"
+	ec_name, nr_release = get_ec_info(class_id)
+
+	logging.info("equivalence_class_service: get_ec_members: ec_name is %s, nr_release is %s" % (ec_name,nr_release))
+
+	members = get_members(class_id, exp_method)
+
+	if len(members) == 0:
+		error_msg = "No members found in equivalence class at the given resolution"
+		return [], "", "", error_msg
+
+	logging.info("equivalence_class_service: get_ec_members: members is %s" % members)
+
+	if id in members:
+		members.remove(id)
+
+	members = process_members(members, id_type, query_id_index)
+
+	logging.info("equivalence_class_service: get_ec_members: members is %s" % members)
+
+	if len(members) == 0:
+		error_msg = "No members found in equivalence class at the given resolution"
+	else:
+		error_msg = ""
+
+	return members, ec_name, nr_release, error_msg
 
 
 def check_valid_membership(members, query_data, exp_method):
