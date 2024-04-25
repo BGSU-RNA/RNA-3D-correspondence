@@ -17,7 +17,7 @@
 
     <style>
         .annotation-table {
-          height: 400px; 
+          height: 400px;
           overflow: auto;}
         .annotation-table td {
           text-align: left;}
@@ -71,7 +71,7 @@
     </nav>
 
     <div class="container">
-        <div class="row">
+        <div class="row mb-2">
           <div class="col-4">
             <dl>
                 <dt>Query PDB|Model|Chain</dt>
@@ -109,7 +109,7 @@
                 {% for col in row %}
                   <td class="text-center">{{ col }}</td>
                 {% endfor %}
-              </tr>  
+              </tr>
               {% endfor %}
             </table>
           </div> -->
@@ -126,13 +126,13 @@
                 {% for col in row %}
                   <td class="text-center">{{ col }}</td>
                 {% endfor %}
-              </tr>  
+              </tr>
               {% endfor %}
             </table>
           </div>
         </div>
-        
-        <div class="row">
+
+        <div class="row mb-2">
             <div class="col-12 annotation-table">
                 <table class="table table-sm table-striped table-bordered" id="instances">
                     <thead class="thead-dark text-nowrap text-center">
@@ -170,19 +170,21 @@
                             {% for position_num in positions_header %}
                               <td> {{ res_position[k][position_num]}} </td>
                             {% endfor %}
-      
+
                             {% for nt_pair in pairwise_data[0] %}
                               <td> {{ pairwise_data[1][k][nt_pair]}} </td>
                             {% endfor %}
-                        </tr>  
+                        </tr>
                       {% endfor %}
                     </tbody>
                 </table>
             </div>
         </div>
+    </div>
+        <div class="container">
 
-        <div class="row">
-          <div class="col-6">
+          <div class="row mb-2">
+          <div class="col-lg-6 col-md-12 mb-2 mb-lg-0">
             <script src="http://rna.bgsu.edu/webfr3d/js/jmolplugin.js" type="text/javascript"></script>
 
             <input type="button" id="neighborhood" value="Show neighborhood">
@@ -197,18 +199,18 @@
                     <option value="CPK">CPK</option>
                 </select>
           </div>
-          <div class="col-6">
+          <div class="col-lg-6 col-md-12">
             <div id ='chart'>
                 <script type="text/javascript">
                     const data = {{ data | tojson | safe }};
                 </script>
-            </div> 
+            </div>
           </div>
           <!--<div class="col">
             4 of 4
           </div>-->
         </div>
-    
+
     </div>
     <script type="text/javascript" src="http://rna.bgsu.edu/webfr3d/js/heatmap.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
@@ -217,7 +219,7 @@
 
     <div class="load-time">
       <small>Page loaded in {{code_time}} seconds</small> </br>
-      <small>Copyright <script type="text/javascript">document.write( new Date().getFullYear())</script> Bowling Green State University RNA group</small> 
+      <small>Copyright <script type="text/javascript">document.write( new Date().getFullYear())</script> Bowling Green State University RNA group</small>
     </div>
 
   </section>
