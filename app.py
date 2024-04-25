@@ -1,6 +1,16 @@
 from flask import Flask
 from flask import render_template, request
 from flask import make_response              # for motif variability, to return plain text
+
+from collections import OrderedDict, defaultdict
+import json
+import logging
+import sys
+import time
+
+logging.basicConfig(filename='/var/www/correspondence/flask.log', encoding='utf-8', level=logging.DEBUG, format='%(asctime)s %(message)s')
+logging.info("Starting BGSU-specific imports")
+
 import process_input as pi
 import query_service as qs
 import equivalence_class_service as ec
@@ -8,30 +18,24 @@ import correspondence_service as cs
 import pairwise_service as ps
 from rotation import get_rotation
 from center import get_center
-import logging
 import utility as ui
-import json
-import time
-from collections import OrderedDict, defaultdict
-from discrepancy import matrix_discrepancy
-import numpy as np
-import sys
-import time
 from get_neighboring_chains import test_run
 
-
 #from flask_cors import CORS   # for circular
-
-app = Flask(__name__, template_folder='templates')
 #CORS(app,expose_headers=["x-suggested-filename"])  # for circular
 
+
+app = Flask(__name__, template_folder='templates')
+
+# turn on more detailed debugging
+app.debug = True
 
 accepted_resolutions = ['1.5', '2', '2.0', '2.5', '3', '3.0', '3.5', '4', '4.0', 'all']
 accepted_disc_methods = ['geometric', 'relative']
 
 @app.route('/')
 def home():
-    return render_template("index.html")
+    return render_template("index.html", input_parameters={})
 
 @app.route('/SVS')
 def SVS_home():
@@ -75,7 +79,7 @@ def display_correspondence():
     # Get the equivalence class members that the query ife belongs to
     # Note: 2022-01-06 CLZ this has 4 inputs, but the method only takes 3
     # Likely to crash
-    members, ec_name, nr_release = ec.get_ec_members(query_units, resolution, exp_method, chain_id)
+    members, ec_name, nr_release, error_msg = ec.get_ec_members(query_units, resolution, exp_method, chain_id)
 
     # Get the correspondences for all the members in the equivalence class
     correspondence, corr_complete, corr_std = cs.get_correspondence(query_units, members)
@@ -121,13 +125,25 @@ def correspondence_between_species(parameters_dict):
 
     unique_pdb_entries = list(set(pdb_entries))
 
+    # Filter out PDB entries in the exclude parameter if any
+    if parameters_dict['exclude'] is not None:
+        logging.info("Unique PDB entries before: %s" % str(unique_pdb_entries))
+        logging.info("Excluding PDB entries: %s" % parameters_dict['exclude'].upper())
+        unique_pdb_entries = list(set(unique_pdb_entries) - set(parameters_dict['exclude'].upper().split(",")))
+        logging.info("Unique PDB entries after: %s" % str(unique_pdb_entries))
+
     exp_method = ui.get_exp_method_name(parameters_dict['exp_method'])
 
     if (exp_method != "all"):
         filtered_members = ec.get_members_across_species(unique_pdb_entries, exp_method)
         if not filtered_members:
-            return "No PDB entries matches the given selection. Please try a different query"
-        corr_complete = ui.filter_dict_by_list(corr_complete, filtered_members)
+            return "No PDB entries match the given selection. Please try a different query"
+    else:
+        filtered_members = unique_pdb_entries
+
+    # logging.info("Filtered members: %s" % filtered_members)
+
+    corr_complete = ui.filter_dict_by_list(corr_complete, filtered_members)
 
     correspondence = [item for sublist in correspondence_list for item in sublist]
 
@@ -209,132 +225,168 @@ def correspondence_between_species(parameters_dict):
 
 def correspondence_within_species(parameters_dict):
 
+    logging.info("Starting correspondence_within_species")
+
     equivalence_class_dict = {}
 
     start = time.time()
 
     complete_query_units, query_error_message = qs.get_query_units_modified(parameters_dict)
 
-    try:
-        if query_error_message:
-            return query_error_message
+    if query_error_message:
+        logging.info("Query error message: %s" % query_error_message)
+        return str(query_error_message)
 
-        status_text = "Got units<br>"
+    logging.info("Got complete query units: %s" % complete_query_units)
 
-        if len(complete_query_units) == 0:
-            return "Not able to find units in " + str(selection)
+    status_text = "Got units<br>"
 
-        single_chain_query = ui.check_valid_single_chain_query(complete_query_units)
+    if len(complete_query_units) == 0:
+        return "Not able to find units in " + str(parameters_dict['selection'])
 
-        if not single_chain_query:
-            return "Your query contains nucleotide selections from more than a single chain. Please limit your selections to a single chain"
+    single_chain_query = ui.check_valid_single_chain_query(complete_query_units)
 
-        complete_query_units_str = ",".join(complete_query_units)
+    if not single_chain_query:
+        return "Your query contains nucleotide selections from more than a single chain. Please limit your selections to a single chain"
 
-        query_info = ui.process_query_units(complete_query_units)
+    complete_query_units_str = ",".join(complete_query_units)
 
-        query_info['chain_name'] = ec.get_chain_standardized_name(query_info)
+    query_info = ui.process_query_units(complete_query_units)
 
-        status_text += "Got query_info<br>"
+    query_info['chain_name'] = ec.get_chain_standardized_name(query_info)
 
-        # if input_type == 'unit_id' or input_type == 'loop_id':
-        #     chain_id = ui.get_chain_id(complete_query_units)
+    status_text += "Got query_info<br>"
 
-        # status_text += "Got chain_id<br>"
+    # if input_type == 'unit_id' or input_type == 'loop_id':
+    #     chain_id = ui.get_chain_id(complete_query_units)
 
-        exp_method = ui.get_exp_method_name(parameters_dict['exp_method'])
+    # status_text += "Got chain_id<br>"
 
-        status_text += "Got exp_method<br>"
+    exp_method = ui.get_exp_method_name(parameters_dict['exp_method'])
 
-        source_organism = ec.get_source_organism(query_info['pdb'], query_info['chain'])
+    status_text += "Got exp_method<br>"
 
-        status_text += "Got source_organism<br>"
+    source_organism = ec.get_source_organism(query_info['pdb'], query_info['chain'])
 
-        # Get the equivalence class members that the query ife belongs to
-        members, ec_name, nr_release, error_msg = ec.get_ec_members(parameters_dict['resolution'], exp_method, query_info['ife'])
+    status_text += "Got source_organism<br>"
 
-        if len(error_msg) > 0:
-            return error_msg
+    logging.info("Got source organism %s" % source_organism)
 
-        status_text += "Got equivalence class members<br>"
+    # Get the equivalence class members that the query ife belongs to
+    members, ec_name, nr_release, error_msg = ec.get_ec_members(parameters_dict['resolution'], exp_method, query_info['ife'])
 
-        # Check whether the selection chain has the same exp_method as in the selection
-        empty_members, method_equality = ec.check_valid_membership(members, query_info, exp_method)
+    logging.info("error_msg is %s and its length is %d" % (error_msg,len(error_msg)))
 
-        status_text += "Checked valid membership<br>"
+    if len(error_msg) > 0:
+        return error_msg
 
-        if empty_members is True and method_equality is False:
-            return "The current selection has no results returned. Please try a different selection"
+    logging.info("Got equivalence class members")
 
-        # Filter out PDB entries in the exclude parameter if any
-        if parameters_dict['exclude'] is not None:
-            members = ui.filter_exclude_ids(members, parameters_dict['exclude'])
+    status_text += "Got equivalence class members<br>"
 
-        # Get the correspondences for all the members in the equivalence class
-        correspondence, corr_complete, corr_std = cs.get_correspondence(complete_query_units, members, method_equality)
+    # Check whether the selection chain has the same exp_method as in the selection
+    empty_members, method_equality = ec.check_valid_membership(members, query_info, exp_method)
 
-        status_text += "Got correspondences<br>"
+    status_text += "Checked valid membership<br>"
 
-        # Remove ec member/s that have missing correspondence
-        entries_with_missing_correspondence, corr_complete = ui.check_missing_correspondence(corr_complete, query_info['units_length'])
+    if empty_members is True and method_equality is False:
+        return "The current selection has no results returned. Please try a different selection"
 
-        status_text += "Removed missing members<br>"
+    # Filter out PDB entries in the exclude parameter if any
+    if parameters_dict['exclude'] is not None:
+        logging.info("Excluding PDB entries: %s" % parameters_dict['exclude'])
+        members = ui.filter_exclude_ids(members, parameters_dict['exclude'])
 
-        nt_position_index = ui.get_nt_position_index(corr_complete)
+    # logging.info("Filtered members: %s" % members)
 
-        possible_nt_pairs = ui.create_all_nt_pairs(corr_complete)
+    # Get the correspondences for all the members in the equivalence class
+    correspondence, corr_complete, corr_std = cs.get_correspondence(complete_query_units, members, method_equality)
 
-        pairwise_data = ps.get_pairwise_interactions_new(possible_nt_pairs, nt_position_index)
+    status_text += "Got correspondences<br>"
 
-        status_text += "Got pairwise interactions<br>"
+    # Remove ec member/s that have missing correspondence
+    entries_with_missing_correspondence, corr_complete = ui.check_missing_correspondence(corr_complete, query_info['units_length'])
 
-        formatted_pairwise_data = ui.format_pairwise_interactions(pairwise_data)
+    status_text += "Removed missing members<br>"
 
-        status_text += "Formatted pairwise interactions<br>"
+    nt_position_index = ui.get_nt_position_index(corr_complete)
 
-        correspondence_positions = ui.get_correspondence_positions(corr_complete)
+    possible_nt_pairs = ui.create_all_nt_pairs(corr_complete)
 
-        status_text += "Got correspondence positions<br>"
+    pairwise_data = ps.get_pairwise_interactions_new(possible_nt_pairs, nt_position_index)
 
-        positions_header = ui.get_positions_header(query_info['units_length'])
+    status_text += "Got pairwise interactions<br>"
 
-        # Get rotation data
-        rotation_data = get_rotation(correspondence, corr_complete)
+    formatted_pairwise_data = ui.format_pairwise_interactions(pairwise_data)
 
-        # Get center data
-        center_data = get_center(correspondence, corr_complete)
+    status_text += "Formatted pairwise interactions<br>"
+    logging.info("Formatted pairwise interactions")
 
-        status_text += "Got %s center and %s rotation data<br>" % (len(center_data),len(rotation_data))
+    correspondence_positions = ui.get_correspondence_positions(corr_complete)
 
-        # Order rotation and center data before computing discrepancy
-        rotation_ordered, center_ordered, ife_list, missing_data = ui.order_data(rotation_data, center_data)
+    status_text += "Got correspondence positions<br>"
+    logging.info("Got correspondence positions")
 
-        status_text += "Ordered center and rotation data<br>"
+    positions_header = ui.get_positions_header(query_info['units_length'])
 
-        disc_data = ui.calculate_geometric_disc(ife_list, rotation_ordered, center_ordered)
+    # Get rotation data
+    rotation_data = get_rotation(correspondence, corr_complete)
 
-    except:
-        return status_text + "<br>... and then something went wrong"
+    # Get center data
+    center_data = get_center(correspondence, corr_complete)
+
+    status_text += "Got %s center and %s rotation data<br>" % (len(center_data),len(rotation_data))
+    logging.info("Got center and rotation data")
+
+    # Order rotation and center data before computing discrepancy
+    rotation_ordered, center_ordered, ife_list, missing_data = ui.order_data(rotation_data, center_data)
+
+    logging.info("Ordered center and rotation data")
+
+    status_text += "Ordered center and rotation data<br>"
+
+    disc_data = ui.calculate_geometric_disc(ife_list, rotation_ordered, center_ordered)
+
+    logging.info("Calculated geometric discrepancy")
 
     # Get the instances ordered according to similarity
     ifes_ordered = ui.order_similarity(ife_list, disc_data)
 
+    logging.info("Ordered by similarity")
+
     # Get discrepancy statistics and build the heatmap data for display
     heatmap_data, percentile_score, max_disc = ui.build_heatmap_data(disc_data, ifes_ordered)
 
+    logging.info("Built heatmap data")
+    logging.info("ifes_ordered: " + str(ifes_ordered))
+    logging.info("corr_complete: " + str(corr_complete))
+
     # Build coord data
     coord_data, table_rows = ui.build_coord_data(ifes_ordered, corr_complete)
+
+    logging.info("coord_data: " + str(coord_data))
+
+    logging.info("Built coord data")
 
     units_string = [str(v) for k, v in coord_data.iteritems()]
 
     # Get the neighboring chains
     neighboring_chains = test_run(units_string)
 
+    logging.info("Got neighboring chains")
+
+    logging.info("coord_data: " + str(coord_data))
+
     # Get the ordered chains as a list
     ifes_ordered_keys = list(coord_data.keys())
 
+    logging.info("ifes_ordered_keys: " + str(ifes_ordered_keys))
+    logging.info("equivalence_class_dict: " + str(equivalence_class_dict))
+
     # Get all chain-related information for the entries to be displayed
     chain_info = ec.get_chain_info_dict(ifes_ordered_keys, equivalence_class_dict)
+
+    logging.info("Got chain info")
 
     # Zip both the chain and neighboring chains lists into a dict
     neighboring_chains_dict = OrderedDict(zip(ifes_ordered_keys, neighboring_chains))
@@ -342,6 +394,8 @@ def correspondence_within_species(parameters_dict):
     neighboring_chains_list = [row[1] for _, v in neighboring_chains_dict.iteritems() if v for row in v]
 
     neighboring_chains_count = ui.get_name_count(neighboring_chains_list)
+
+    logging.info("Got neighboring chains")
 
     end = time.time()
 
@@ -368,6 +422,21 @@ def correspondence_within_species(parameters_dict):
     return output_data
 
 
+def clean_resolution(resolution):
+    # deal with alternative formats for the resolution value
+    if resolution.lower() == "all":
+        resolution = "all"
+        return resolution
+
+    if resolution.lower().endswith("a"):
+        resolution = resolution.lower().replace("a", "")
+
+    if resolution in ["2","3","4","20"]:
+        resolution = resolution + ".0"
+
+    return resolution
+
+
 @app.route('/comparison')
 def geometric_correspondence_new():
 
@@ -383,6 +452,9 @@ def geometric_correspondence_new():
     exp_method = query_parameters.get('exp_method', default='all')
     scope = query_parameters.get('scope', default='EC')
     resolution = query_parameters.get('resolution', default='4.0')
+
+    resolution = clean_resolution(resolution)
+
     depth = query_parameters.get('depth')
     exclude = query_parameters.get('exclude', default=None)
     input_form = query_parameters.get('input_form', default='false')
@@ -390,7 +462,7 @@ def geometric_correspondence_new():
     parameters_dict = {'selection': selection, 'pdb': pdb_id, 'chain': chain_id, 'scope': scope, 'resolution': resolution, 'depth': depth, 'exp_method': exp_method, 'exclude': exclude}
 
     if input_form.lower() == 'true':
-        return render_template("index_form.html", input_parameters=parameters_dict)
+        return render_template("index.html", input_parameters=parameters_dict)
 
     if parameters_dict['resolution'] not in valid_resolutions:
         return "Please enter a valid resolution value. Accepted values are " + ", ".join(valid_resolutions)
@@ -754,7 +826,7 @@ def pairwise_interactions_correspondence():
     exp_method = ui.get_exp_method_name(exp_method)
 
     # Get the equivalence class members that the query ife belongs to
-    members, ec_name, nr_release = ec.get_ec_members(resolution, exp_method, chain_id)
+    members, ec_name, nr_release, error_msg = ec.get_ec_members(resolution, exp_method, chain_id)
 
     # Check whether the selection chain has the same exp_method as in the selection
     empty_members, method_equality = ec.check_valid_membership(members, query_data, exp_method)
@@ -765,7 +837,9 @@ def pairwise_interactions_correspondence():
     correspondence, corr_complete, corr_std = cs.get_correspondence(query_units, members, method_equality)
 
     # Remove ec member/s that have missing correspondence
-    missing_data, corr_complete, corr_std = ui.check_missing_correspondence(corr_complete, corr_std)
+    logging.debug("corr_std is %s" % corr_std)
+    if corr_std:
+        missing_data, corr_complete, corr_std = ui.check_missing_correspondence(corr_complete, corr_std)
 
     pairwise_data, pairwise_residue_pairs_reference = ps.get_pairwise_interactions(corr_complete)
 
@@ -833,7 +907,7 @@ def loop_correspondence():
     exp_method = ui.get_exp_method_name(exp_method)
 
     # Get the equivalence class members that the query ife belongs to
-    members, ec_name, nr_release = ec.get_ec_members(query_units, resolution, exp_method, chain_id)
+    members, ec_name, nr_release, error_msg = ec.get_ec_members(query_units, resolution, exp_method, chain_id)
 
     # Get the correspondences for all the members in the equivalence class
     correspondence, corr_complete, corr_std = cs.get_correspondence(loop_range, members)
@@ -849,6 +923,12 @@ def loop_correspondence():
 @app.route('/variability')
 def variability():
 
+    query_parameters = request.args
+
+    # if the URL tells us to display a pre-populated form, do so
+    if "input_form" in query_parameters:
+        return render_template("variability.html",input_parameters=request.args)
+
     try:
         from motif_variability import get_sequence_variability
     except Exception as inst:
@@ -857,7 +937,6 @@ def variability():
         output += "%s" % inst
         return output
 
-    query_parameters = request.args
 
     id = query_parameters.get('id')            # better to just allow some kind of id
     #loop_id = query_parameters.get('loop_id')
@@ -867,6 +946,8 @@ def variability():
     domain = query_parameters.get('domain')
     codon = query_parameters.get('codon')
     count = query_parameters.get('count')
+
+    logging.info("variability route with %s,%s,%s,%s,%s,%s" % (id,extension,output_format,domain,codon,count))
 
     #id = id.replace(" ","")                 # in case this helps
     #loop_id = loop_id.replace(" ","")
@@ -982,7 +1063,10 @@ def map_across_species():
 
     scope = query_parameters.get('scope','Rfam')
     resolution = query_parameters.get('resolution','3.0A')
-    depth = int(query_parameters.get('depth','5'))
+    try:
+        depth = int(query_parameters.get('depth','5'))
+    except:
+        depth = 1
     format = query_parameters.get('format','text')
     match = query_parameters.get('match','full')
 
@@ -1037,6 +1121,8 @@ def map_across_species():
 
     response.mimetype = "text/plain"
 
+    logging.info("map_across_species response length %d" % len(output))
+
     return response
 
 
@@ -1054,10 +1140,16 @@ def align_chains():
     output = "Making progress"
 
     try:
+        # output = "Just before importing"
+        # return output
         from align_chains import align_chains as a_c
     except Exception as inst:
         output = "%s" % inst
         return output
+
+
+    # output = "Just after importing"
+    # return output
 
     query_parameters = request.args
 
@@ -1072,9 +1164,74 @@ def align_chains():
             output += 'Invalid chains %s\n' % chains
             problem = True
 
+    # output = "Just before running a_c"
+    # return output
+
     if not problem:
         try:
-            output = a_c(chains.split(","))
+            output,result_list = a_c(chains.split(","))
+
+        except Exception as e:
+            exception_type, exception_object, exception_traceback = sys.exc_info()
+            line_number = exception_traceback.tb_lineno
+            output += "\nSomething went wrong with this request on line %s with error type %s\n" % (line_number,exception_type)
+            output += "%s\n" % type(e)
+            output += "%s\n" % exception_traceback
+            #output += "%s\n" % inst.args
+            output += "%s\n" % e
+            problem = True
+
+    if problem:
+        response = make_response(output, 400)
+    else:
+        response = make_response(output, 200)
+
+    response.mimetype = "text/plain"
+
+    return response
+
+
+@app.route('/nucleotide_annotation')
+def nucleotide_annotation():
+
+    # return a list of unit ids and individual annotations
+
+    # http://rna.bgsu.edu/correspondence/nucleotide_annotation?chain=8B0X|1|A
+    # http://rna.bgsu.edu/correspondence/nucleotide_annotation?chain=7K00|1|a
+    # http://rna.bgsu.edu/correspondence/nucleotide_annotation?chain=
+    # http://rna.bgsu.edu/correspondence/nucleotide_annotation?chain=
+
+    output = "Making progress"
+
+    try:
+        from nucleotide_annotation import annotate_chain
+    except Exception as inst:
+        output = "%s" % inst
+        return output
+
+
+    # output = "Just after importing"
+    # return output
+
+    query_parameters = request.args
+
+    chain = query_parameters.get('chain').replace("'","")
+
+    output = "Specify one chain, for example, 5J7L|1|AA\n"
+    problem = False
+
+    if chain:
+        output += 'New request made for chains %s\n' % (chain)
+        if not "|" in chain:
+            output += 'Invalid chains %s\n' % chain
+            problem = True
+
+    # output = "Just before running a_c"
+    # return output
+
+    if not problem:
+        try:
+            output,result_list = annotate_chain(chain)
 
         except Exception as e:
             exception_type, exception_object, exception_traceback = sys.exc_info()
@@ -1158,9 +1315,9 @@ def basepair_bar_diagram():
         # python problem with matplotlib prevents us from running this directly
 
         # run from command line
-        command = 'export MPLBACKEND=agg; python /var/www/correspondence/basepair_bar_diagram.py "%s" "%s"' % (chains[0],chains[1])
-        command = 'python /var/www/correspondence/basepair_bar_diagram.py "%s" "%s" --output "%s"' % (chains[0],chains[1],path_filename)
-        command = 'python /var/www/correspondence/basepair_bar_diagram.py "%s" "%s" --output "%s" --pairs "%s" > /var/www/correspondence/bbd.txt' % (chains[0],chains[1],path_filename,pairs_file)
+        # command = 'export MPLBACKEND=agg; python /var/www/correspondence/basepair_bar_diagram.py "%s" "%s"' % (chains[0],chains[1])
+        # command = 'python /var/www/correspondence/basepair_bar_diagram.py "%s" "%s" --output "%s"' % (chains[0],chains[1],path_filename)
+        command = '/usr/bin/python /var/www/correspondence/basepair_bar_diagram.py "%s" "%s" --output "%s" --pairs "%s" > /var/www/correspondence/bbd.txt' % (chains[0],chains[1],path_filename,pairs_file)
         # command = '/opt/rh/python27/root/usr/bin/python /var/www/correspondence/basepair_bar_diagram.py "%s" "%s" --output "%s" --pairs "%s" > /var/www/correspondence/bbd.txt' % (chains[0],chains[1],path_filename,pairs_file)
 
         # command = '/opt/rh/python27/root/usr/bin/python /var/www/correspondence/basepair_bar_diagram_mock.py > /var/www/correspondence/bbd.txt'
@@ -1172,16 +1329,23 @@ def basepair_bar_diagram():
         #os.system('touch %s' % path_filename)
         #os.system('export MPLBACKEND=agg')
         try:
-            # os.environ['MPLBACKEND'] = 'agg'
-            # os.environ['MPLCONFIGDIR'] = '/var/www/correspondence/basepair_bar_diagrams'
-            # os.environ['LANG'] = 'en_US.UTF-8'    # why would this work?
-            # os.environ['LC_ALL'] = 'en_US.UTF-8'
-            # from basepair_bar_diagram import basepair_bar_diagram
-            # basepair_bar_diagram(chains,filename,pairs_file)
+            # sometimes these four lines are needed, sometimes not.  Added back in 2024-02-22.
+            os.environ['MPLBACKEND'] = 'agg'
+            os.environ['MPLCONFIGDIR'] = '/var/www/correspondence/basepair_bar_diagrams'
+            os.environ['LANG'] = 'en_US.UTF-8'    # why would this work?
+            os.environ['LC_ALL'] = 'en_US.UTF-8'
 
             os.system(command)
+            # return "Ran command: " + command
         except Exception as e:
             return str(e) + " but we tried this command here: " + " " + command
+
+    if not os.path.exists(path_filename):
+        # try, try again
+        os.system(command)
+
+    if not os.path.exists(path_filename):
+        return "We tried twice to run this command: " + " " + command + " " + "but the output file was not created."
 
     try:
         #return send_file(pdf_file, attachment_filename=filename+".pdf")  # wrong download name
@@ -1192,33 +1356,71 @@ def basepair_bar_diagram():
 
 @app.route('/circular')
 def circular_diagram():
+    """
+    Examples
+    http://rna.bgsu.edu/correspondence/circular?chains=5J7L|1|AA
+    """
+
+    #return "The circular diagram route is temporarily unavailable, as of 2024-03-08. Please try again later."
 
     from flask import send_file
     import os
-    import circular_diagram_14
+    import circular_diagram_16
 
     query_parameters = request.args
 
     chains_string = str(query_parameters.get('chains',default='',type=str))
+    hs = str(query_parameters.get('hs',default='5',type=str))
+    try:
+        hs = int(hs)
+    except:
+        hs = 5
+    dim = str(query_parameters.get('dim',default='',type=str))
+    hide = str(query_parameters.get('hide',default='',type=str))
+    text = str(query_parameters.get('text',default='all',type=str))
+    color = str(query_parameters.get('color',default='default',type=str))
+    hn = str(query_parameters.get('hn',default=False,type=str))
+    if hn.lower() == "true":
+        hn = True
+    elif hn.lower() == "false":
+        hn = False
+    n3d = str(query_parameters.get('n3d',default=True,type=str))
+    if n3d.lower() == "true":
+        n3d = True
+    elif n3d.lower() == "false":
+        n3d = False
+    #  = str(query_parameters.get('',default='',type=str))
+    #  = str(query_parameters.get('',default='',type=str))
+    #  = str(query_parameters.get('',default='',type=str))
+    #  = str(query_parameters.get('',default='',type=str))
+    #  = str(query_parameters.get('',default='',type=str))
+
+
+    output_path = '/var/www/correspondence/circular_diagram_pdf'
 
     try:
-        filename = ""
-        filename = circular_diagram_14.main([None,chains_string])
-        iii = 3
+        filename_ps = circular_diagram_16.main(chains_string, output_path, helix_size=hs, coloring=color, dim=dim, hide=hide, text=text, show_helix_number=hn, show_nucleotides_with_no_3D_interactions=n3d)
     except Exception as e:
-        return str(e)
+        exception_type, exception_object, exception_traceback = sys.exc_info()
+        line_number = exception_traceback.tb_lineno
+        output = ""
+        output += "\nSomething went wrong with this request on line %s with error type %s\n" % (line_number,exception_type)
+        output += "%s\n" % type(e)
+        output += "%s\n" % exception_traceback
+        #output += "%s\n" % inst.args
+        output += "%s\n" % e
+        return output
 
-    # return 'Trying to create the circular diagram for %s' % (chains_string)
+    filename_pdf = filename_ps.replace(".ps",".pdf")
 
+    ps_file  = os.path.join('/var/www/correspondence/circular_diagram_pdf',filename_ps)
+    pdf_file = os.path.join('/var/www/correspondence/circular_diagram_pdf',filename_pdf)
 
-    ps_file  = os.path.join('/var/www/correspondence/circular_diagram_pdf',filename+".ps")
-    pdf_file = os.path.join('/var/www/correspondence/circular_diagram_pdf',filename+".pdf")
-
-    os.remove(ps_file)
+    # os.remove(ps_file)
 
     try:
         #return send_file(pdf_file, attachment_filename=filename+".pdf")  # wrong download name
-        return send_file(pdf_file, attachment_filename=filename+".pdf", as_attachment=True)  # instant download
+        return send_file(pdf_file, attachment_filename=filename_pdf, as_attachment=True)  # instant download
 
         #response = send_file(pdf_file, attachment_filename = filename+".pdf")
         #response.headers["x-suggested-filename"] = filename+".pdf"
@@ -1226,6 +1428,38 @@ def circular_diagram():
         #return response
     except Exception as e:
         return str(e)
+
+# Handle errors of different types
+@app.errorhandler(301)
+def error_301(error):
+    return render_template('error.html'),301
+@app.errorhandler(302)
+def error_302(error):
+    return render_template('error.html'),302
+@app.errorhandler(400)
+def not_found_error(error):
+    return render_template('error.html'),400
+@app.errorhandler(403)
+def error_403(error):
+    return render_template('error.html'),403
+@app.errorhandler(404)
+def error_404(error):
+    return render_template('error.html'),404
+@app.errorhandler(429)
+def error_429(error):
+    return render_template('error.html'),429
+@app.errorhandler(500)
+def internal_error(error):
+    return render_template('error.html'),500
+@app.errorhandler(502)
+def error_502(error):
+    return render_template('error.html'),502
+@app.errorhandler(503)
+def error_503(error):
+    return render_template('error.html'),503
+@app.errorhandler(504)
+def error_504(error):
+    return render_template('error.html'),504
 
 
 if __name__ == '__main__':
