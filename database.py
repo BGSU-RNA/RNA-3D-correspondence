@@ -4,16 +4,18 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 from contextlib import contextmanager
 
 '''
-# you would need to change the username & password
-SQLALCHEMY_DATABASE_URL = "mysql://sria:sria@127.0.0.1/rna3dhub-next"
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
-
 session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-Base = declarative_base()
 '''
 
-engine = create_engine('mysql://sria:sria@127.0.0.1/rna3dhub-next', convert_unicode=True, echo=False)
+with open("/usr/local/pipeline/flask.config","r") as f:
+	t = f.readlines()
+
+database_connection_string = t[0].replace("\n","")
+
+# pool_pre_ping=True was tried but did not work. it would be used to check the connection before using it; maybe that will reduce Internal Service Errors
+
+engine = create_engine(database_connection_string, convert_unicode=True, echo=False)
 Base = declarative_base()
 Base.metadata.reflect(engine)
 
