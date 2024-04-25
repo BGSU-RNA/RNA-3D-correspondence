@@ -89,27 +89,27 @@
 
         <p align="justify" class="lead">
           The RNA 3D Motif Sequence Variability Server maps the given nucleotides to columns of a
-          multiple sequence alignment and returns sequence variants in a variety of formats. 
-	  This makes it possible to see how the sequence of a 3D motif varies across many species, 
-	  including ones for which we do not have a 3D structure.  R3D SVS can be used to study the 
-          sequence variability of individual nucleotides, base paired nucleotides, or small motifs.  
+          multiple sequence alignment and returns sequence variants in a variety of formats.
+	  This makes it possible to see how the sequence of a 3D motif varies across many species,
+	  including ones for which we do not have a 3D structure.  R3D SVS can be used to study the
+          sequence variability of individual nucleotides, base paired nucleotides, or small motifs.
         </p>
         <p>This site is under construction as of November 2023</p>
       </div>
-	
-   
+
+
 	<div class="row">
 
        <div class="col-sm-6" style="width:50%;float:left;">
         <form class="form-horizontal" id="generateMotifSequenceVariabilityServer">
-	
+
 
             <!-- <label for="selection">Enter ID &nbsp</label><span id="popup-icon" class="fa fa-question-circle" aria-hidden="true"></span> -->
             <label for="id">Enter unit id(s)/loop id(s) &nbsp</label>
             <!-- <i class="fa fa-question-circle" aria-hidden="true"></i> -->
             <input type="text" class="form-control" id="id" name="id" value="IL_4V9F_007">
             </br>
-	    
+
             <label for="format">Choose output format </label>
             <select class="form-control" id="format" name="format">
                 <option value="full" selected>full (all sequences, species, identifiers)</option>
@@ -129,7 +129,7 @@
             <option value="top_80_percent">top_80_percent</option>
         </select>
 	<div id="selectedCount"></div>
-        </br>               
+        </br>
             <label for="extension">Choose extension (beyond the specified loop limits)</label>
             <select class="form-control" id="extension" name="extension">
                 <option value="0" selected>0</option>
@@ -139,14 +139,14 @@
             </select>
             </br>
 
-            <label for="source">Select Source (choose from A,B,C,E,M,V,U. Can choose multiple sources and separate them with commas) &nbsp</label>            
+            <label for="source">Select Source (choose from A,B,C,E,M,V,U. Can choose multiple sources and separate them with commas) &nbsp</label>
             <input type="text" class="form-control" id="source" name="source" oninput="replaceSpecialCharacters(this)">
             <div id="selectedItems">
             </div>
             </br>
-    
 
-	    <label for="datasource">Choose data source </label>
+
+	          <label for="datasource">Choose data source </label>
             <select class="form-control" id="datasource" name="datasource">
                 <option value="Rfam" selected>Rfam </option>
                 <option value="PDB">PDB</option>
@@ -164,17 +164,27 @@
             <div class="card">
               <div class="card-body">
                 <h5 class="card-title">Examples</h5>
-		<p>Several APIs are available, where one can input unit ids or loop ids or chain ids and get back useful information.<a href="https://www.bgsu.edu/research/rna/APIs.html" target="_blank">RNA APIs</a></p>
-                <p><a href="http://rna.bgsu.edu/correspondence/SVS?id=7EVO%7C1%7CH%7CU%7C32&format=unique&input_form=True" target="_blank">Example 1</a><br>Watson-Crick-Franklin basepair from the spliceosome.  Only the unique sequences will be shown.They are usually U*A but sometimes U*U</br><a href="http://rna.bgsu.edu/rna3dhub/display3D/unitid/7EVO%7C1%7CH%7CU%7C32,7EVO%7C1%7CH%7CA%7C38" target="_blank">Visualize the coordinate at this link</a></p>
-                <p><a href="http://rna.bgsu.edu/correspondence/SVS?id=8B0X|1|a|C|418&format=full&count=multiplicity_5_or_more&source=B&input_form=True" target="_blank">Example 2</a><br>E. coli has GC basepair, other bacteria have AU or UA or CG<br><a href="http://rna.bgsu.edu/rna3dhub/display3D/unitid/8B0X%7C1%7Ca%7CG%7C409,8B0X%7C1%7Ca%7CC%7C418,8B0X%7C1%7Ca%7CA%7C226" target="_blank">Visualize the coordinates at this link</p>
-		<p><a href="http://rna.bgsu.edu/correspondence/SVS?id=HL_4V9F_001&format=unique&count=multiplicity_5_or_more&input_form=True" target="_blank">Example 3</a><br>Hairpin loop from Helix 95 of archaeal LSU in fasta format<br><a href="http://rna.bgsu.edu/rna3dhub/loops/view/HL_4V9F_066" target="_blank">Visualize the cordinates at this link</p>
-                <p><a href ="http://rna.bgsu.edu/correspondence/SVS?id=IL_8GLP_067&format=unique&input_form=True" target="_blank">Example 4</a><br>Eukaryotic internal loop with intercalated nucleotide<br><a href="http://rna.bgsu.edu/rna3dhub/loops/view/IL_8GLP_067" target="_blank">Visualize the coordinates at this link</p>
+                <p><a href="http://rna.bgsu.edu/correspondence/SVS?id=7EVO%7C1%7CH%7CU%7C32&format=unique&input_form=True">Example 1</a><br>
+                Watson-Crick-Franklin basepair from the spliceosome.  Only the unique sequences will be shown. They are usually U*A but sometimes U*U.</br>
+                <a href="http://rna.bgsu.edu/rna3dhub/display3D/unitid/7EVO%7C1%7CH%7CU%7C32,7EVO%7C1%7CH%7CA%7C38" target="_blank">Visualize the coordinates at this link</a></p>
+                <p><a href="http://rna.bgsu.edu/correspondence/SVS?id=8B0X|1|a|C|418&format=full&count=multiplicity_5_or_more&source=B&input_form=True">Example 2</a><br>
+                E. coli has GC basepair, other bacteria have AU or UA or CG.<br>
+                <a href="http://rna.bgsu.edu/rna3dhub/display3D/unitid/8B0X%7C1%7Ca%7CG%7C409,8B0X%7C1%7Ca%7CC%7C418,8B0X%7C1%7Ca%7CA%7C226" target="_blank">Visualize the coordinates at this link</a></p>
+            		<p><a href="http://rna.bgsu.edu/correspondence/SVS?id=HL_4V9F_001&format=unique&count=multiplicity_5_or_more&input_form=True">Example 3</a><br>
+                Hairpin loop from Helix 95 of archaeal LSU in fasta format.<br>
+                <a href="http://rna.bgsu.edu/rna3dhub/loops/view/HL_4V9F_066" target="_blank">Visualize the cordinates at this link</a></p>
+                <p><a href ="http://rna.bgsu.edu/correspondence/SVS?id=IL_8GLP_067&format=unique&input_form=True">Example 4</a><br>
+                Eukaryotic internal loop with intercalated nucleotide.<br>
+                <a href="http://rna.bgsu.edu/rna3dhub/loops/view/IL_8GLP_067" target="_blank">Visualize the coordinates at this link</a></p>
+                <p>In addition to R3D SVS, several other APIs are available, where one can input unit ids or loop ids or chain ids and get back useful information.
+                <a href="https://www.bgsu.edu/research/rna/APIs.html" target="_blank">RNA APIs</a></p>
+
               </div>
             </div>
           </div>
       </div>
-     
-    
+
+
 
       </div>
       <hr>
@@ -217,7 +227,7 @@
             if (inputParameters.hasOwnProperty('source')) {
                 select5.value = inputParameters['source'];
             }
-            
+
             if (inputParameters.hasOwnProperty('datasource')) {
                 select6.value = inputParameters['datasource'];
             }
@@ -291,10 +301,10 @@
         const source = document.getElementById("source").value;
         // const codon = document.getElementById("codon").value;
 	const datasource = document.getElementById("datasource").value;
-        
+
         if (count === "none") {
         	// Construct the URL with extension and count
-        	const url = `http://rna.bgsu.edu/correspondence/variability?id=${encodeURIComponent(id)}&format=${encodeURIComponent(format)}&extension=${encodeURIComponent(extension)}&source=${encodeURIComponent(source)}&datasource=${encodeURIComponent(datasource)}`;        	
+        	const url = `http://rna.bgsu.edu/correspondence/variability?id=${encodeURIComponent(id)}&format=${encodeURIComponent(format)}&extension=${encodeURIComponent(extension)}&source=${encodeURIComponent(source)}&datasource=${encodeURIComponent(datasource)}`;
 		window.location.href = url;
        	} else if (extension === "0") {
 		const url = `http://rna.bgsu.edu/correspondence/variability?id=${encodeURIComponent(id)}&format=${encodeURIComponent(format)}&count=${encodeURIComponent(count)}&source=${encodeURIComponent(source)}&datasource=${encodeURIComponent(datasource)}`;
@@ -303,7 +313,7 @@
 		const url = `http://rna.bgsu.edu/correspondence/variability?id=${encodeURIComponent(id)}&format=${encodeURIComponent(format)}&count=${encodeURIComponent(count)}&extension=${encodeURIComponent(extension)}&source=${encodeURIComponent(source)}&datasource=${encodeURIComponent(datasource)}`;
 		window.location.href = url;
 	}
-	
+
         //const url = `http://rna.bgsu.edu/correspondence/variability?id=${encodeURIComponent(id)}&format=${encodeURIComponent(format)}&count=${encodeURIComponent(count)}&extension=${encodeURIComponent(extension)}&source=${encodeURIComponent(source)}&datasource=${encodeURIComponent(datasource)}`;
         //window.location.href = url;
 
@@ -317,7 +327,7 @@
           hideLoading();
         }
       });
-   
+
       // To display the text box when the other option is selected from the count drop down
       function enableEditCount() {
                 var countSelect = document.getElementById('count');
@@ -331,7 +341,7 @@
                         if (editedValue !== null) {
                             // Update the countSelect option text with the edited numeric part
                             countSelect.options[countSelect.selectedIndex].text = countSelect.value.replace(/\d+/, editedValue);
-			    
+
           		   // Construct the URL with the edited count restriction value
           		   var editedCountValue = countSelect.value.replace(/\d+/, editedValue);
           		   updateURLWithCountRestriction(editedCountValue);
@@ -340,14 +350,14 @@
                 }
             }
 
-	
+
 
 	function replaceSpecialCharacters(nputElement) {
             var inputElement = document.getElementById('domain');
             var errorElement = document.getElementById('error-message');
             var selectedItemsElement = document.getElementById('selectedItems');
 
-	    
+
             // Remove any non-allowed characters
             var cleanedValue = inputElement.value.replace(/[^A,B,C,E,M,V,U,]/g, '');
 
@@ -385,10 +395,10 @@
        document.getElementById("loading").style.display = "inline";
    }
 
-			
-	
-	        
- 
+
+
+
+
     </script>
   </body>
 </html>
