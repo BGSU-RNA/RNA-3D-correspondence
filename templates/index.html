@@ -28,15 +28,6 @@
             <li class="nav-item">
               <a class="nav-link" href="https://www.bgsu.edu/research/rna/APIs.html" target="_blank">APIs</a>
             </li>
-            <!-- <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Download
-              </a>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="#">Pairwise annotation</a></li>
-                <li><a class="dropdown-item" href="#">Sequence conservation</a></li>
-              </ul>
-            </li> -->
           </ul>
         </div>
       </div>
@@ -52,10 +43,11 @@
       </div>
 
       <div class="row">
+        <div class="col-sm-6" style="width:50%;float:left;">
 
         <form class="form-horizontal col-sm-12" id="generateCorrespondence">
 
-          <div class="form-group col-sm-4">
+          <!-- <div class="form-group col-sm-4"> -->
 
             <label for="selection">Enter PDB ID (optional)</label>
             <input type="text" class="form-control" id="pdb" name="pdb">
@@ -64,7 +56,7 @@
             <label for="selection">Enter Chain ID (optional)</label>
             <input type="text" class="form-control" id="chain" name="chain">
             </br>
-            
+
             <!-- <label for="selection">Enter selection &nbsp</label><span id="popup-icon" class="fa fa-question-circle" aria-hidden="true"></span> -->
             <label for="selection">Enter Selection &nbsp</label>
             <!-- <i class="fa fa-question-circle" aria-hidden="true"></i> -->
@@ -72,9 +64,9 @@
             </br>
 
             <label for="correspondence_type">Choose Correspondence Type</label>
-            <select class="form-control" id="correspondence-type" name="corr_type">
-                <option value="EC">Same species</option>
-                <option value="Rfam">Different species</option>
+            <select class="form-control" id="scope" name="scope">
+                <option value="EC">Same species; EC</option>
+                <option value="Rfam">Different species; Rfam</option>
             </select>
             </br>
 
@@ -84,16 +76,15 @@
               </br>
             </div>
 
-            <label for="structure-resolution">Choose Resolution (<span>&#8491;</span>) Threshold</label>
+            <label for="structure-resolution">Choose Resolution Threshold</label>
             <select class="form-control" id="structure-resolution" name="resolution">
-                <option value="all">all</option>
-                <option value="20.0">20.0</option>
                 <option value="4.0" selected>4.0</option>
                 <option value="3.5">3.5</option>
                 <option value="3.0">3.0</option>
                 <option value="2.5">2.5</option>
                 <option value="2.0">2.0</option>
                 <option value="1.5">1.5</option>
+                <option value="all">all</option>
             </select>
             </br>
 
@@ -105,12 +96,38 @@
             </select>
             </br>
 
+            <label for="exclusion">PDB identifiers to exclude, separated by commas</label>
+            <input type="text" class="form-control" id="exclude" name="exclude" value="">
+            </br>
+
             <button type="submit" id="submit_test" class="btn btn-primary" >Submit</button>
             <button type="button" id="clear_form" class="btn btn-light" onclick="clearForm()">Clear</button>
             <span id="loading" style="display: none;"><i class="fa fa-spinner fa-spin"></i> Loading... </span>
           </div>
-        </form>    
+        </form>
 
+        <div class="col-sm-6" style="width:50%;float:right;">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Examples</h5>
+              <p><a href="http://rna.bgsu.edu/correspondence/comparison?selection=IL_5J7L_060&exp_method=all&resolution=3.0&scope=EC&input_form=True">Example 1</a>
+              <br>Decoding loop across E. coli small subunit ribosomal RNA 3D structures at 3.0A resolution or better. This example illustrates the dynamic nature of the decoding loop.
+              </p>
+
+              <p><a href="http://rna.bgsu.edu/correspondence/comparison?selection=IL_5AJ3_023&exp_method=all&resolution=4.0&depth=1&scope=Rfam&input_form=True">Example 2</a>
+              <br>Internal loop from the small subunit ribosomal RNA helix 27, compared across species in the associated Rfam family at resolution 4.0A or better, and including just one instance from each species.
+              </p>
+
+              <p><a href="http://rna.bgsu.edu/correspondence/comparison?pdb=null&chain=null&selection=HL_8GLP_022&exp_method=all&resolution=4.0&depth=3&scope=Rfam&input_form=True">Example 3</a>
+              <br>GNRA hairpin loop from Helix 34 of the large subunit ribosomal RNA, compared across different species in the associated Rfam family solved at resolution 4.0A or better, with up to 3 instances from each species.  This example illustrates how some structures (in this case, the models of <i>Triticum aestivum</i>) model the top adenine base of the GNRA in syn while others model that base in anti. Other variability is also evident.
+              </p>
+
+              <p>In addition to R3D MCS, several other APIs are available, where one can input unit ids or loop ids or chain ids and get back useful information.
+              <a href="https://www.bgsu.edu/research/rna/APIs.html" target="_blank">RNA APIs</a></p>
+
+            </div>
+          </div>
+        </div>
       </div>
       <hr>
     </div>
@@ -120,11 +137,55 @@
 
     <script type="text/javascript">
 
+      function disableSubmitButton() {
+        var submitButton = document.getElementById("submit_test");
+        submitButton.disabled = true;
+        setTimeout(function() {
+            submitButton.disabled = false;
+        }, 2000);
+      }
+
+      window.onload = function () {
+        disableSubmitButton();
+        var object = JSON.parse('{{ input_parameters|tojson|safe }}');
+        console.log(object)
+        // Check if the object is not empty and present
+        if (object && Object.keys(object).length > 0) {
+          const form = document.getElementById('generateCorrespondence');
+
+          for (const key in object) {
+            if (object.hasOwnProperty(key)) {
+              const value = object[key];
+
+              const inputs = form.querySelectorAll(`[name="${key}"]`);
+
+              if (inputs.length > 0) {
+                // Loop through all matching input elements (in case of radio buttons or multiple elements with the same name)
+                inputs.forEach((input) => {
+                  if (input.type === 'checkbox') {
+                    input.checked = value;
+                  } else {
+                    input.value = value;
+                  }
+
+                  // If the key is 'depth' and it's not null or undefined, make the hidden element visible and update its value
+                  if (key === 'depth' && value !== null && value !== undefined) {
+                    const depthInputContainer = document.getElementById('depth-input-container');
+                    depthInputContainer.style.display = 'block';
+                    const depthInput = depthInputContainer.querySelector('[name="depth"]');
+                    depthInput.value = value;
+                  }
+                });
+              }
+            }
+          }
+        }
+      }
+
       function showLoading() {
         document.getElementById("loading").style.display = "inline";
       }
 
-      // Function to hide the loading message
       function hideLoading() {
         document.getElementById("loading").style.display = "none";
       }
@@ -144,11 +205,11 @@
       // Function to set depth value based on scope and user input
       function getDepthValue(scope, userInputDepth) {
         if (scope === "EC") {
-          return null; // If scope is "EC", set depth to null
+          return null;
         } else if (scope === "Rfam") {
-          return userInputDepth ? userInputDepth : 1; // If scope is "Rfam" and userInputDepth is not provided, use 1 as default
+          return userInputDepth ? userInputDepth : 1;
         } else {
-          return userInputDepth ? userInputDepth : null; // For other cases, use userInputDepth if provided, else set depth to null
+          return userInputDepth ? userInputDepth : null;
         }
       }
 
@@ -158,7 +219,7 @@
         return commaSeparatedString;
       };
 
-      document.getElementById('correspondence-type').addEventListener('change', function() {
+      document.getElementById('scope').addEventListener('change', function() {
         var depthInputContainer = document.getElementById('depth-input-container');
         var correspondenceTypeValue = this.value;
 
@@ -173,8 +234,6 @@
       document.getElementById("generateCorrespondence").addEventListener("submit", function(event) {
         event.preventDefault(); // Prevent form submission
 
-        // showLoading(); // Show loading message
-        
         // Retrieve form values
         const pdbInput = document.getElementById("pdb").value;
         const chainInput = document.getElementById("chain").value;
@@ -185,22 +244,40 @@
         const formatted_selection = convertToCommaSeparated(selection)
         const exp_method = document.getElementById("experimental-method").value;
         const resolution = document.getElementById("structure-resolution").value;
-        const scope = document.getElementById("correspondence-type").value;
-        
+
+        const scope = document.getElementById("scope").value;
         const userInputDepth = document.getElementById("depth").value;
         // Get the depth value based on the selected scope and user input
         const species_depth = getDepthValue(scope, userInputDepth);
 
-        // const url = `http://rna.bgsu.edu/correspondence/comparison?pdb=${encodeURIComponent(pdb)}&chain=${encodeURIComponent(chain)}&selection=${encodeURIComponent(formatted_selection)}&exp_method=${encodeURIComponent(exp_method)}&resolution=${encodeURIComponent(resolution)}&depth=${encodeURIComponent(species_depth)}&scope=${encodeURIComponent(scope)}`;
-        // window.location.href = url;
+        const excl = document.getElementById("exclude").value;
+        const exclude = convertToCommaSeparated(excl);
+
 
         if (selection.trim() !== "") {
-          showLoading(); // Show loading message only if selection is not empty
+          showLoading();
 
-          const url = `http://rna.bgsu.edu/correspondence/comparison?pdb=${encodeURIComponent(pdb)}&chain=${encodeURIComponent(chain)}&selection=${encodeURIComponent(formatted_selection)}&exp_method=${encodeURIComponent(exp_method)}&resolution=${encodeURIComponent(resolution)}&depth=${encodeURIComponent(species_depth)}&scope=${encodeURIComponent(scope)}`;
+          // const url = `http://rna.bgsu.edu/correspondence/comparison?pdb=${encodeURIComponent(pdb)}&chain=${encodeURIComponent(chain)}&selection=${encodeURIComponent(formatted_selection)}&exp_method=${encodeURIComponent(exp_method)}&resolution=${encodeURIComponent(resolution)}&depth=${encodeURIComponent(species_depth)}&scope=${encodeURIComponent(scope)}`;
+          // const url = `http://rna.bgsu.edu/correspondence/comparison?pdb=${encodeURIComponent(pdb)}&chain=${encodeURIComponent(chain)}&selection=${encodeURIComponent(formatted_selection)}&exp_method=${encodeURIComponent(exp_method)}&resolution=${encodeURIComponent(resolution)}&depth=${encodeURIComponent(species_depth)}&scope=${encodeURIComponent(scope)}&exclude=${encodeURIComponent(exclude)}`;
+
+          var url = `http://rna.bgsu.edu/correspondence/comparison?`;
+          if (pdb) {
+            url += `pdb=${encodeURIComponent(pdb)}&`;
+          }
+          if (chain) {
+            url += `chain=${encodeURIComponent(chain)}&`;
+          }
+          url += `selection=${encodeURIComponent(formatted_selection)}&exp_method=${encodeURIComponent(exp_method)}&resolution=${encodeURIComponent(resolution)}&scope=${encodeURIComponent(scope)}&`;
+          if (species_depth) {
+            url += `depth=${encodeURIComponent(species_depth)}&`;
+          }
+          if (exclude) {
+            url += `exclude=${encodeURIComponent(exclude)}&`;
+          }
+
           window.location.href = url;
         } else {
-          hideLoading(); // Hide loading message if selection is empty
+          hideLoading();
         }
 
       });
