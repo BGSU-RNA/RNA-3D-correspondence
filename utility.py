@@ -1,23 +1,35 @@
 from __future__ import division
 from collections import OrderedDict, defaultdict
-from discrepancy import matrix_discrepancy, relative_discrepancy
-import numpy as np
-# import pandas as pd
-#from ordering import optimalLeafOrder
 import io
 import itertools
-import re
-from ordering_similarity import treePenalizedPathLength
+import logging
 import math
-from operator import itemgetter
+import numpy as np
+import re
 import requests
+
+from discrepancy import matrix_discrepancy, relative_discrepancy
+from ordering_similarity import treePenalizedPathLength
+
+# import pandas as pd
+#from ordering import optimalLeafOrder
+# from operator import itemgetter
+
 
 EXCLUDE_LIST = ['No alignment', 'Not resolved', 'No chain']
 
 def filter_exclude_ids(data, exclude_str):
-    exclude_list = exclude_str.split(",")
-    exclude_list = [item.lower() for item in exclude_list]
-    return [item for item in data if item[0].lower() not in exclude_list]
+    """
+    data is pairs like (u'4YBB', u'AA')
+    """
+    exclude_list = exclude_str.lower().split(",")
+    keep_data = []
+    logging.info("utility: Exclude string: %s" % exclude_str)
+    # logging.info("data %s" % str(data))
+    for item in data:
+        if item[0].lower() not in exclude_list:
+            keep_data.append(item)
+    return keep_data
 
 def check_valid_single_chain_query(units):
     all_chains = [unit.split("|")[2] for unit in units]
@@ -130,6 +142,9 @@ def get_correspondence_across_species(param_dict):
             equivalence_class_dict[entry["rfam_EC_chain"][0][2]] = entry["rfam_EC_chain"][0][1]
 
         correspondence_list = [sublist for sublist in correspondence_list if not any(x in sublist for x in EXCLUDE_LIST)]
+
+        logging.info("utility: get_corr_across_species: Correspondence list length: %s" % len(correspondence_list))
+
         return query_info, equivalence_class_dict, correspondence_list
     else:
         return None, None, None
@@ -172,7 +187,7 @@ def get_sequence_variability(query_units_string):
     data = response.text
     lines = list(io.StringIO(data, newline=''))
     lines = lines[2:]
-    
+
     count_dict = {}
     for line in lines:
         test = re.split(r'\t+', line)
@@ -182,7 +197,7 @@ def get_sequence_variability(query_units_string):
 
     count_dict = [(str(k),int(v)) for k,v in count_dict.iteritems() if "-" not in k]
     return sorted(count_dict, key=lambda x: x[1], reverse=True)
-    
+
 def format_correspondence_display(corr):
 
 	display_str = ""
@@ -217,7 +232,7 @@ def check_missing_correspondence(data, query_length):
     # most_common_len = max(correspondence_lengths, key = correspondence_lengths.count)
 
     # missing_correspondence = [ife for ife, units in corr_complete.iteritems() if len(units) != query_length]
-  
+
     # for ife, correspondence in corr_std.iteritems():
     #     if len(correspondence) != most_common_len:
     #         missing_correspondence.append(ife)
@@ -236,7 +251,7 @@ def check_missing_correspondence_new(corr_complete, corr_std, chain):
     most_common_len = max(correspondence_lengths, key = correspondence_lengths.count)
 
     entries_to_remove = []
-  
+
     for ife, correspondence in corr_std.iteritems():
         if len(correspondence) != most_common_len:
             entries_to_remove.append(ife)
@@ -257,7 +272,7 @@ def order_data(rot, ctr):
       if set(rot_keys) == set(ctr_keys):
             common_keys = rot_keys
       else:
-            common_keys = list(set(rot_keys).intersection(ctr_keys))  
+            common_keys = list(set(rot_keys).intersection(ctr_keys))
 
       rotation_ordered = [rot.get(k) for k in common_keys]
       center_ordered = [ctr.get(k) for k in common_keys]
@@ -271,7 +286,7 @@ def order_data(rot, ctr):
     #       rotation_ordered, center_ordered, common_keys = remove_instances_with_missing_data(common_keys, rotation_ordered, center_ordered, missing_data)
       #for k in common_keys:
           #rotation_ordered_dict[k] = rot.get(k)
-    
+
       return rotation_ordered, center_ordered, common_keys, None
 
 
@@ -313,25 +328,34 @@ def calculate_relative_disc(ife_list, center_data, core_len, query_len):
             except:
                 distances[ife_list[a]][ife_list[b]] = None
 
-    return distances 
+    return distances
 
 
 def calculate_geometric_disc(ife_list, rotation_data, center_data):
     distances = defaultdict(lambda: defaultdict(int))
 
     for a in range(0, len(ife_list)):
+        # distance 0 on the diagonal
+        distances[ife_list[a]][ife_list[a]] = 0.0
         for b in range(a + 1, len(ife_list)):
             try:
                 disc = matrix_discrepancy(center_data[a], rotation_data[a], center_data[b],
                                         rotation_data[b])
+                if disc < 0:
+                    disc = None
+
+                # store discrepancies in both directions
                 distances[ife_list[a]][ife_list[b]] = disc
+                distances[ife_list[b]][ife_list[a]] = disc
             except:
+                # store discrepancies in both directions
                 distances[ife_list[a]][ife_list[b]] = None
+                distances[ife_list[b]][ife_list[a]] = None
 
-    return distances 
+    return distances
 
-      
-      
+
+
 def order_similarity(ife_list, distances):
     '''
     Calculates the order by similarity between the instances
@@ -350,7 +374,8 @@ def order_similarity(ife_list, distances):
         for index2, member2 in enumerate(ife_list):
             dist[index1, index2] = curr.get(member2, 0)
 
-    dist = (dist + np.swapaxes(dist, 0, 1))
+    # fill in symmetric values; no longer necessary
+    # dist = (dist + np.swapaxes(dist, 0, 1))
 
     # ordering, _, _ = orderWithPathLengthFromDistanceMatrix(dist, 10, scanForNan=True)
     #disc_order = optimalLeafOrder(dist)
@@ -368,7 +393,7 @@ def order_similarity(ife_list, distances):
         order_idx.append(idx)
 
     ifes_ordered = zip(order_idx, ordering)
-    ''' 
+    '''
 
     return ifes_ordered
 
@@ -381,7 +406,7 @@ def build_heatmap_data_new(distances, ifes_ordered):
         row_labels.append(member1[1])
         for member2 in ifes_ordered:
             ife1.append(member1[1])
-            ife2.append(member2[1]) 
+            ife2.append(member2[1])
 
     ife_pairs = zip(ife1, ife2)
 
@@ -396,11 +421,11 @@ def build_heatmap_data_new(distances, ifes_ordered):
     a = a.astype(np.float)
     max_disc = max(a)
 
-    # How many elements each 
-    # list should have 
+    # How many elements each
+    # list should have
     sublist_len = len(ifes_ordered)
-    
-    # using list comprehension 
+
+    # using list comprehension
     disc_list = [disc_formatted[i:i + sublist_len] for i in range(0, len(disc_formatted), sublist_len)]
 
     return disc_ordered, disc_list, row_labels
@@ -499,7 +524,7 @@ def build_heatmap_data_revised(distances, ifes_ordered):
 
 
 def build_coord_data(ifes_ordered, corr_data):
-  
+
   coord_ordered = OrderedDict()
 
   # what if the correspondence is not available? Is it possible?
@@ -510,7 +535,7 @@ def build_coord_data(ifes_ordered, corr_data):
     table_residue_rows.append(correspondence)
     correspondence = ','.join(correspondence)
     coord_ordered[ife[1]] = correspondence
-   
+
   return coord_ordered, table_residue_rows
 
 
@@ -536,7 +561,7 @@ def get_exp_method_name(exp_method):
 
     if exp_method.lower() == 'xray':
         return 'X-RAY DIFFRACTION'
-    elif exp_method.lower() == 'em': 
+    elif exp_method.lower() == 'em':
         return 'ELECTRON MICROSCOPY'
     else:
         return 'all'
@@ -573,7 +598,7 @@ def format_pairwise_interactions_display(corr_data, nt_pairs_positions, pairwise
         part_1 = '  '.join(corr_data[ife])
         part_2 = '  '.join(str(interaction) for interaction in interaction_data.values())
         display_str += part_1 + "   " + part_2 + " </br>"
-     
+
 
     return display_str, nt_pairs
 
@@ -600,7 +625,7 @@ def format_pairwise_interactions_single_display(pairwise_interactions, nt_pairs,
 
     display_str = ""
     display_str += header + " </br>"
-    display_str += row 
+    display_str += row
 
     return str(display_str)
 
@@ -619,7 +644,7 @@ def format_pairwise_interactions(data):
         for nt_pair in nt_pairs:
             interactions_dict[ife][nt_pair] = pairwise_data.get(ife, {}).get(nt_pair, "")
 
-    return (nt_pairs, interactions_dict)            
+    return (nt_pairs, interactions_dict)
 
 
 def get_chain_id(query_units):
@@ -653,7 +678,7 @@ def display_loop_correspondences(loop_correspondences):
 
 
 def get_correspondence_positions(correspondence):
-    
+
     positions_ref = {}
     for ife, corr in correspondence.iteritems():
         positions = {}
