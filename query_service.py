@@ -6,34 +6,48 @@ import utility as ui
 import itertools
 import re
 
+import logging
+
+logging.basicConfig(filename='/var/www/correspondence/flask.log', encoding='utf-8', level=logging.DEBUG, format='%(asctime)s %(message)s')
+
 LOOP_REGEX_PATTERN = r'^(IL|HL|J3)_[0-9A-Z]{4}_\d{3}$'
 
 def get_units(incomplete_units):
 
-    with db_session() as session:    
-        
+    with db_session() as session:
+
         complete_units = []
         for unit in incomplete_units:
             query = session.query(UnitInfo).filter(UnitInfo.unit_id.like(unit))
             for row in query:
                 complete_units.append(row.unit_id)
-    
+
         return complete_units
 
 def get_units_new(incomplete_unit):
 
     with db_session() as session:
         query = session.query(UnitInfo).filter(UnitInfo.unit_id.like(incomplete_unit))
-        return query[0].unit_id
+
+        output_list = [result for result in query]
+
+        if len(output_list) == 0:
+            return None
+        else:
+            return query[0].unit_id
 
 def get_single_range_units(range_positions, pdb_id, chain):
+
+    # Previously was using sequence position, known as chain_index.
+    # .filter(UnitInfo.chain_index.between(range_positions[0], range_positions[1])) \
+
 
     with db_session() as session:
 
         complete_units = []
         query = session.query(UnitInfo).filter_by(pdb_id=pdb_id) \
                                        .filter_by(chain=chain) \
-                                       .filter(UnitInfo.chain_index.between(range_positions[0], range_positions[1])) \
+                                       .filter(UnitInfo.number.between(range_positions[0], range_positions[1])) \
                                        .order_by(UnitInfo.chain_index)
 
         for row in query:
@@ -45,7 +59,7 @@ def get_single_range_units(range_positions, pdb_id, chain):
 def get_multiple_range_units(range_positions_list, pdb_id, chain):
 
     with db_session() as session:
-        
+
         complete_units = []
         for single_range in range_positions_list:
             single_range_units = []
@@ -64,7 +78,7 @@ def get_multiple_range_units(range_positions_list, pdb_id, chain):
         return list(itertools.chain(*complete_units))
 
 def get_loop_units(loop_id):
-    
+
     with db_session() as session:
 
         complete_units = []
@@ -88,7 +102,7 @@ def get_query_units(query_type, query_list, query_ife):
 
     elif query_type == 'multiple_ranges':
         pass
-        
+
     elif query_type == 'loop_id':
         loop_id = query_list[0][0]
         # unsorted_units = get_loop_units(loop_id)
@@ -129,8 +143,14 @@ def get_query_units_new(input_type, selection, chain_id):
     return complete_units
 
 def is_unit_id(item):
-    if 4<=(len(item.split("|")))<=9:
-        return True
+
+    fields = item.split("|")
+
+    if 4 <= len(fields) <= 9:
+        if fields[3] == "HOH":
+            return False
+        else:
+            return True
     else:
         return False
 
@@ -141,8 +161,12 @@ def is_loop_id(item):
         return False
 
 def is_residue_num(item):
-    if 1 <= int(item) <= 9999:
-        return True
+    if item.isdigit():
+        num = int(item)
+        if 1 <= num <= 9999:
+            return True
+        else:
+            return False
     else:
         return False
 
@@ -151,26 +175,79 @@ def get_query_units_modified(param_dict):
     complete_units = []
     error_message = ""
     range_separator = ":"
-    items = param_dict['selection'].split(",")
+
+    selection = param_dict['selection']
+
+    # replace space colon with colon
+    selection = re.sub(r'\s+:', ':', selection)
+    # replace colon space with colon
+    selection = re.sub(r':\s+', ':', selection)
+
+    # replace whitespace, tab with comma
+    selection = re.sub(r'\s+', ',', selection)
+    # replace multiple commas with single comma
+    selection = re.sub(r',+', ',', selection)
+
+    logging.info('Selection: ' + selection)
+
+    items = selection.split(",")
     for item in items:
+
+        logging.info('Item: ' + item)
+
         if range_separator in item:
             if (param_dict['pdb'] is None) or (param_dict['chain'] is None):
-                error_message = "No pdb/chain information provided with the query selection"
+                error_message = "Need pdb and chain information when using %s operator" % range_separator
                 return None, error_message
             else:
-                range_positions = item.split(':')
+                range_positions = item.split(range_separator)
+                if not len(range_positions) == 2:
+                    error_message = "Need exactly two range positions"
+                    return None, error_message
+                for position in range_positions:
+                    if not position.isdigit():
+                        error_message = "Range positions must be integers"
+                        return None, error_message
+
                 complete_units.extend(get_single_range_units(range_positions, param_dict['pdb'], param_dict['chain']))
+
         elif is_loop_id(item):
             loop_units = get_loop_units(item)
+            if not loop_units or len(loop_units) == 0:
+                error_message = "Invalid loop id %s" % item
+                return None, error_message
             complete_units.extend(loop_units)
         elif is_unit_id(item):
-            complete_units.append(item)
+            # check to see if this is a known unit id; if not, give an error message
+            complete_unit = get_units_new(item)
+            if not complete_unit:
+                error_message = "Invalid unit id %s" % item
+                return None, error_message
+            if is_unit_id(complete_unit):
+                complete_units.append(item)
         elif is_residue_num(item):
+            # use pdb id, chain, and residue number to get the unit id
             # assumption here is that the model num is always 1
             incomplete_unit = param_dict['pdb'] + "|1|" + param_dict['chain'] + "|%|" + str(item)
             complete_unit = get_units_new(incomplete_unit)
-            complete_units.append(complete_unit)
-    return complete_units, error_message          
+
+            if not complete_unit:
+                if param_dict['pdb'] and param_dict['chain']:
+                    error_message = "Invalid residue number %s in %s chain %s" % (item,param_dict['pdb'],param_dict['chain'])
+                else:
+                    error_message = "Invalid residue number %s" % item
+                return None, error_message
+
+            if is_unit_id(complete_unit):
+                complete_units.append(complete_unit)
+            else:
+                if param_dict['pdb'] and param_dict['chain']:
+                    error_message = "Invalid residue number %s in %s chain %s" % (item,param_dict['pdb'],param_dict['chain'])
+                else:
+                    error_message = "Invalid residue number %s" % item
+                return None, error_message
+
+    return complete_units, error_message
 
 
 
