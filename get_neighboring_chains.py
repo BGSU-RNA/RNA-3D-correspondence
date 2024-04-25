@@ -232,6 +232,11 @@ def get_chains(unit_ids, distance=10):
     # Get all centers of unit_ids, including base, sugar, phosphate, aa_fg
     centers_xyz_coord = get_xyz_coordinates(unit_ids, pdb_id)
 
+    # Check if any of the coordinate lists is empty and return an empty list or handle it accordingly
+    if any(len(coords) == 0 for coords in centers_xyz_coord):
+        print("No coordinates found for the given unit IDs {}".format(unit_ids))
+        return []
+
     # # Find the maxima and minima and expand by distance
     x_min = min(centers_xyz_coord[0]) - distance
     x_max = max(centers_xyz_coord[0]) + distance
@@ -262,7 +267,6 @@ def get_chains(unit_ids, distance=10):
         formatted_names = neighboring_chains_with_names
 
     return sorted(formatted_names, key=lambda x: x[1])
-    # return neighboring_chains_with_names
 
 
 def test_run(units_list):
@@ -288,4 +292,3 @@ def test_run(units_list):
 units = ["5J7L|1|AA|G|1491,5J7L|1|AA|A|1492,5J7L|1|AA|A|1493,5J7L|1|AA|G|1494,5J7L|1|AA|U|1495,5J7L|1|AA|C|1496"]
 units = ['4V9C|1|CA|C|1407,4V9C|1|CA|A|1408,4V9C|1|CA|C|1409,4V9C|1|CA|G|1491,4V9C|1|CA|A|1492,4V9C|1|CA|A|1493,4V9C|1|CA|G|1494']
 tst = test_run(units)
-print(tst)
