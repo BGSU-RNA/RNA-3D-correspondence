@@ -1363,11 +1363,14 @@ def circular_diagram():
 
     #return "The circular diagram route is temporarily unavailable, as of 2024-03-08. Please try again later."
 
+    query_parameters = request.args
+
+    if query_parameters.get('input_form','').lower() == 'true':
+        return render_template("circular.html",input_parameters=query_parameters)
+
     from flask import send_file
     import os
     import circular_diagram_16
-
-    query_parameters = request.args
 
     chains_string = str(query_parameters.get('chains',default='',type=str))
     hs = str(query_parameters.get('hs',default='5',type=str))
