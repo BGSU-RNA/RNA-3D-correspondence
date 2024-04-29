@@ -49,34 +49,34 @@
 
           <!-- <div class="form-group col-sm-4"> -->
 
-            <label for="selection">Enter PDB ID (optional)</label>
-            <input type="text" class="form-control" id="pdb" name="pdb">
-            </br>
-
-            <label for="selection">Enter Chain ID (optional)</label>
-            <input type="text" class="form-control" id="chain" name="chain">
-            </br>
-
             <!-- <label for="selection">Enter selection &nbsp</label><span id="popup-icon" class="fa fa-question-circle" aria-hidden="true"></span> -->
-            <label for="selection">Enter Selection &nbsp</label>
+            <label for="selection">Selection (using residue numbers, loop ids, or unit ids)</label>
             <!-- <i class="fa fa-question-circle" aria-hidden="true"></i> -->
             <input type="text" class="form-control" id="selection" name="selection" required>
             </br>
 
-            <label for="correspondence_type">Choose Correspondence Type</label>
+            <label for="selection">PDB ID (when using residue numbers)</label>
+            <input type="text" class="form-control" id="pdb" name="pdb">
+            </br>
+
+            <label for="selection">Chain ID (when using residue numbers)</label>
+            <input type="text" class="form-control" id="chain" name="chain">
+            </br>
+
+            <label for="correspondence_type">Correspondence Scope</label>
             <select class="form-control" id="scope" name="scope">
-                <option value="EC">Same species; EC</option>
+                <option value="EC">Same species; Equivalence class</option>
                 <option value="Rfam">Different species; Rfam</option>
             </select>
             </br>
 
             <div id="depth-input-container" style="display: none;">
-              <label for="depth">Depth</label>
+              <label for="depth">Depth (number of instances to retrieve from each equivalence class)</label>
               <input type="text" class="form-control" id="depth" name="depth", value=1>
               </br>
             </div>
 
-            <label for="structure-resolution">Choose Resolution Threshold</label>
+            <label for="structure-resolution">Resolution Threshold</label>
             <select class="form-control" id="structure-resolution" name="resolution">
                 <option value="4.0" selected>4.0</option>
                 <option value="3.5">3.5</option>
@@ -88,7 +88,7 @@
             </select>
             </br>
 
-            <label for="experimental-method">Choose Experimental Technique</label>
+            <label for="experimental-method">Experimental Technique</label>
             <select class="form-control" id="experimental-method" name="exp_method">
                 <option value="all" selected>All</option>
                 <option value="xray">X-ray diffraction</option>
@@ -118,7 +118,7 @@
               <br>Internal loop from the small subunit ribosomal RNA helix 27, compared across species in the associated Rfam family at resolution 4.0A or better, and including just one instance from each species.
               </p>
 
-              <p><a href="http://rna.bgsu.edu/correspondence/comparison?pdb=null&chain=null&selection=HL_8GLP_022&exp_method=all&resolution=4.0&depth=3&scope=Rfam&input_form=True">Example 3</a>
+              <p><a href="http://rna.bgsu.edu/correspondence/comparison?selection=HL_8GLP_022&exp_method=all&resolution=4.0&depth=3&scope=Rfam&input_form=True">Example 3</a>
               <br>GNRA hairpin loop from Helix 34 of the large subunit ribosomal RNA, compared across different species in the associated Rfam family solved at resolution 4.0A or better, with up to 3 instances from each species.  This example illustrates how some structures (in this case, the models of <i>Triticum aestivum</i>) model the top adenine base of the GNRA in syn while others model that base in anti. Other variability is also evident.
               </p>
 
