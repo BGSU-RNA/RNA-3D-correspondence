@@ -163,7 +163,7 @@ def is_loop_id(item):
 def is_residue_num(item):
     if item.isdigit():
         num = int(item)
-        if 1 <= num <= 9999:
+        if 1 <= num <= 99999:
             return True
         else:
             return False
@@ -228,6 +228,11 @@ def get_query_units_modified(param_dict):
         elif is_residue_num(item):
             # use pdb id, chain, and residue number to get the unit id
             # assumption here is that the model num is always 1
+
+            if (param_dict['pdb'] is None) or (param_dict['chain'] is None):
+                error_message = "Need pdb and chain information when using residue number"
+                return None, error_message
+
             incomplete_unit = param_dict['pdb'] + "|1|" + param_dict['chain'] + "|%|" + str(item)
             complete_unit = get_units_new(incomplete_unit)
 
