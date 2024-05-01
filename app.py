@@ -445,15 +445,39 @@ def geometric_correspondence_new():
     query_parameters = request.args
 
     selection = query_parameters.get('selection')
+
+    if selection is None:
+        # no selection given, present the HTML input form
+        return render_template("index.html", input_parameters={})
+
     pdb_id = query_parameters.get('pdb', default=None)
     if pdb_id is not None:
         pdb_id = pdb_id.upper()
     chain_id = query_parameters.get('chain', default=None)
+
     exp_method = query_parameters.get('exp_method', default='all')
+    if exp_method.lower() in ['x-ray','xray']:
+        exp_method = 'xray'
+    elif exp_method.lower() in ['cryo-em','cryo','em']:
+        exp_method = 'em'
+    elif exp_method.lower() == 'all':
+        exp_method = 'all'
+    elif exp_method.lower() == 'nmr':
+        exp_method = 'nmr'
+    else:
+        return "Please enter a valid experimental method. Accepted values are X-ray, NMR, EM, or all"
+
     scope = query_parameters.get('scope', default='EC')
+    if scope.lower() == 'ec':
+        scope = 'EC'
+    elif scope.lower() == 'rfam':
+        scope = 'Rfam'
     resolution = query_parameters.get('resolution', default='4.0')
 
-    resolution = clean_resolution(resolution)
+    if exp_method == 'nmr':
+        resolution = 'all'
+    else:
+        resolution = clean_resolution(resolution)
 
     depth = query_parameters.get('depth')
     exclude = query_parameters.get('exclude', default=None)
