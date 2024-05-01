@@ -559,10 +559,12 @@ def get_sorted_units(units):
 # here we are assuming there are only 2 methods
 def get_exp_method_name(exp_method):
 
-    if exp_method.lower() == 'xray':
+    if exp_method.lower() in ['x-ray','xray']:
         return 'X-RAY DIFFRACTION'
-    elif exp_method.lower() == 'em':
+    elif exp_method.lower() in ['em','cryo-em','cryo']:
         return 'ELECTRON MICROSCOPY'
+    elif exp_method.lower() == 'nmr':
+        return 'SOLUTION NMR'
     else:
         return 'all'
 
