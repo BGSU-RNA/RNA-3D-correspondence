@@ -13,7 +13,7 @@ logging.info("Starting BGSU-specific imports")
 
 import process_input as pi
 import query_service as qs
-import equivalence_class_service as ec
+import equivalence_class_service_2024 as ec
 import correspondence_service as cs
 import pairwise_service as ps
 from rotation import get_rotation
@@ -253,6 +253,9 @@ def correspondence_within_species(parameters_dict):
 
     query_info = ui.process_query_units(complete_query_units)
 
+    # if not query_info['model'] == '1':
+    #     return "Please use model 1 for the query. Model %s is not supported" % query_info['model']
+
     query_info['chain_name'] = ec.get_chain_standardized_name(query_info)
 
     status_text += "Got query_info<br>"
@@ -472,7 +475,7 @@ def geometric_correspondence_new():
         scope = 'EC'
     elif scope.lower() == 'rfam':
         scope = 'Rfam'
-    resolution = query_parameters.get('resolution', default='4.0')
+    resolution = query_parameters.get('resolution', default='3.0')
 
     if exp_method == 'nmr':
         resolution = 'all'
