@@ -26,6 +26,10 @@ class NrChains(Base):
     __table__ = Base.metadata.tables['nr_chains']
 
 
+class NrClassRank(Base):
+    __table__ = Base.metadata.tables['nr_class_rank']
+
+
 class NrClasses(Base):
     __table__ = Base.metadata.tables['nr_classes']
 
@@ -73,4 +77,4 @@ class ChainPropertyValue(Base):
 # class ProteinChainProperty(Base):
 #     __table__ = Base.metadata.tables['protein_chain_property']
 
-    
+
