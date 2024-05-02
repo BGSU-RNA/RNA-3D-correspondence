@@ -702,7 +702,10 @@ def process_query_units(query_units):
     pdb = query_units[0].split('|')[0]
     model = query_units[0].split('|')[1]
     chain = query_units[0].split('|')[2]
+
     ife = "|".join(query_units[0].split('|')[:3])
+    ife = pdb + "|1|" + chain    # use model 1 since IFEs only use model 1
+
     units_str = ['|'.join(unit.split('|')[3:]) for unit in query_units]
     units_str = ', '.join(units_str)
     units_length = len(query_units)
