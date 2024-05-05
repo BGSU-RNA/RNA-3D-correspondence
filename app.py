@@ -361,8 +361,8 @@ def correspondence_within_species(parameters_dict):
     heatmap_data, percentile_score, max_disc = ui.build_heatmap_data(disc_data, ifes_ordered)
 
     logging.info("Built heatmap data")
-    logging.info("ifes_ordered: " + str(ifes_ordered))
-    logging.info("corr_complete: " + str(corr_complete))
+    # logging.info("ifes_ordered: " + str(ifes_ordered))
+    # logging.info("corr_complete: " + str(corr_complete))
 
     # Build coord data
     coord_data, table_rows = ui.build_coord_data(ifes_ordered, corr_complete)
@@ -495,13 +495,17 @@ def geometric_correspondence_new():
         return "Please enter a valid resolution value. Accepted values are " + ", ".join(valid_resolutions)
 
     if parameters_dict['scope'] == "EC":
+        logging.info('Starting correspondence_within_species ###')
         final_output = correspondence_within_species(parameters_dict)
+        logging.info('Finished correspondence_within_species ###')
         if isinstance(final_output, str):
             return str(final_output)
         else:
             return render_template("comparison_ec.html", **final_output)
     else:
+        logging.info('Starting correspondence_between_species ###')
         final_output = correspondence_between_species(parameters_dict)
+        logging.info('Finished correspondence_between_species ###')
         if isinstance(final_output, str):
             return str(final_output)
         else:
