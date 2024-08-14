@@ -1294,6 +1294,14 @@ def basepair_bar_diagram():
 
     """
 
+    query_parameters = request.args
+
+    if query_parameters.get('input_form','').lower() == 'true':
+        return render_template("basepair_bar_diagram.html",input_parameters=query_parameters)
+
+    if query_parameters.get('chains','') == '':
+        return render_template("basepair_bar_diagram.html",input_parameters=query_parameters)
+
     from flask import send_file
     import os
 
@@ -1399,6 +1407,9 @@ def circular_diagram():
     if query_parameters.get('input_form','').lower() == 'true':
         return render_template("circular.html",input_parameters=query_parameters)
 
+    if query_parameters.get('chains','') == '':
+        return render_template("circular.html",input_parameters=query_parameters)
+
     from flask import send_file
     import os
     import circular_diagram_16
@@ -1414,6 +1425,8 @@ def circular_diagram():
     text = str(query_parameters.get('text',default='all',type=str))
     color = str(query_parameters.get('color',default='default',type=str))
     hn = str(query_parameters.get('hn',default=False,type=str))
+    interchain = str(query_parameters.get('interchain',default='show',type=str))
+    intrachain = str(query_parameters.get('intrachain',default='show',type=str))
     if hn.lower() == "true":
         hn = True
     elif hn.lower() == "false":
@@ -1428,17 +1441,17 @@ def circular_diagram():
     #  = str(query_parameters.get('',default='',type=str))
     #  = str(query_parameters.get('',default='',type=str))
     #  = str(query_parameters.get('',default='',type=str))
-
+   
 
     output_path = '/var/www/correspondence/circular_diagram_pdf'
 
     try:
-        filename_ps = circular_diagram_16.main(chains_string, output_path, helix_size=hs, coloring=color, dim=dim, hide=hide, text=text, show_helix_number=hn, show_nucleotides_with_no_3D_interactions=n3d)
+        filename_ps = circular_diagram_16.main(chains_string, output_path, interchain = interchain, intrachain=intrachain, helix_size=hs, coloring=color, dim=dim, hide=hide, text=text, show_helix_number=hn, show_nucleotides_with_no_3D_interactions=n3d)
     except Exception as e:
         exception_type, exception_object, exception_traceback = sys.exc_info()
         line_number = exception_traceback.tb_lineno
         output = ""
-        output += "\nSomething went wrong with this request on line %s with error type %s\n" % (line_number,exception_type)
+        output += "\nSomething went wrong with this request: %s\n" % (exception_type)
         output += "%s\n" % type(e)
         output += "%s\n" % exception_traceback
         #output += "%s\n" % inst.args
@@ -1462,6 +1475,8 @@ def circular_diagram():
         #return response
     except Exception as e:
         return str(e)
+
+
 
 # Handle errors of different types
 @app.errorhandler(301)
