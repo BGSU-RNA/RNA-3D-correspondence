@@ -7,9 +7,9 @@ theme: jekyll-theme-minimal  # Simple theme
 # Navigation Links
 navbar:
   - name: Home
-    link: /
+    link: "{{ site.baseurl }}/"
   - name: Help
-    link: /help
+    link: "{{ site.baseurl }}/help"
 
 # Markdown processing
 markdown: kramdown
