@@ -1,0 +1,8 @@
+title: Webserver Help Documentation
+description: Help documentation for the webserver project
+baseurl: ""  # Leave empty for root
+url: "https://username.github.io"  # Replace with your GitHub Pages URL
+theme: jekyll-theme-minimal  # Simple theme
+
+# Optional settings to enable better navigation experience
+markdown: kramdown
