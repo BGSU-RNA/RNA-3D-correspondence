@@ -2,7 +2,7 @@ title: Webserver Documentation
 description: Comprehensive documentation for the webserver project
 baseurl: "/RNA-3D-correspondence"  # Your repository name
 url: "https://bgsu-rna.github.io"  # The base URL of your GitHub Pages site
-theme: jekyll-theme-minimal  # Simple theme
+theme: just-the-docs  # Simple theme
 
 # Navigation Links
 navbar:
