@@ -1,3 +1,5 @@
+<base target="_blank">
+
 ---
 layout: default
 title: Help Page
@@ -139,4 +141,8 @@ Links to the input page are provided on all hairpin, internal, and 3-way junctio
 After loading the input page, it takes 2 seconds for the Submit button to change to blue and become active.  That is to slow down bots that might click links to the R3DMCS input page. 
 
 ## Output page and examples {#output_page}
+The R3DMCS output page provides query information, a table of instances, a coordinate window, an interactive heat map, and a listing of nearby chains.  Each row of the table lists one instance, and shows the PDB id, model number, chain, resolution, nearby chains, nucleotide numbers, and annotated pairwise interactions. The instances are ordered by geometric similarity so that instances that are more similar to each other are placed near one another in the table. The same ordering is used in the heatmap.  The heatmap is interactive; clicking the heatmap selects instances, which are then marked in the table and are shown in the coordinate window.  These features of the output page are explained in detail in the context of Example 1 below.
+
+### Example 1: E. coli small decoding loop
+This example illustrates the dynamic nature of the decoding loop.  During translation, the decoding loop in helix 44 of the small subunit ribosomal RNA makes contact with the mRNA to promote fidelity of translation.  The contact is made by two adenine bases, often numbered 1492 and 1493, flipping out of the internal loop.  When the mRNA is not present, the adenine bases typically stack inside the internal loop.  We can see several different conformations of the internal loop with R3DMCS.  We use internal loop IL_5J7L_060 from E. coli as the query.  For this illustration, we use resolution threshold 3.0Å and retrieve corresponding instances across the equivalence class of E. coli small subunit ribosomal RNA 3D structures.  See the [URL to produce the input page for Example 1](http://rna.bgsu.edu/correspondence/comparison?selection=IL_5J7L_060&resolution=3.0&scope=EC&input_form=True).  
 
