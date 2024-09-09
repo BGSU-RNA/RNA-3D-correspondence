@@ -1,11 +1,13 @@
-<base target="_blank">
+
 
 ---
 layout: default
 title: Help Page
 ---
 
-# Webserver Help Documentation
+<base target="_blank">
+
+# R3DMCS Help Documentation
 
 ## Table of Contents
 - [Input Page](#input_page)
