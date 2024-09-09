@@ -1,10 +1,3 @@
-
-
----
-layout: default
-title: Help Page
----
-
 <base target="_blank">
 
 # R3DMCS Help Documentation
