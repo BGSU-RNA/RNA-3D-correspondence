@@ -143,7 +143,7 @@ After loading the input page, it takes 2 seconds for the Submit button to change
 ## Output page and examples {#output_page}
 The R3DMCS output page provides query information, a table of instances, a coordinate window, an interactive heat map, and a listing of nearby chains.  Each row of the table lists one instance, and shows the PDB id, model number, chain, resolution, nearby chains, nucleotide numbers, and annotated pairwise interactions. The instances are ordered by geometric similarity so that instances that are more similar to each other are placed near one another in the table. The same ordering is used in the heatmap.  The heatmap is interactive; clicking the heatmap selects instances, which are then marked in the table and are shown in the coordinate window.  These features of the output page are explained in detail in the context of Example 1 below.
 
-### Example 1: E. coli small decoding loop
+### Example 1: *E. coli* small decoding loop
 This example illustrates the dynamic nature of the decoding loop.  During translation, the decoding loop in helix 44 of the small subunit ribosomal RNA makes contact with the mRNA to promote fidelity of translation.  The contact is made by two adenine bases, often numbered 1492 and 1493, flipping out of the internal loop.  When the mRNA is not present, the adenine bases typically stack inside the internal loop.  We can see several different conformations of the internal loop with R3DMCS.  We use internal loop IL_5J7L_060 from E. coli as the query.  For this illustration, we use resolution threshold 3.0Å and retrieve corresponding instances across the equivalence class of E. coli small subunit ribosomal RNA 3D structures.  See the [URL to produce the input page for Example 1](http://rna.bgsu.edu/correspondence/comparison?selection=IL_5J7L_060&resolution=3.0&scope=EC&input_form=True).  
 
 #### Query information panel
@@ -210,4 +210,17 @@ Below, we use the colormap to identify a pair of instances with a large geometri
 The upper right corner of the output page lists all unique names of nearby chains, with counts of how many times they occur.  Below, we show the lines of the table for Example 1.   
 
 ![Nearby chains listing](/assets/chains_count.png)
+
+### Example 2: *E. coli* SSU h27 internal loop
+This [example](http://rna.bgsu.edu/correspondence/comparison?selection=IL_5AJ3_023&resolution=4.0&scope=Rfam&depth=1&input_form=true) studies an internal loop from the small subunit ribosomal RNA helix 27.  The core of the loop is the same as the sarcin-ricin internal loop in Helix 95 of the large subunit ribosomal RNA, consisting of a GUA base triple.  This recurrent internal loop motif is also called a G-bulge.  This example compares instances of the loop across different species whose SSU chains map to Rfam family RF00177.  The query loop is IL_5AJ3_023, which comes from chain A of PDB id 5AJ3, which is a small subunit ribosomal RNA from the mitochondrion of Sus scrofa.  As it happens, there are other 3D structures of the same molecule from the same species, and 5AJ3|1|A is not the representative of the equivalence class of 3D structures, as we illustrate below by showing the table entry in the [Representative Set page](http://rna.bgsu.edu/rna3dhub/nrlist/release/3.332/4.0A) that contains 5AJ3:
+
+![Representative entry](/assets/ec_example.png)
+
+Note that 6GAZ is the representative structure.  Note here that the chains in this equivalence class map to Rfam family RF00177, which Rfam labels as being bacterial SSU, but which mitochondrial and chloroplast ribosomes also match well, due to the ribosomes in those organelles originating from bacteria.  
+
+Using 5AJ3 as a starting point in the query, R3DMCS maps its 18 nucleotides to other 3D structures which also map to [Rfam family RF00177](https://rfam.org/family/SSU_rRNA_bacteria).  The query has depth=1, so only on structure, the representative structure, from each equivalence class is returned.  Thus an instance from 6GAZ appears in the output page, not the query from 5AJ3.
+
+This loop is particularly interesting, because the heat map shows four structures that are quite distinct from the rest, see below where we have selected the instance from 6GAZ and the instance from 5J7L, which is from E. coli as in previous examples.  The key difference is that the four structures in the lower right of the heat map are all mitochondrial ribosomes, in which position 4 in the sequence is C, whereas the other structures all have G in that position.  This example shows that when the G in the base triple in the G-bulge changes to C, the base triple is lost, and the C bulges out of the motif.  Apparently that is not a problem in some mitochondria, but all bacteria in the 3D structure database have G in that position, and the G participates in the base triple.
+
+![Example2](/assets/example2.png)
 
