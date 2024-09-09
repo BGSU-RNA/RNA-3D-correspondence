@@ -146,3 +146,68 @@ The R3DMCS output page provides query information, a table of instances, a coord
 ### Example 1: E. coli small decoding loop
 This example illustrates the dynamic nature of the decoding loop.  During translation, the decoding loop in helix 44 of the small subunit ribosomal RNA makes contact with the mRNA to promote fidelity of translation.  The contact is made by two adenine bases, often numbered 1492 and 1493, flipping out of the internal loop.  When the mRNA is not present, the adenine bases typically stack inside the internal loop.  We can see several different conformations of the internal loop with R3DMCS.  We use internal loop IL_5J7L_060 from E. coli as the query.  For this illustration, we use resolution threshold 3.0Å and retrieve corresponding instances across the equivalence class of E. coli small subunit ribosomal RNA 3D structures.  See the [URL to produce the input page for Example 1](http://rna.bgsu.edu/correspondence/comparison?selection=IL_5J7L_060&resolution=3.0&scope=EC&input_form=True).  
 
+#### Query information panel
+The upper left panel of the output page, shown below, shows basic information about the query and the corresponding instances.  The query nucleotides come from PDB id 5J7L, model 1, chain AA.  The standardized name of that chain is the small subunit ribosomal RNA, SSU for short.  The query nucleotides are listed; note that residue 1407 is a modified C.  Concatenating the PDB|Model|Chain with the query nucleotide sequence and number would give the full unit id, for example, 5J7L|1|AA|G|1405 for the first nucleotide.  The Query Organism identifies the species of the PDB chain the query nucleotides are from.  Since we chose to retrieve instances from across the equivalence class, the equivalence class identifier NR_3.0_56726.109 is shown; this indicates that the resolution threshold is 3.0Å and that the equivalence class with handle 56726 is on version 109, meaning that since the inception of this equivalence class, the membership has changed 109 times.  This query has retrieved 124 instances, all of which are from E. coli small subunit ribosomal RNA 3D structures.  In the all-against-all geometric comparison, the largest geometric discrepancy is 1.21, indicating a moderate level of geometric similarity even between the most dissimilar instances.
+
+![Query information panel](/assets/query_panel.png)
+
+#### Table of instances
+The table of instances in the center of the output page lists all 134 instances.  In the image below, we show two rows of the table.  The query instance is in row 4 and indicates the PDB, model, and chain to be 5J7L, 1, AA.  The structure 5J7L was solved at 3.0Å resolution.  The columns numbered 1, 2, 3, indicate the query nucleotides, starting with G|1405.  The column labeled "Neighboring Protein/NA Chains" indicates chains which have at least one residue within 10Å of one of the nucleotides in the instance on that row.  In 5J7L, that includes the LSU rRNA and the SSU protein uS12.  The instance in row 52 of the table is from PDB structure 7M5D, solved at 2.8Å.  Numbering in E. coli 3D structures is quite consistent from one structure to the next, so it is no surprise that the nucleotide numbers in the columns are the same.  What differs the most is the nearby chains; in 7M5D three additional chains are nearby, namely Peptide chain release factor RF-1, a tRNA, and an mRNA; their chain identifiers are indicated at the beginning of each line.  As we will explain below, the user can visualize residues from these chains in the coordinate window by clicking "Show neighborhood".
+
+![Table of instances](/assets/image1.png)
+
+#### Coordinate window
+Below, we show the instances from 7M5D|1|2 (left) and from 5J7L|1|AA (center), together with their superposition (right).  One can use the checkboxes in the table to select which instances to display; when multiple instances are displayed, they are superimposed.  The coordinates can be rotated by clicking and dragging in the window.  One can turn on or off the display of nucleotide sequence and number.  Default coloring uses red for A, yellow for C, green for G, cyan for U, and CPK for modified nucleotides.  CPK coloring can be selected for all nucleotides.
+
+![Superposed decoding loop](/assets/image2.png)
+
+One can click "Show neighborhood" to show all residues within 10 Ångstroms of the selected instance; the instance from 5J7L is shown below.  Neighboring nucleotides are shown in gray, and neighboring amino acids are shown in purple.
+
+![Neighborhood](/assets/chain_neighbour.png)
+
+#### Heatmap
+All instances are compared to one another, all against all, and the geometric discrepancy is calculated.  Geometric discrepancy is similar to RMSD, but allows for base substitutions.  Geometric discrepancy has two contributions:  the location error is the minimum RMSD between glycosidic atoms (N1/N9) when superimposed optimally, and orientation error accounts for different orientations of corresponding bases in the two instances.  Units are Ångstroms per nucleotide.  See [2008 article on FR3D](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2837920/) for more details on the calculation.   
+
+If there are N instances, the discrepancies form an N by N matrix, which is displayed as a heat map, with dark colors indicating small discrepancy and light (yellow) colors indicating large discrepancy.  In order to make the heatmap easier to understand, the N instances are ordered in such a way that similar instances are put next to each other in the ordering.  The heuristic for ordering is called tree-penalized path length (tpPL), which is described in detail in a [2023 article on data seriation](https://www.sciencedirect.com/science/article/pii/S037722172200501X).  With this ordering and the heatmap coloring, clusters of similar instances become apparent, allowing the user to examine a small number of instances from each cluster to understand.
+
+The heatmap is interactive, in the sense that one can click on the heatmap to select instances, or select instances in the table and see where the instance falls on the heatmap.  Briefly,
+- Left clicking on the diagonal of the heatmap selects one instance
+- Left clicking below the diagonal of the heatmap selects two instances
+- Left clicking above the diagonal of the heatmap selects a range of instances
+- Right clicking on the heatmap (or control left click) adds to the selection
+
+The selected instance(s) will be indicated by a white square on the diagonal of the heatmap.  We illustrate by showing one or more instances from different clusters.
+
+Below, we selected an instance in the center of the large cluster in the upper left of the heat map.  The coordinates show A1492 and A1493 flipped out of the internal loop.  The table entry shows that the loop nucleotides are close to a tRNA and the mRNA, indicating that this cluster consists of instances reacting to the presence of tRNA and mRNA.
+
+![Heatmap1](/assets/heatmap1.png)
+
+Below, we left clicked above the diagonal to select a range of instances with low mutual discrepancies between them.  The superposition of coordinates shows that the instances are all geometrically very similar.  The table entries (not shown) indicate that all selected instances are close to tRNA and mRNA.
+
+![Heatmap2](/assets/heatmap2.png)
+
+Below, we show the query instance from 5J7L chain AA.  It lies in a geometrically distinct cluster, with the A's not fully extended from the loop.  5J7L does not have tRNA molecules in the structure.
+
+![Heatmap3](/assets/heatmap3.png)
+
+Below, we illustrate how clicking below the diagonal of the heatmap will select two instances, one from the row clicked, one from the column clicked.  A1492 and A1493 are in different conformations, but the rest of the internal loop nucleotides maintain much the same geometry between the two instances.
+
+![Heatmap4](/assets/heatmap4.png)
+
+Below, we show an instance from a distinct cluster where A1493 is flipped out but A1492 is stacked inside the internal loop.  In this case, no tRNA chain is close to the loop.
+
+![Heatmap5](/assets/heatmap5.png)
+
+Below, we show one instance from the remaining large cluster of instances.  This instance comes from the same PDB id as the query instance, but it comes from chain BA rather than AA.  In fact, 5J7L contains two assemblies which are complete ribosomes.  Neither have tRNA or mRNA in the structure.
+
+![Heatmap6](/assets/heatmap6.png)
+
+Below, we use the colormap to identify a pair of instances with a large geometric discrepancy between them and then click below the diagonal to display them.  In one, only A1493 is flipped out, and in the other, only A1492 is flipped out, creating a geometric discrepancy per nucleotide value of 1.1405Å.
+
+![Heatmap7](/assets/heatmap7.png)
+
+#### Nearby chain listing
+The upper right corner of the output page lists all unique names of nearby chains, with counts of how many times they occur.  Below, we show the lines of the table for Example 1.   
+
+![Nearby chains listing](/assets/chains_count.png)
+
