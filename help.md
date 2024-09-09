@@ -11,6 +11,8 @@ title: Help Page
 - [Input Page](#input_page)
 - [URL Access](#url_access)
 - [Output page and examples](#output_page)
+- [Availability](#availability)
+- [Limitations](#limitations)
 
 
 ---
@@ -83,6 +85,7 @@ The base URL is:
 ### Selection of nucleotides
 It is required to specify a selection, using one of the methods listed above.  For example, to specific a hairpin loop in PDB structure 5TBW:
 - [http://rna.bgsu.edu/correspondence/comparison?selection=HL_5TBW_007](http://rna.bgsu.edu/correspondence/comparison?selection=HL_5TBW_007)
+
 Default settings in the query above are to retrieve within the equivalence class, resolution threshold 3.0Å, all experimental techniques, and no excluded PDB ids.
 
 To use residue numbers, also specify the PDB id and the chain id, and then specify ranges as explained in the examples above.  For individual nucleotides:
@@ -101,16 +104,17 @@ For multiple ranges of nucleotides plus an individual nucleotide:
 Note that we are including the resolution threshold in these examples, to provide smaller and faster queries.
 
 ### Scope and Depth
-To specify the scope use the "scope" key and values EC for retrievals across the equivalence class of same molecule, same species, and use Rfam for retrievals across species.
+To specify the scope use the "scope" key and values **EC** for **retrievals across the equivalence class of same molecule, same species**, and use **Rfam** for **retrievals across species**.
 - [http://rna.bgsu.edu/correspondence/comparison?selection=HL_5TBW_007&scope=EC](http://rna.bgsu.edu/correspondence/comparison?selection=HL_5TBW_007&scope=EC)
 - [http://rna.bgsu.edu/correspondence/comparison?selection=HL_5TBW_007&scope=Rfam](http://rna.bgsu.edu/correspondence/comparison?selection=HL_5TBW_007&scope=Rfam)
 
-When using scope=Rfam, the default depth is 1, but other values can be chosen, so that R3DMCS retrieves additional instances from each species:
+When using scope=Rfam, the **default depth is 1**, but other values can be chosen, so that R3DMCS retrieves additional instances from each species:
 - [http://rna.bgsu.edu/correspondence/comparison?selection=HL_5TBW_007&scope=Rfam&depth=4](http://rna.bgsu.edu/correspondence/comparison?selection=HL_5TBW_007&scope=Rfam&depth=4)
 
 ### Resolution threshold
-To specify the maximum resolution, use the "resolution" key and value chosen from 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 20.0, all:
+To specify the maximum resolution, use the "resolution" key and value chosen from **1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 20.0, all**:
 - [http://rna.bgsu.edu/correspondence/comparison?selection=HL_5TBW_007&scope=EC&resolution=3.0](http://rna.bgsu.edu/correspondence/comparison?selection=HL_5TBW_007&scope=EC&resolution=3.0)
+
 Make sure that the query structure is within the resolution threshold.
 
 ### Experimental technique
@@ -223,4 +227,43 @@ Using 5AJ3 as a starting point in the query, R3DMCS maps its 18 nucleotides to o
 This loop is particularly interesting, because the heat map shows four structures that are quite distinct from the rest, see below where we have selected the instance from 6GAZ and the instance from 5J7L, which is from E. coli as in previous examples.  The key difference is that the four structures in the lower right of the heat map are all mitochondrial ribosomes, in which position 4 in the sequence is C, whereas the other structures all have G in that position.  This example shows that when the G in the base triple in the G-bulge changes to C, the base triple is lost, and the C bulges out of the motif.  Apparently that is not a problem in some mitochondria, but all bacteria in the 3D structure database have G in that position, and the G participates in the base triple.
 
 ![Example2](/assets/example2.png)
+
+### Example 3: *E. coli* LSU H34 hairpin loop
+[Example 3](http://rna.bgsu.edu/correspondence/comparison?selection=HL_8GLP_022&exp_method=all&resolution=4.0&depth=3&scope=Rfam&input_form=True) illustrates the GNRA hairpin loop from Helix 34 of the large subunit ribosomal RNA, compared across different species in the associated Rfam family solved at resolution 4.0A or better, with up to 3 instances from each species. This example illustrates how some structures (in this case, the models of Triticum aestivum) model the top adenine base of the GNRA in syn while others model that base in anti. Other variability is also evident.  The image below shows the query instance from 8GLP (human) and one instance with the top A modeled in syn; the syn/anti superposition makes a characteristically symmetric image which can be spotted relatively easily.  Modeling differences such as this often explain the difference between clusters of instances.
+
+![Example3](/assets/example3.png)
+
+## Availability {#availability}
+R3DMCS is freely available to non-commercial users.  Users need not register in order to use the service and there is no login requirement.
+
+The code behind the web server is posted on GitHub at 
+- [https://github.com/BGSU-RNA/RNA-3D-correspondence ](https://github.com/BGSU-RNA/RNA-3D-correspondence )
+
+## Limitations {#limitations}
+In this section we document known limitations.  We hope to remove some or all of these limitations in the future.
+
+### Internal Server Error
+We have worked hard to identify and eliminate situations in which the page does not return results.  Some problems occur intermittently, leading to the message Internal Server Error.  Re-loading the page will often work.  We will continue to try to track down and fix errors that cause this.
+
+### Nucleotides must be from the same chain
+The nucleotides in a query must be from the same chain.  For example, some internal loops in the eukaryotic ribosomal large subunit (LSU) have one strand in the 5.8S rRNA and one in the long LSU chain, see for example the large internal loop [IL_8GLP_021] (http://rna.bgsu.edu/rna3dhub/loops/view/IL_8GLP_021) from *Homo sapiens*.  In principle, it would be possible to retrieve aligned nucleotides across multiple chains, but in practice there are many edge cases that are difficult to cover.
+
+### Alignments across Rfam families are not available
+With the ribosomal small subunit (SSU) and large subunit (LSU), Rfam provides separate families for archaea, bacteria, and eukarya.  R3DMCS can retrieve and compare motifs within each family, but at the moment does not provide alignments across those different domains.  We will remove this limitation when we can provide sufficiently accurate cross-domain alignments.
+
+### Basepairs made by modified nucleotides are not noted
+Many RNA 3D structures include modified nucleotides, and R3DMCS will retrieve them, but in the table of instances, the columns listing pairwise interactions will not show basepairs or other interactions made by the modified nucleotides.  Those interactions will be added across the BGSU RNA website in Summer 2024.
+
+### Poor alignment quality in some regions of some Rfam alignments
+The alignments produced across PDB chains in an Rfam family are sometimes inaccurate, especially in regions where the secondary structure is variable between organisms.  This will generally show itself with two or more clearly separated clusters in the heat map, and visual inspection will show that the sets of nucleotides in the two sets bear no resemblance to each other.  tRNA alignments are particularly susceptible to this problem, partly because Rfam has a single family for all tRNAs from all domains, and they don't all align perfectly well.  Alignment in variable regions is difficult, and perhaps not meaningful because different species simply have different 3D structures.  R3DMCS can make it clear that the 2D or 3D structures differ enough in that region to require further study.
+
+### Long computation time on large comparisons
+R3DMCS can retrieve hundreds of instances, but the all-against-all geometric comparison scales as the square of the number of instances, and so that can take a few minutes in some cases.  The amount of time it took to create the output is shown on the bottom of the output page.  It is a good idea to start with a low resolution threshold or with a low equivalence class depth at first.
+
+### No discrepancy calculated when an instance is missing atoms
+Some 3D structures have nucleotides with missing atoms, for example, missing base atoms.  As of April 2024, no discrepancy is calculated with those instances, but they are shown in the table and in the heat map.
+
+### http instead of https
+As of April 2024, the web browser must use the http protocol instead of the https protocol.  Since no user personal information is being used or transmitted, there should be no security concern, but some browsers may object to the http protocol.  Using https may generate the error message, "This site can’t be reached rna.bgsu.edu took too long to respond." or "The connection has timed out".
+
 
