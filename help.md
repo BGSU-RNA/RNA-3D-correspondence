@@ -13,7 +13,7 @@ title: Help Page
 ---
 
 ## Input page {#input_page}
-This section provides an overview of the webserver and its features.
+This section provides an overview on how to fill up the input page.
 
 ### Step 1 - Select nucleotides
 First specify the nucleotides in one 3D structure that you would like to work with.  There are different ways to describe your selection: residue number, loop id, and unit id. A short description for each selection type is given below. 
@@ -28,7 +28,7 @@ To retrieve the specific nucleotides mentioned above, one would type 1405,1496 i
 A range of residue numbers can be provided, separating the lower and upper number with a colon character.  The format for entering a single range of nucleotide numbers is “**start_position:end_position**”.  For example, to specify the lower-numbered strand of the decoding loop in the E. coli SSU from 5J7L chain AA, one would type 1405:1409 in the Selection box.  [Link to example of range of residue numbers](http://rna.bgsu.edu/correspondence/comparison?selection=1405:1409&pdb=5J7L&chain=AA&exp_method=all&resolution=3.0&scope=EC&input_form=True).
 
 ##### Multiple ranges of residues
-This option consists of entering multiple single ranges of nucleotide numbers separated by commas. This is especially helpful when the motif is an internal loop, a junction loop, or a long-range interaction motif.  The general format is “start1:end1,start2:end2” and repeat for as many ranges as are needed.  For example, to get both strands of the E. coli SSU decoding loop, one would type 1405:1409,1491:1496.  [Link to example of multiple ranges of residue numbers](http://rna.bgsu.edu/correspondence/comparison?selection=1405:1409,1491:1496&pdb=5J7L&chain=AA&exp_method=all&resolution=3.0&scope=EC&input_form=True).
+This option consists of entering multiple single ranges of nucleotide numbers separated by commas. This is especially helpful when the motif is an internal loop, a junction loop, or a long-range interaction motif.  The general format is “**start1:end1,start2:end2**” and repeat for as many ranges as are needed.  For example, to get both strands of the E. coli SSU decoding loop, one would type 1405:1409,1491:1496.  [Link to example of multiple ranges of residue numbers](http://rna.bgsu.edu/correspondence/comparison?selection=1405:1409,1491:1496&pdb=5J7L&chain=AA&exp_method=all&resolution=3.0&scope=EC&input_form=True).
 
 #### Loop ID
 Each week, the BGSU data processing pipeline extracts hairpin, internal, and junction loops from RNA-containing 3D structure files using the FR3D software. Once the loops are extracted, we label them with unique and stable identifiers. These “loop ids" contain the following three fields, separated by underscores:
@@ -57,3 +57,15 @@ R3DMCS uses multiple sequence alignments produced by the BGSU RNA pipeline using
 
 ##### Depth
 This parameter tells the maximum number of chains in each equivalence class to use for the retrieval across different organisms.  The chains are prioritized in the order that they are listed on the Representative Set page, which is according to six structure quality factors, which are briefly described on the [Representative Set home page](http://rna.bgsu.edu/rna3dhub/nrlist).
+
+### Step 3 - Resolution threshold
+The BGSU RNA site organizes equivalence classes (chains of the same molecule from the same species) by resolution, keeping all structures solved up to a threshold value.  Setting the resolution threshold makes it possible to look only at the highest resolution structures.  The query will retrieve corresponding motif instances from all chains in the equivalence class with resolution up to the resolution threshold.  The default resolution threshold is 3 Ångstroms.  Note that NMR structures have no reported resolution, and can only be retrieved by setting the resolution threshold to "all".
+
+### Step 4 - Experimental technique
+Choose the desired experimental technique. Users can choose X-ray diffraction, cryo-EM microscopy, or “all” which also includes NMR and other techniques besides X-ray and cryo-EM.
+
+### Step 5 - PDB identifiers to exclude
+Occasionally a PDB entry will have a very different 3D structure in a specific region, due to a variety of factors such as the presence of a modified nucleotide, a bound ligand, or a modeling feature that sets it far apart from other structures.  If it is desired to exclude those instances in order to focus on ones of more direct interest, it is possible to give a list of PDB identifiers to exclude.  For example, in the [example of individual residue numbers](http://rna.bgsu.edu/correspondence/comparison?selection=1405,1496&pdb=5J7L&chain=AA&exp_method=all&resolution=3.0&scope=EC&input_form=True) from above, the structures 4V9O and 4V9P model C1496 in syn, which sets them apart from the other instances.  Also, structure 8GHU has the non-standard residue ZIV at position 1405, which has two bases in one nucleotide and so is not compared geometrically to the other instances, which is shown with gray cells in the heat map.  [Listing these three structures under PDB identifiers to exclude](http://rna.bgsu.edu/correspondence/comparison?selection=1405,1496&pdb=5J7L&chain=AA&exp_method=all&resolution=3.0&scope=EC&exclude=4V9O,4V9P,8GHU&input_form=True) removes these instances, and the heat map coloring adjusts accordingly, making it easier to see the high degree of similarity between the remaining instances.
+
+### Step 6 - Submit
+After pressing the Submit button, the R3DMCS server will retrieve data for all corresponding nucleotides, calculate all-against-all discrepancies, order the instances by similarity, and render the page in HTML.  This process typically takes 5 to 15 seconds, depending on the number of instances returned.  However, a larger number of instances will take longer; for reference, R3DMCS took almost 6 minutes for a tRNA hairpin retrieval that resulted in 718 instances.  It seems that that was an unnecessarily broad query.
