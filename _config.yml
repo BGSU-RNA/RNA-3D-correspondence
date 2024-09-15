@@ -1,7 +1,11 @@
 title: R3DMCS Documentation
 baseurl: "/RNA-3D-correspondence"  
 url: "https://bgsu-rna.github.io"  
-theme: "just-the-docs"  
+remote_theme: just-the-docs/just-the-docs
+
+# Enable the jekyll-remote-theme plugin
+plugins:
+  - jekyll-remote-theme
 
 # Navigation Links
 navbar:
