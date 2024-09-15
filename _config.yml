@@ -9,27 +9,26 @@ plugins:
 
 # Configuration for Just the Docs
 just_the_docs:
-  # Navigation structure for your documentation
   nav_order: 1
   # Define the sidebar navigation for the site
-  navigation:
+  nav:
+    - title: "Home"
+      url: "/RNA-3D-correspondence/"
+      nav_order: 1
     - title: "Help Documentation"
-      url: "/RNA-3D-correspondence/help/"
+      url: "/RNA-3D-correspondence/help"
+      nav_order: 2
       children:
         - title: "Input Page"
-          url: "/RNA-3D-correspondence/help/#input_page"
+          url: "/RNA-3D-correspondence/help#input_page"
         - title: "URL Access"
-          url: "/RNA-3D-correspondence/help/#url_access"
+          url: "/RNA-3D-correspondence/help#url_access"
         - title: "Output Page and Examples"
-          url: "/RNA-3D-correspondence/help/#output_page"
+          url: "/RNA-3D-correspondence/help#output_page"
         - title: "Availability"
-          url: "/RNA-3D-correspondence/help/#availability"
+          url: "/RNA-3D-correspondence/help#availability"
         - title: "Limitations"
-          url: "/RNA-3D-correspondence/help/#limitations"
-
-# Markdown processing
-markdown: kramdown
-
+          url: "/RNA-3D-correspondence/help#limitations"
 
 # Markdown processing
 markdown: kramdown
