@@ -9,28 +9,5 @@ plugins:
 
 nav_enabled: true
 
-# Configuration for Just the Docs
-# just_the_docs:
-#   # Set to true to use a single page's navigation as the sidebar
-#   aux_nav:
-#     "Help Documentation":
-#       - url: "/RNA-3D-correspondence/help"
-#         title: "R3DMCS Help Documentation"
-#       - url: "/RNA-3D-correspondence/help#input_page"
-#         title: "Input Page"
-#       - url: "/RNA-3D-correspondence/help#url_access"
-#         title: "URL Access"
-#       - url: "/RNA-3D-correspondence/help#output_page"
-#         title: "Output Page and Examples"
-#       - url: "/RNA-3D-correspondence/help#availability"
-#         title: "Availability"
-#       - url: "/RNA-3D-correspondence/help#limitations"
-#         title: "Limitations"
-
-just_the_docs:
-  # Sidebar settings
-  # Set to true to always display the ToC in the sidebar
-  show_toc_in_sidebar: true
-
 # Markdown processing
 markdown: kramdown
