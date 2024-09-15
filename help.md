@@ -1,7 +1,8 @@
 ---
 layout: default
 title: "R3DMCS Help Documentation"
-nav_order: 1
+nav_order: 2
+has_toc: false
 ---
 
 # R3DMCS Help Documentation
