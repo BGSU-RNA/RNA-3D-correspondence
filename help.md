@@ -1,19 +1,12 @@
 ---
-title: R3DMCS Help Page
+title: R3DMCS Help Documentation
 nav_order: 2
+has_toc: true
+toc_label: "Help Sections"
+toc_sticky: true
 ---
 
 # R3DMCS Help Documentation
-
-## Table of Contents
-- [Input Page](#input_page)
-- [URL Access](#url_access)
-- [Output page and examples](#output_page)
-- [Availability](#availability)
-- [Limitations](#limitations)
-
-
----
 
 ## Input page {#input_page}
 This section provides an overview on how to fill up the input page.
