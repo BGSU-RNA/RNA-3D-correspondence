@@ -14,23 +14,26 @@ plugins:
 #   - name: Help
 #     link: "{{ site.baseurl }}/help"
 
-sidebar:
-  nav: "help"
+just_the_docs:
+  # Set the layout to "default" to include the sidebar
+  layout: "default"
+  # Define the navigation for your help page
+  nav_order: 1
+  nav:
+    - title: "Help Documentation"
+      url: "/RNA-3D-correspondence/help"
+      children:
+        - title: "Input Page"
+          url: "#input_page"
+        - title: "URL Access"
+          url: "#url_access"
+        - title: "Output Page and Examples"
+          url: "#output_page"
+        - title: "Availability"
+          url: "#availability"
+        - title: "Limitations"
+          url: "#limitations"
 
-# Create a navigation structure
-navigation:
-  - title: "Help Documentation"
-    children:
-      - title: "Input Page"
-        url: "/RNA-3D-correspondence/help/#input_page"
-      - title: "URL Access"
-        url: "/RNA-3D-correspondence/help/#url_access"
-      - title: "Output Page and Examples"
-        url: "/RNA-3D-correspondence/help/#output_page"
-      - title: "Availability"
-        url: "/RNA-3D-correspondence/help/#availability"
-      - title: "Limitations"
-        url: "/RNA-3D-correspondence/help/#limitations"
 
 # Markdown processing
 markdown: kramdown
