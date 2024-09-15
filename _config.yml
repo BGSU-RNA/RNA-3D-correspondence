@@ -9,5 +9,7 @@ plugins:
 
 nav_enabled: true
 
+color_scheme: dark
+
 # Markdown processing
 markdown: kramdown
