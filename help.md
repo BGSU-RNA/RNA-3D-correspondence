@@ -1,3 +1,5 @@
+# R3DMCS Help Documentation
+
 ---
 title: R3DMCS Help
 nav_order: 2
@@ -11,8 +13,6 @@ nav_order: 2
 1. TOC
 {:toc}
 </details>
-
-# R3DMCS Help Documentation
 
 ## Input page {#input_page}
 This section provides an overview on how to fill up the input page.
