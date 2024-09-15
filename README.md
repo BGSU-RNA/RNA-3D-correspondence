@@ -1,8 +1,3 @@
----
-title: Home
-nav_order: 1
----
-
 # RNA 3D Motif Correspondence Server (R3DMCS)
 
 ## Background
