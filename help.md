@@ -1,11 +1,3 @@
----
-layout: single
-title: "R3DMCS Help Documentation"
-toc: true
-toc_label: "Help Sections"
-toc_sticky: true
----
-
 # R3DMCS Help Documentation
 
 ## Table of Contents
