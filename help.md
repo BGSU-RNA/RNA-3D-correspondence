@@ -1,5 +1,5 @@
 ---
-title: R3DMCS Help Documentation
+title: R3DMCS Help
 nav_order: 2
 ---
 
