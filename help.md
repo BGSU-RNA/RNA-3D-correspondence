@@ -1,10 +1,16 @@
 ---
 title: R3DMCS Help Documentation
 nav_order: 2
-has_toc: true
-toc_label: "Help Sections"
-toc_sticky: true
 ---
+
+<details open markdown="block">
+  <summary>
+    Table of contents
+  </summary>
+  {: .text-delta }
+1. TOC
+{:toc}
+</details>
 
 # R3DMCS Help Documentation
 
