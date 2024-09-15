@@ -8,11 +8,29 @@ plugins:
   - jekyll-remote-theme
 
 # Navigation Links
-navbar:
-  - name: Home
-    link: "{{ site.baseurl }}/"
-  - name: Help
-    link: "{{ site.baseurl }}/help"
+# navbar:
+#   - name: Home
+#     link: "{{ site.baseurl }}/"
+#   - name: Help
+#     link: "{{ site.baseurl }}/help"
+
+sidebar:
+  nav: "help"
+
+# Create a navigation structure
+navigation:
+  - title: "Help Documentation"
+    children:
+      - title: "Input Page"
+        url: "/RNA-3D-correspondence/help/#input_page"
+      - title: "URL Access"
+        url: "/RNA-3D-correspondence/help/#url_access"
+      - title: "Output Page and Examples"
+        url: "/RNA-3D-correspondence/help/#output_page"
+      - title: "Availability"
+        url: "/RNA-3D-correspondence/help/#availability"
+      - title: "Limitations"
+        url: "/RNA-3D-correspondence/help/#limitations"
 
 # Markdown processing
 markdown: kramdown
