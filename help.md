@@ -1,6 +1,7 @@
 ---
 title: R3DMCS Help Documentation
 nav_order: 2
+toc: true
 ---
 
 <details open markdown="block">
