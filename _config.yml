@@ -1,3 +1,10 @@
+---
+layout: default
+title: "R3DMCS Help Documentation"
+nav_order: 2
+has_toc: false
+---
+
 title: R3DMCS Documentation
 baseurl: "/RNA-3D-correspondence"
 url: "https://bgsu-rna.github.io"
