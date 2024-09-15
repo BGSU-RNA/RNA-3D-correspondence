@@ -1,3 +1,8 @@
+---
+title: R3DMCS Help Page
+nav_order: 2
+---
+
 # R3DMCS Help Documentation
 
 ## Table of Contents
