@@ -27,5 +27,10 @@ nav_enabled: true
 #       - url: "/RNA-3D-correspondence/help#limitations"
 #         title: "Limitations"
 
+just_the_docs:
+  # Sidebar settings
+  # Set to true to always display the ToC in the sidebar
+  show_toc_in_sidebar: true
+
 # Markdown processing
 markdown: kramdown
