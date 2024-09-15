@@ -1,7 +1,6 @@
 ---
 title: R3DMCS Help Documentation
 nav_order: 2
-toc: true
 ---
 
 <details open markdown="block">
@@ -260,8 +259,5 @@ R3DMCS can retrieve hundreds of instances, but the all-against-all geometric com
 
 ### No discrepancy calculated when an instance is missing atoms
 Some 3D structures have nucleotides with missing atoms, for example, missing base atoms.  As of April 2024, no discrepancy is calculated with those instances, but they are shown in the table and in the heat map.
-
-### http instead of https
-As of April 2024, the web browser must use the http protocol instead of the https protocol.  Since no user personal information is being used or transmitted, there should be no security concern, but some browsers may object to the http protocol.  Using https may generate the error message, "This site can’t be reached rna.bgsu.edu took too long to respond." or "The connection has timed out".
 
 
