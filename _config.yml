@@ -1,38 +1,34 @@
 title: R3DMCS Documentation
-baseurl: "/RNA-3D-correspondence"  
-url: "https://bgsu-rna.github.io"  
+baseurl: "/RNA-3D-correspondence"
+url: "https://bgsu-rna.github.io"
 remote_theme: just-the-docs/just-the-docs
 
 # Enable the jekyll-remote-theme plugin
 plugins:
   - jekyll-remote-theme
 
-# Navigation Links
-# navbar:
-#   - name: Home
-#     link: "{{ site.baseurl }}/"
-#   - name: Help
-#     link: "{{ site.baseurl }}/help"
-
+# Configuration for Just the Docs
 just_the_docs:
-  # Set the layout to "default" to include the sidebar
-  layout: "default"
-  # Define the navigation for your help page
+  # Navigation structure for your documentation
   nav_order: 1
-  nav:
+  # Define the sidebar navigation for the site
+  navigation:
     - title: "Help Documentation"
-      url: "/RNA-3D-correspondence/help"
+      url: "/RNA-3D-correspondence/help/"
       children:
         - title: "Input Page"
-          url: "#input_page"
+          url: "/RNA-3D-correspondence/help/#input_page"
         - title: "URL Access"
-          url: "#url_access"
+          url: "/RNA-3D-correspondence/help/#url_access"
         - title: "Output Page and Examples"
-          url: "#output_page"
+          url: "/RNA-3D-correspondence/help/#output_page"
         - title: "Availability"
-          url: "#availability"
+          url: "/RNA-3D-correspondence/help/#availability"
         - title: "Limitations"
-          url: "#limitations"
+          url: "/RNA-3D-correspondence/help/#limitations"
+
+# Markdown processing
+markdown: kramdown
 
 
 # Markdown processing
