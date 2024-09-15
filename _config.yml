@@ -7,7 +7,7 @@ remote_theme: just-the-docs/just-the-docs
 plugins:
   - jekyll-remote-theme
 
-nav_enabled: true
+# nav_enabled: true
 
 # Configuration for Just the Docs
 # just_the_docs:
