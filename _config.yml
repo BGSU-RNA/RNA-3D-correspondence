@@ -11,5 +11,9 @@ nav_enabled: true
 
 color_scheme: dark
 
+# Set a path/url to a favicon that will be displayed by the browser
+favicon_ico: "/assets/C_icon.png"
+
+
 # Markdown processing
 markdown: kramdown
