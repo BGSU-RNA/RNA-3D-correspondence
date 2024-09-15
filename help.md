@@ -1,3 +1,9 @@
+---
+layout: default
+title: "R3DMCS Help Documentation"
+nav_order: 1
+---
+
 # R3DMCS Help Documentation
 
 ## Table of Contents
