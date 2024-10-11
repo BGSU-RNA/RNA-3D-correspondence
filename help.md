@@ -241,7 +241,7 @@ The code behind the web server is posted on GitHub at
 In this section we document known limitations.  We hope to remove some or all of these limitations in the future.
 
 ### Internal Server Error
-We have worked hard to identify and eliminate situations in which the page does not return results.  Some problems occur intermittently, leading to the message Internal Server Error.  Re-loading the page will often work.  We will continue to try to track down and fix errors that cause this.
+We have worked hard to identify and eliminate situations in which the page does not return results.  Some problems occur intermittently, leading to the message Internal Server Error.  When a browser tab with R3DMCS results has been open long enough that the browser identifies it as a stale tab, switching to that tab may result in an Internal Server Error.  Re-loading the page will often work.  We will continue to try to track down and fix errors.
 
 ### Nucleotides must be from the same chain
 The nucleotides in a query must be from the same chain.  For example, some internal loops in the eukaryotic ribosomal large subunit (LSU) have one strand in the 5.8S rRNA and one in the long LSU chain, see for example the large internal loop [IL_8GLP_021](http://rna.bgsu.edu/rna3dhub/loops/view/IL_8GLP_021) from Homo sapiens.  In principle, it would be possible to retrieve aligned nucleotides across multiple chains, but in practice there are many edge cases that are difficult to cover.
@@ -249,16 +249,13 @@ The nucleotides in a query must be from the same chain.  For example, some inter
 ### Alignments across Rfam families are not available
 With the ribosomal small subunit (SSU) and large subunit (LSU), Rfam provides separate families for archaea, bacteria, and eukarya.  R3DMCS can retrieve and compare motifs within each family, but at the moment does not provide alignments across those different domains.  We will remove this limitation when we can provide sufficiently accurate cross-domain alignments.
 
-### Basepairs made by modified nucleotides are not noted
-Many RNA 3D structures include modified nucleotides, and R3DMCS will retrieve them, but in the table of instances, the columns listing pairwise interactions will not show basepairs or other interactions made by the modified nucleotides.  Those interactions will be added across the BGSU RNA website in Summer 2024.
-
 ### Poor alignment quality in some regions of some Rfam alignments
 The alignments produced across PDB chains in an Rfam family are sometimes inaccurate, especially in regions where the secondary structure is variable between organisms.  This will generally show itself with two or more clearly separated clusters in the heat map, and visual inspection will show that the sets of nucleotides in the two sets bear no resemblance to each other.  tRNA alignments are particularly susceptible to this problem, partly because Rfam has a single family for all tRNAs from all domains, and they don't all align perfectly well.  Alignment in variable regions is difficult, and perhaps not meaningful because different species simply have different 3D structures.  R3DMCS can make it clear that the 2D or 3D structures differ enough in that region to require further study.
 
 ### Long computation time on large comparisons
-R3DMCS can retrieve hundreds of instances, but the all-against-all geometric comparison scales as the square of the number of instances, and so that can take a few minutes in some cases.  The amount of time it took to create the output is shown on the bottom of the output page.  It is a good idea to start with a low resolution threshold or with a low equivalence class depth at first.
+R3DMCS can retrieve hundreds of instances, but the all-against-all geometric comparison scales as the square of the number of instances, and so that can take a few minutes in some cases.  The amount of time it took to create the output is shown on the bottom of the output page.  It is a good idea to start with a low resolution threshold or with a low equivalence class depth at first. For reference, R3DMCS produced results for a 92-nucleotide query with 149 matching instances in 227 seconds. That said, it is primarily designed for motifs up to about 30 nucleotides.
 
 ### No discrepancy calculated when an instance is missing atoms
-Some 3D structures have nucleotides with missing atoms, for example, missing base atoms.  As of April 2024, no discrepancy is calculated with those instances, but they are shown in the table and in the heat map.
+Some 3D structures have nucleotides with missing atoms, for example, missing base atoms.  As of April 2024, no discrepancy is calculated with those instances, but the nucleotides are shown in the table and in the heat map.
 
 
