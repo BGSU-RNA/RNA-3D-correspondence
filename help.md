@@ -12,6 +12,8 @@ nav_order: 2
 {:toc}
 </details>
 
+## Introduction
+R3DMCS (pronounced like /redmax/) is a web service which maps an input set of RNA nucleotides in one 3D structure from the Protein Data Bank to an output page showing corresponding instances of the motif across 3D structures of the same molecule from the same organism, or across 3D structures of the same molecule from other organisms but in the same Rfam family. Target structures can be filtered by resolution, redundancy, and experimental method. The output page lists the corresponding instances in a table as a multiple alignment, with each row listing nearby chains in the structure, basepairs and other pairwise interactions, and structure resolution. The output page shows an all-against-all comparison of the instances of the motif in the form of a heatmap; instances are ordered to put geometrically similar instances near each other. Finally, the output page has a coordinate viewer to visualize one instance at a time, or to superimpose instances for easier comparison.
 
 ## Input page {#input_page}
 This section provides an overview on how to fill up the input page.
