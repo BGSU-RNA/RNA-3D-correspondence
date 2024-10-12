@@ -11,7 +11,7 @@ Please refer to the **[Help](https://bgsu-rna.github.io/RNA-3D-correspondence/he
 - **[Sri Devan Appasamy](https://www.ebi.ac.uk/people/person/sri-devan-appasamy/)**
 - **[Craig L. Zirbel](https://www.bgsu.edu/arts-and-sciences/mathematics-and-statistics/faculty-and-staff/craig-zirbel.html)**
 
-  ## License
+## License
 Licensed under the Apache License, Version 2.0.
 
 ## Acknowledgements
