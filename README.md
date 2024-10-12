@@ -11,5 +11,8 @@ Please refer to the **[Help](https://bgsu-rna.github.io/RNA-3D-correspondence/he
 - **[Sri Devan Appasamy](https://www.ebi.ac.uk/people/person/sri-devan-appasamy/)**
 - **[Craig L. Zirbel](https://www.bgsu.edu/arts-and-sciences/mathematics-and-statistics/faculty-and-staff/craig-zirbel.html)**
 
+  ## License
+Licensed under the Apache License, Version 2.0.
+
 ## Acknowledgements
 We dedicate this server to the memory of **[Neocles Leontis](https://www.bgsu.edu/arts-and-sciences/chemistry/faculty/neocles-b-leontis.html)**, our research mentor and collaborator, who inspired all of our work with RNA 3D structures.
