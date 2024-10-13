@@ -7,6 +7,20 @@ The **RNA 3D Motif Correspondence Server** allows querying **[RNA 3D motifs](htt
 ## Documentation
 Please refer to the **[Help](https://bgsu-rna.github.io/RNA-3D-correspondence/help)** page for detailed guidelines on how to create and run queries on the R3DMCS server.
 
+Below is a brief description of the key files in the repository:
+- **app.py**: The main program that manages routes in the Flask server.
+- **process_input.py**: Determines the type of input provided to the server.
+- **query_service.py**: Returns the complete list of nucleotides (nts) for the input query.
+- **equivalence_class_service.py**: Retrieves the members of an Equivalence Class (EC) for the given resolution and experimental method.
+- **pairwise_service.py**: Provides pairwise annotations for equivalent nucleotide (nt) or motif instances.
+- **rotation.py**: Returns the rotation data for equivalent instances.
+- **center_py**: Provides the center data for equivalent instances.
+- **discrepancy_py**: Calculates the discrepancy between equivalent nucleotide (nt) or motif instances.
+- **ordering_similarity.py**: Orders equivalent nucleotide (nt) or motif instances based on similarity.
+- **get_neighboring_chains.py**: Finds the neighboring chains that are within 10 Angstroms of the input nts.
+- **utility.py**: Handles various utility tasks.
+- **map_across_species**: Returns equivalent nts across Rfam family.
+
 ## Authors
 - **[Sri Devan Appasamy](https://www.ebi.ac.uk/people/person/sri-devan-appasamy/)**
 - **[Craig L. Zirbel](https://www.bgsu.edu/arts-and-sciences/mathematics-and-statistics/faculty-and-staff/craig-zirbel.html)**
