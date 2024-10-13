@@ -19,7 +19,7 @@ Below is a brief description of the key files in the repository:
 - **ordering_similarity.py**: Orders equivalent nucleotide (nt) or motif instances based on similarity.
 - **get_neighboring_chains.py**: Finds the neighboring chains that are within 10 Angstroms of the input nts.
 - **utility.py**: Handles various utility tasks.
-- **map_across_species**: Returns equivalent nts across Rfam family.
+- **map_across_species.py**: Returns equivalent nts across Rfam family.
 
 ## Authors
 - **[Sri Devan Appasamy](https://www.ebi.ac.uk/people/person/sri-devan-appasamy/)**
