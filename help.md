@@ -258,8 +258,9 @@ The alignments produced across PDB chains in an Rfam family are sometimes inaccu
 ### Long computation time on large comparisons
 R3DMCS can retrieve hundreds of instances, but the all-against-all geometric comparison scales as the square of the number of instances, which can take a few minutes in some cases.  The amount of time it took to create the output is shown on the bottom of the output page.  It is a good idea to start with a strict resolution threshold or with a low equivalence class depth at first. For reference, R3DMCS produced results for a 92-nucleotide query with 149 matching instances in 87 seconds. R3DMCS is primarily designed for motifs up to about 30 nucleotides.
 
-### No discrepancy calculated when an instance is missing atoms
-Some 3D structures have nucleotides with missing atoms, for example, missing base atoms.  As of April 2024, no discrepancy is calculated with those instances, but the nucleotides are shown in the table and in the heat map.
-
 ### Partial versus full matches
 In some cases, only some of the query nucleotides can be aligned to nucleotides in another structure, which is called a partial alignment.  Partial alignments are not returned by R3DMCS.  In some cases, only partial alignments are found, and R3DMCS reports that the query returned no results.  If you are interested in partial matches, or want to understand why R3DMCS gives no results, see the [map_across_chains route on our API page](https://www.bgsu.edu/research/rna/APIs.html#map_across_chains).
+
+### No discrepancy calculated in some cases
+Some 3D structures have nucleotides with missing atoms, for example, missing base atoms.  Others have modified residues that have not been fully processed by our pipeline.  These situations can explain cases where no discrepancy is calculated between some instances, even though the nucleotides are shown in the table and in the heat map.
+
