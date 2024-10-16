@@ -230,7 +230,7 @@ This loop is particularly interesting, because the heat map shows four structure
 ![Example3](/assets/example3.png)
 
 ### Example 4: NMR internal loop
-[Example 4](https://rna.bgsu.edu/correspondence/comparison?selection=IL_6MCI_003&exp_method=all&resolution=all&scope=EC&input_form=True) illustrates the variability of an internal loop across 10 models in each of two 3D structures solved by solution NMR. The selected instances show four different possible orientations of U41.  When starting with an NMR structure, use experimental technique ''NMR'' or use experimental technique ''all'' and resolution threshold ''all''. One can use R3DMCS to view the variability across models for a single PDB entry solved by NMR, even if the equivalence class has only one structure in it.  
+[Example 4](https://rna.bgsu.edu/correspondence/comparison?selection=IL_6MCI_003&exp_method=all&resolution=all&scope=EC&input_form=True) illustrates the variability of an internal loop across 10 models in each of two 3D structures of [7SK RNA](https://rfam.org/family/RF00100) solved by solution NMR. The selected instances show four different possible orientations of U41.  When starting with an NMR structure, use experimental technique ''NMR'' or use experimental technique ''all'' and resolution threshold ''all''. One can use R3DMCS to view the variability across models for a single PDB entry solved by NMR, even if the equivalence class has only one structure in it.  This query takes about 3 seconds to return 20 instances.
 
 ![Example4](/assets/example4.png)
 
@@ -261,5 +261,5 @@ R3DMCS can retrieve hundreds of instances, but the all-against-all geometric com
 ### No discrepancy calculated when an instance is missing atoms
 Some 3D structures have nucleotides with missing atoms, for example, missing base atoms.  As of April 2024, no discrepancy is calculated with those instances, but the nucleotides are shown in the table and in the heat map.
 
-### Partial alignments
-In some cases, only some of the query nucleotides can be aligned to nucleotides in another structure, which is called a partial alignment.  Partial alignments are not returned by R3DMCS.  In some cases, only partial alignments are found, and R3DMCS reports that the query returned no results.
+### Partial versus full matches
+In some cases, only some of the query nucleotides can be aligned to nucleotides in another structure, which is called a partial alignment.  Partial alignments are not returned by R3DMCS.  In some cases, only partial alignments are found, and R3DMCS reports that the query returned no results.  If you are interested in partial matches, or want to understand why R3DMCS gives no results, see the [map_across_chains route on our API page](https://www.bgsu.edu/research/rna/APIs.html#map_across_chains).
