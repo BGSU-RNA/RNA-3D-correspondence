@@ -229,6 +229,11 @@ This loop is particularly interesting, because the heat map shows four structure
 
 ![Example3](/assets/example3.png)
 
+### Example 4: NMR internal loop
+[Example 4](https://rna.bgsu.edu/correspondence/comparison?selection=IL_6MCI_003&exp_method=all&resolution=all&scope=EC&input_form=True) illustrates the variability of an internal loop across 10 models in each of two 3D structures solved by solution NMR. The selected instances show four different possible orientations of U41.  When starting with an NMR structure, use experimental technique ''NMR'' or use experimental technique ''all'' and resolution threshold ''all''. One can use R3DMCS to view the variability across models for a single PDB entry solved by NMR, even if the equivalence class has only one structure in it.  
+
+![Example4](/assets/example4.png)
+
 ## Availability {#availability}
 R3DMCS is freely available to non-commercial users.  Users need not register in order to use the service and there is no login requirement.
 
