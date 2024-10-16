@@ -65,13 +65,13 @@ The depth parameter tells the maximum number of chains in each equivalence class
 The BGSU RNA site organizes equivalence classes (chains of the same molecule from the same species) by resolution, keeping all structures solved up to a threshold value.  Setting the resolution threshold makes it possible to look only at the highest resolution structures.  The query will retrieve corresponding motif instances from all chains in the equivalence class with resolution up to the resolution threshold.  The default resolution threshold is 3 Ångstroms.  Note that NMR structures have no reported resolution, and can be retrieved only by setting the resolution threshold to "all".
 
 ### Step 4 - Experimental technique
-Choose the desired experimental technique. Users can choose X-ray diffraction, cryo-EM microscopy, NMR, or “all” which includes all techniques above. [Example of a loop in an NMR structure](https://rna.bgsu.edu/correspondence/comparison?selection=IL_6MCI_003&exp_method=all&resolution=all&scope=EC&input_form=True).
+Choose the desired experimental technique. Users can choose X-ray diffraction, cryo-EM microscopy, NMR, or “all” which includes all techniques above. [Example of a loop in an NMR structure](https://rna.bgsu.edu/correspondence/comparison?selection=IL_6MCI_003&exp_method=all&resolution=all&scope=EC&input_form=True).  Note that the query above will map to all models in 6MCI and across models in other structures in the equivalence class.
 
 ### Step 5 - PDB identifiers to exclude
-Occasionally a PDB entry will have a very different 3D structure in a specific region, due to a variety of factors such as the presence of a modified nucleotide, a bound ligand, or a modeling feature that sets it far apart from other structures.  If it is desired to exclude those instances in order to focus on ones of more direct interest, it is possible to give a list of PDB identifiers to exclude.  For example, in the [example of individual residue numbers](https://rna.bgsu.edu/correspondence/comparison?selection=1405,1496&pdb=5J7L&chain=AA&exp_method=all&resolution=3.0&scope=EC&input_form=True) from above, the structures 4V9O and 4V9P model C1496 in syn, which sets them apart from the other instances.  Also, structure 8GHU has the non-standard residue ZIV at position 1405, which has two bases in one nucleotide and so is not compared geometrically to the other instances, which is shown with gray cells in the heat map.  [Listing these three structures under PDB identifiers to exclude](https://rna.bgsu.edu/correspondence/comparison?selection=1405,1496&pdb=5J7L&chain=AA&exp_method=all&resolution=3.0&scope=EC&exclude=4V9O,4V9P,8GHU&input_form=True) removes these instances, and the heat map coloring adjusts accordingly, making it easier to see the high degree of similarity between the remaining instances.
+Occasionally a PDB entry will have a very different 3D structure in a specific region, due to a variety of factors such as the presence of a modified nucleotide, a bound ligand, or a modeling feature that sets it far apart from other structures.  If it is desired to exclude those instances in order to focus on ones of more direct interest, it is possible to give a list of PDB identifiers to exclude.  For example, in the [example of individual residue numbers](https://rna.bgsu.edu/correspondence/comparison?selection=1405,1496&pdb=5J7L&chain=AA&exp_method=all&resolution=3.0&scope=EC&input_form=True) from above, the structures 4V9O and 4V9P model C1496 in syn, which sets them apart from the other instances.  Structure 8G2U models the bases in different planes.  Also, structure 8GHU has the non-standard residue ZIV at position 1405, which has two bases in one nucleotide and so is not compared geometrically to the other instances, which is shown with gray cells in the heat map.  [Listing these three structures under PDB identifiers to exclude](https://rna.bgsu.edu/correspondence/comparison?selection=1405,1496&pdb=5J7L&chain=AA&exp_method=all&resolution=3.0&scope=EC&exclude=4V9O,4V9P,8GHU,8G2U&input_form=True) removes these instances, and the heat map coloring adjusts accordingly, making it easier to see the slight dissimilarity between the remaining instances.
 
 ### Step 6 - Submit
-After pressing the Submit button, the R3DMCS server will retrieve data for all corresponding nucleotides, calculate all-against-all discrepancies, order the instances by similarity, and render the page in HTML.  This process typically takes 5 to 15 seconds, depending on the number of instances returned.  However, a larger number of instances will take longer; for reference, R3DMCS took almost 223 seconds for a tRNA hairpin retrieval that resulted in 520 instances.  See other timing examples below.
+After pressing the Submit button, the R3DMCS server will retrieve data for all corresponding nucleotides, calculate all-against-all discrepancies, order the instances by similarity, and render the page in HTML.  This process typically takes 5 to 15 seconds, depending on the number of instances returned.  However, a larger query or a larger number of instances will take longer; for reference, R3DMCS took almost 223 seconds for a tRNA hairpin retrieval that resulted in 520 instances.  See other timing examples below.
 
 ## URL access {#url_access}
 R3DMCS works by responding to a carefully created URL.  The only function of the input page described above is to create the URL, and then R3DMCS processes the URL.  The URL can be created separately from the input page using the settings described in this section.
@@ -81,10 +81,10 @@ The base URL is:
 - [https://rna.bgsu.edu/correspondence/comparison](https://rna.bgsu.edu/correspondence/comparison)
 
 ### Selection of nucleotides
-It is required to specify a selection, using one of the methods listed above.  For example, to specific a hairpin loop in PDB structure 5TBW:
+It is required to specify a selection, using one of the methods listed above.  For example, to specify a hairpin loop in PDB structure 5TBW:
 - [https://rna.bgsu.edu/correspondence/comparison?selection=HL_5TBW_007](https://rna.bgsu.edu/correspondence/comparison?selection=HL_5TBW_007)
 
-Default settings in the query above are to retrieve within the equivalence class, resolution threshold 3.0Å, all experimental techniques, and no excluded PDB ids.
+Default settings in the query above are: retrieve within the equivalence class, resolution threshold 3.0Å, all experimental techniques, and no excluded PDB ids.
 
 To use residue numbers, also specify the PDB id and the chain id, and then specify ranges as explained in the examples above.  For individual nucleotides:
 - [https://rna.bgsu.edu/correspondence/comparison?selection=1405,1496&pdb=5J7L&chain=AA&resolution=3.0](https://rna.bgsu.edu/correspondence/comparison?selection=1405,1496&pdb=5J7L&chain=AA&resolution=3.0)
@@ -99,8 +99,6 @@ For multiple ranges of nucleotides:
 For multiple ranges of nucleotides plus an individual nucleotide:
 - [https://rna.bgsu.edu/correspondence/comparison?selection=1405:1409,1491:1496,530&pdb=5J7L&chain=AA&resolution=3.0](https://rna.bgsu.edu/correspondence/comparison?selection=1405:1409,1491:1496,530&pdb=5J7L&chain=AA&resolution=3.0)
 
-Note that we are including the resolution threshold in these examples, to provide smaller and faster queries.
-
 ### Scope and depth
 To specify the scope use the "scope" key and values **EC** for **retrievals across the equivalence class of same molecule, same species**, and use **Rfam** for **retrievals across species**.
 - [https://rna.bgsu.edu/correspondence/comparison?selection=HL_5TBW_007&scope=EC](https://rna.bgsu.edu/correspondence/comparison?selection=HL_5TBW_007&scope=EC)
@@ -111,7 +109,7 @@ When using scope=Rfam, the **default depth is 1**, but other values can be chose
 
 ### Resolution threshold
 To specify the maximum resolution, use the "resolution" key and value chosen from **1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 20.0, all**:
-- [https://rna.bgsu.edu/correspondence/comparison?selection=HL_5TBW_007&scope=EC&resolution=3.0](https://rna.bgsu.edu/correspondence/comparison?selection=HL_5TBW_007&scope=EC&resolution=3.0)
+- [https://rna.bgsu.edu/correspondence/comparison?selection=HL_4V9F_007&scope=EC&resolution=2.5](https://rna.bgsu.edu/correspondence/comparison?selection=HL_4V9F_007&scope=EC&resolution=2.5)
 
 Make sure that the query structure is within the resolution threshold.
 
@@ -138,7 +136,7 @@ To direct the user to the input page with fields already filled in, so the user 
 
 Note that a significant fraction of the instances on this page have A279 modeled in syn rather than anti in the example above.
 
-Links to the input page are provided on all hairpin, internal, and 3-way junction loop pages on the BGSU RNA site; see for example the [page for IL_5J7L_014](https://rna.bgsu.edu/rna3dhub/loops/view/IL_5J7L_014), which is a kink turn.
+Links to pre-filled R3DMCS input pages are provided on all hairpin, internal, and 3-way junction loop pages on the BGSU RNA site; see for example the [page for IL_5J7L_014](https://rna.bgsu.edu/rna3dhub/loops/view/IL_5J7L_014), which is a kink turn.
 
 After loading the input page, it takes 2 seconds for the Submit button to change to blue and become active.  That is to slow down bots that might click links to the R3DMCS input page. 
 
