@@ -112,8 +112,6 @@ venv.bak/
 test_app.py
 
 #ignore all the following files
-RPFAM.py
-RPFAM_configuration.py
 Rfam.pdb.gz
 align_chains.py
 alignments
@@ -139,6 +137,7 @@ ribosome_chain_annotation.csv
 ribosome_chain_annotation_new.csv
 static/js/heatmap_new.js
 status.txt
+static/
 
 #ignore the following dir
 uniprot_pdb_mapping/
