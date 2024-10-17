@@ -14,8 +14,8 @@ Below is a brief description of the key files in the repository:
 - **equivalence_class_service.py**: Retrieves the members of an Equivalence Class (EC) that is part of the [Representative Sets of RNA 3D structures](https://rna.bgsu.edu/rna3dhub/nrlist) for the given resolution and experimental method.
 - **pairwise_service.py**: Provides pairwise annotations for equivalent nucleotide (nt) or motif instances.
 - **rotation.py**: Returns the base rotation data for equivalent instances.
-- **center_py**: Provides the base center data for equivalent instances.
-- **discrepancy_py**: Calculates the discrepancy between equivalent nucleotide (nt) or motif instances.
+- **center.py**: Provides the base center data for equivalent instances.
+- **discrepancy.py**: Calculates the discrepancy between equivalent nucleotide (nt) or motif instances.
 - **ordering_similarity.py**: Orders equivalent nucleotide (nt) or motif instances based on similarity.
 - **get_neighboring_chains.py**: Finds the neighboring chains that are within 10 Angstroms of the input nts.
 - **utility.py**: Handles various utility tasks.
