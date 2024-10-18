@@ -1,5 +1,5 @@
 from flask import Flask
-from flask import render_template, request
+from flask import render_template, request, redirect
 from flask import make_response              # for motif variability, to return plain text
 
 from collections import OrderedDict, defaultdict
@@ -1095,85 +1095,15 @@ def basepair_bar_diagram():
 def circular_diagram():
     """
     Examples
-    http://rna.bgsu.edu/correspondence/circular?chains=5J7L|1|AA
+    https://rna.bgsu.edu/correspondence/circular?chains=5J7L|1|AA
     """
 
-    #return "The circular diagram route is temporarily unavailable, as of 2024-03-08. Please try again later."
-
-    query_parameters = request.args
-
-    if query_parameters.get('input_form','').lower() == 'true':
-        return render_template("circular.html",input_parameters=query_parameters)
-
-    if query_parameters.get('chains','') == '':
-        return render_template("circular.html",input_parameters=query_parameters)
-
-    from flask import send_file
-    import os
-    import circular_diagram_16
-
-    chains_string = str(query_parameters.get('chains',default='',type=str))
-    hs = str(query_parameters.get('hs',default='5',type=str))
-    try:
-        hs = int(hs)
-    except:
-        hs = 5
-    dim = str(query_parameters.get('dim',default='',type=str))
-    hide = str(query_parameters.get('hide',default='',type=str))
-    text = str(query_parameters.get('text',default='all',type=str))
-    color = str(query_parameters.get('color',default='default',type=str))
-    hn = str(query_parameters.get('hn',default=False,type=str))
-    interchain = str(query_parameters.get('interchain',default='show',type=str))
-    intrachain = str(query_parameters.get('intrachain',default='show',type=str))
-    if hn.lower() == "true":
-        hn = True
-    elif hn.lower() == "false":
-        hn = False
-    n3d = str(query_parameters.get('n3d',default=True,type=str))
-    if n3d.lower() == "true":
-        n3d = True
-    elif n3d.lower() == "false":
-        n3d = False
-    #  = str(query_parameters.get('',default='',type=str))
-    #  = str(query_parameters.get('',default='',type=str))
-    #  = str(query_parameters.get('',default='',type=str))
-    #  = str(query_parameters.get('',default='',type=str))
-    #  = str(query_parameters.get('',default='',type=str))
-   
-
-    output_path = '/var/www/correspondence/circular_diagram_pdf'
-
-    try:
-        filename_ps = circular_diagram_16.main(chains_string, output_path, interchain = interchain, intrachain=intrachain, helix_size=hs, coloring=color, dim=dim, hide=hide, text=text, show_helix_number=hn, show_nucleotides_with_no_3D_interactions=n3d)
-    except Exception as e:
-        exception_type, exception_object, exception_traceback = sys.exc_info()
-        line_number = exception_traceback.tb_lineno
-        output = ""
-        output += "\nSomething went wrong with this request: %s\n" % (exception_type)
-        output += "%s\n" % type(e)
-        output += "%s\n" % exception_traceback
-        #output += "%s\n" % inst.args
-        output += "%s\n" % e
-        return output
-
-    filename_pdf = filename_ps.replace(".ps",".pdf")
-
-    ps_file  = os.path.join('/var/www/correspondence/circular_diagram_pdf',filename_ps)
-    pdf_file = os.path.join('/var/www/correspondence/circular_diagram_pdf',filename_pdf)
-
-    # os.remove(ps_file)
-
-    try:
-        #return send_file(pdf_file, attachment_filename=filename+".pdf")  # wrong download name
-        return send_file(pdf_file, attachment_filename=filename_pdf, as_attachment=True)  # instant download
-
-        #response = send_file(pdf_file, attachment_filename = filename+".pdf")
-        #response.headers["x-suggested-filename"] = filename+".pdf"
-        #response.headers["Access-Control-Expose-Headers"] = 'x-suggested-filename'
-        #return response
-    except Exception as e:
-        return str(e)
-
+    # this route is now handled by the fr3d server
+    # redirect the user to https://rna.bgsu.edu/fr3d/circular with the same URL arguments
+    query_string = request.query_string.decode("utf-8")
+    logging.info("circular query_string is %s" % query_string)
+    new_url = "https://rna.bgsu.edu/fr3d/circular?%s" % query_string
+    return redirect(new_url, code=302)
 
 
 # Handle errors of different types
