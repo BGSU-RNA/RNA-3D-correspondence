@@ -1101,7 +1101,6 @@ def circular_diagram():
     # this route is now handled by the fr3d server
     # redirect the user to https://rna.bgsu.edu/fr3d/circular with the same URL arguments
     query_string = request.query_string.decode("utf-8")
-    logging.info("circular query_string is %s" % query_string)
     new_url = "https://rna.bgsu.edu/fr3d/circular?%s" % query_string
     return redirect(new_url, code=302)
 
