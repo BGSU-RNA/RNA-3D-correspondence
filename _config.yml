@@ -1,0 +1,19 @@
+title: R3DMCS Documentation
+baseurl: "/RNA-3D-correspondence"
+url: "https://bgsu-rna.github.io"
+remote_theme: just-the-docs/just-the-docs
+
+# Enable the jekyll-remote-theme plugin
+plugins:
+  - jekyll-remote-theme
+
+nav_enabled: true
+
+color_scheme: dark
+
+# Set a path/url to a favicon that will be displayed by the browser
+favicon_ico: "/assets/C_icon.png"
+
+
+# Markdown processing
+markdown: kramdown

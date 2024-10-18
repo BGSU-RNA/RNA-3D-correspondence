@@ -138,6 +138,7 @@ ribosome_chain_annotation_new.csv
 static/js/heatmap_new.js
 status.txt
 static/
+old/
 
 #ignore the following dir
 uniprot_pdb_mapping/
