@@ -144,6 +144,9 @@ def get_query_units_new(input_type, selection, chain_id):
         range_positions_list = [single_range.split(':') for single_range in ranges_selection]
         complete_units = get_multiple_range_units(range_positions_list, pdb_id, chain)
 
+    else:
+        complete_units = []
+
     return complete_units
 
 def is_unit_id(item):

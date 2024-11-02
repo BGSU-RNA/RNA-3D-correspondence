@@ -70,3 +70,5 @@ def check_input_type(loop_id, unit_id, res_num):
         return "unit_id"
     elif res_num is not None and loop_id is None and unit_id is None:
         return "res_num"
+    else:
+        return "unrecognized"

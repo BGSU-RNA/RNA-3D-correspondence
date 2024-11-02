@@ -39,6 +39,10 @@ app = Flask(__name__)
 # turn on more detailed debugging
 app.debug = True
 
+# pipe any print statements to files
+sys.stdout = open('/var/www/correspondence/flask_stdout.log', 'w')
+sys.stderr = open('/var/www/correspondence/flask_stderr.log', 'w')
+
 accepted_resolutions = ['1.5', '2', '2.0', '2.5', '3', '3.0', '3.5', '4', '4.0', 'all']
 accepted_disc_methods = ['geometric', 'relative']
 
@@ -77,11 +81,16 @@ def display_correspondence():
     input_type = pi.check_input_type(loop_id, unit_id, res_num)
 
     if input_type == 'res_num' and chain_id is None:
-
         return "Please enter the chain parameter"
+
+    if input_type == "unrecognized":
+        return "Unrecognized input type"
 
     query_units = qs.get_query_units_new(input_type, loop_id, unit_id, \
                                          res_num, chain_id)
+
+    if len(query_units) == 0:
+        return "No units found in the selection"
 
     if input_type == 'unit_id' or input_type == 'loop_id':
         chain_id = ui.get_chain_id(query_units)
@@ -1038,6 +1047,9 @@ def basepair_bar_diagram():
     #chains_string = "_".join(chains).replace("|","_")
 
     chains = chains_string.split(",")
+
+    if len(chains) < 2:
+        return "Please enter two or more chains separated by commas, for example, 5J7L|1|AA,4V88|1|A6"
 
     filename = 'basepair_bar_diagram_'+chains_string.replace("|","_").replace(",","_") + ".pdf"
     path_filename = os.path.join('/var','www','correspondence','basepair_bar_diagrams',filename)
