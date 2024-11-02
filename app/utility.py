@@ -345,10 +345,14 @@ def calculate_geometric_disc(ife_list, rotation_data, center_data):
                 distances[ife_list[a]][ife_list[b]] = disc
                 distances[ife_list[b]][ife_list[a]] = disc
             except:
-                logging.info("utility: center_data[%d]: %s" % (a, center_data[a]))
-                logging.info("utility: center_data[%d]: %s" % (b, center_data[b]))
-                logging.info("utility: rotation_data[%d]: %s" % (a, rotation_data[a]))
-                logging.info("utility: rotation_data[%d]: %s" % (b, rotation_data[b]))
+                # Modified nucleotides sometimes don't have a glycosidic center
+                # and so the calculation above fails.
+                # We need to add center data for more modified nucleotides.
+
+                # logging.info("utility: center_data[%d]: %s" % (a, center_data[a]))
+                # logging.info("utility: center_data[%d]: %s" % (b, center_data[b]))
+                # logging.info("utility: rotation_data[%d]: %s" % (a, rotation_data[a]))
+                # logging.info("utility: rotation_data[%d]: %s" % (b, rotation_data[b]))
                 # store discrepancies in both directions
                 distances[ife_list[a]][ife_list[b]] = None
                 distances[ife_list[b]][ife_list[a]] = None
