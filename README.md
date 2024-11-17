@@ -30,3 +30,7 @@ Licensed under the Apache License, Version 2.0. Please see [LICENSE](https://git
 
 ## Acknowledgements
 We dedicate this server to the memory of **[Neocles Leontis](https://www.bgsu.edu/arts-and-sciences/chemistry/faculty/neocles-b-leontis.html)**, our research mentor and collaborator, who inspired all of our work with RNA 3D structures.
+
+## Get in touch
+
+If you have any questions or feature requests, feel free to [submit an issue](https://github.com/BGSU-RNA/RNA-3D-correspondence/issues) or get in touch via a [contact form](https://www.bgsu.edu/research/rna/contact-us.html) on the website of the BGSU RNA Bioinformatics group.
