@@ -14,7 +14,8 @@ import utility as ui
 
 logging.info("Importing query_service 4")
 
-LOOP_REGEX_PATTERN = r'^(IL|HL|J3)_[0-9A-Z]{4}_\d{3}$'
+LOOP_REGEX_PATTERN = r'^(IL|HL|J([3-9]|[1-9]\d))_[0-9A-Z]{4}_\d{3}$'
+
 
 def get_units(incomplete_units):
 
