@@ -74,6 +74,38 @@
       font-size: 0.9em;
       font-family: 'Roboto', sans-serif;
     }
+
+    .popup {
+      display: none;
+      position: absolute;
+      background-color: #fff;
+      border: 3px solid #333;
+      /* More pronounced border */
+      border-radius: 8px;
+      box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.2);
+      padding: 12px;
+      font-size: 14px;
+      z-index: 1000;
+      /* Ensure it is always on top */
+      width: 350px;
+      max-width: 90vw;
+      /* Prevent pop-up from being too wide */
+      max-height: 90vh;
+      /* Prevent pop-up from being too tall */
+      overflow: auto;
+    }
+
+    .popup-header {
+      font-weight: bold;
+      font-size: 16px;
+      text-align: center;
+      padding-bottom: 5px;
+    }
+
+    .popup-content {
+      font-size: 14px;
+      text-align: left;
+    }
   </style>
 </head>
 
@@ -110,7 +142,7 @@
       <div class="col-4">
         <dl>
           <dt>Query PDB|Model|Chain</dt>
-          <dd id="query_ife" class="edit">{{ selection_data['ife'] }}</dd>
+          <dd id="query_ife" class="edit"><a class = 'pdb'>{{ selection_data['ife'] }}</a></dd>
 
           <dt>Query Macromolecule Standardized Name</dt>
           <dd id="rfam_description" class="edit">{{ selection_data['chain_name'] }}</dd>
@@ -179,7 +211,7 @@
             <tr>
               <td>{{ loop.index }}</td>
               <td><input type='checkbox' id='{{ loop.index0 }}' class='jmolInline' data-coord='{{ coord[k] }}'></td>
-              <td><a>{{ k }}</a></td>
+              <td><a class = 'pdb'>{{ k }}</a></td>
               <td><a>{{ chain_info[k]['resolution'] }}</a></td>
               {% if neighboring_chains[k] is not none %}
               <td>
@@ -289,6 +321,117 @@
       } else {
         console.log('Download button not found.');
       }
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+      // Create a single pop-up element
+      const popup = document.createElement("div");
+      popup.classList.add("popup");
+      document.body.appendChild(popup); // Append to body to prevent clipping
+
+      const cache = new Map(); // Cache to store API responses
+      let hideTimeout; // Store timeout for delayed hiding
+
+      const showPopup = (element, pdb, data) => {
+        if (!pdb) {
+          console.error("PDB value is undefined!");
+          return;
+        }
+
+        popup.innerHTML = `
+          <div class="popup-header">${pdb}</div>
+          <hr>
+          <div class="popup-content">${data}</div>
+        `;
+        popup.style.display = "block";
+        popup.style.position = "absolute";
+        popup.style.zIndex = "1000"; // Ensure it's above other elements
+
+        const rect = element.getBoundingClientRect();
+        const popupWidth = popup.offsetWidth;
+        const popupHeight = popup.offsetHeight;
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+
+        let top = rect.bottom + window.scrollY;
+        let left = rect.left + window.scrollX;
+
+        // Ensure the pop-up doesn't overflow the right edge of the screen
+        if (left + popupWidth > windowWidth) {
+          left = windowWidth - popupWidth - 10;
+        }
+
+        // Ensure the pop-up doesn't overflow the bottom edge of the screen
+        if (top + popupHeight > windowHeight) {
+          top = rect.top + window.scrollY - popupHeight - 10;
+        }
+
+        popup.style.top = `${top}px`;
+        popup.style.left = `${left}px`;
+      };
+
+      const hidePopup = () => {
+        hideTimeout = setTimeout(() => {
+          popup.style.display = "none";
+        }, 10000); // Hide after 10 seconds
+      };
+
+      const cancelHidePopup = () => {
+        clearTimeout(hideTimeout); // Cancel hiding if mouse enters pop-up
+      };
+
+      const fetchDataAndShowPopup = (pdb, element) => {
+        if (!pdb) {
+          console.error("PDB value is missing in fetchDataAndShowPopup.");
+          return;
+        }
+
+        if (cache.has(pdb)) {
+          showPopup(element, pdb, cache.get(pdb)); // ✅ Pass pdb explicitly
+          return;
+        }
+
+        const apiUrl = `https://rna.bgsu.edu/rna3dhub/rest/getPdbInfo?pdb=${encodeURIComponent(pdb)}`;
+
+        fetch(apiUrl)
+          .then(response => {
+            if (!response.ok) throw new Error(`API error: ${response.statusText}`);
+            return response.text();
+          })
+          .then(data => {
+            cache.set(pdb, data); // Cache the fetched data
+            showPopup(element, pdb, data); // ✅ Pass pdb explicitly
+          })
+          .catch(error => {
+            console.error(`Error fetching data for PDB ${pdb}:`, error.message);
+          });
+      };
+
+      // Event delegation for all `.pdb` links (allows multiple instances on the page)
+      document.addEventListener("mouseover", event => {
+        const target = event.target;
+        if (target.classList.contains("pdb")) {
+          const pdb = target.textContent.trim();
+          if (!pdb) {
+            console.error("PDB text content is empty!");
+            return;
+          }
+          fetchDataAndShowPopup(pdb, target);
+        }
+      });
+
+      document.addEventListener("mouseout", event => {
+        const target = event.target;
+        if (target.classList.contains("pdb")) {
+          hidePopup();
+        }
+      });
+
+      // Prevent hiding when mouse is inside the pop-up
+      popup.addEventListener("mouseover", cancelHidePopup);
+
+      // Hide pop-up if mouse leaves it
+      popup.addEventListener("mouseout", hidePopup);
     });
   </script>
 
