@@ -79,13 +79,10 @@ def read_rfam_to_pdb_mappings(download=False):
     rfam_chain_to_family = {}
     pdb_chain_to_rfam_family = {}
 
-    #filename = os.path.join(BASE_DIRECTORY,'Rfam.pdb.gz')
-    #lines = gzip.open(filename,read_mode).read().split("\n")
+    filename = os.path.join(BASE_DIRECTORY,'pdb_chain_to_best_rfam.txt')
 
-    filename = os.path.join(BASE_DIRECTORY,'pdb_chain_to_rfam.txt')
-
-    if download:
-        url = 'https://rna.bgsu.edu/data/alignments/rfam/pdb_chain_to_rfam.txt'
+    if download or not os.path.exists(filename):
+        url = 'https://rna.bgsu.edu/data/pdb_chain_to_best_rfam.txt'
         urlretrieve(url,filename)
 
     lines = open(filename,read_mode).read().split("\n")
@@ -1334,7 +1331,7 @@ def load_fasta_alignment(family,filename=[]):
     codon_list = []           # only non-empty for RF00005
 
     #print("Time %s. Loading alignment for %s from %s.  " % (str(datetime.now()),family,filename_gz))
-    print("Loading alignment for %s from %s.  " % (family,filename_gz))
+    # print("Loading alignment for %s from %s.  " % (family,filename_gz))
 
     if family.startswith("RF") or family in joint_alignments.keys():
         # see if the compressed alignment file is available locally
