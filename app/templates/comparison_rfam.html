@@ -73,7 +73,37 @@
       font-family: 'Roboto', sans-serif;
     }
 
+    .popup {
+      display: none;
+      position: absolute;
+      background-color: #fff;
+      border: 3px solid #333;
+      /* More pronounced border */
+      border-radius: 8px;
+      box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.2);
+      padding: 12px;
+      font-size: 14px;
+      z-index: 1000;
+      /* Ensure it is always on top */
+      width: 350px;
+      max-width: 90vw;
+      /* Prevent pop-up from being too wide */
+      max-height: 90vh;
+      /* Prevent pop-up from being too tall */
+      overflow: auto;
+    }
 
+    .popup-header {
+      font-weight: bold;
+      font-size: 16px;
+      text-align: center;
+      padding-bottom: 5px;
+    }
+
+    .popup-content {
+      font-size: 14px;
+      text-align: left;
+    }
   </style>
 </head>
 
@@ -93,8 +123,7 @@
               Hub</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link"
-              href="https://bgsu-rna.github.io/RNA-3D-correspondence/help.html"
+            <a class="nav-link" href="https://bgsu-rna.github.io/RNA-3D-correspondence/help.html"
               target="_blank">Help</a>
           </li>
           <li class="nav-item">
@@ -110,7 +139,7 @@
       <div class="col-4">
         <dl>
           <dt>Query PDB|Model|Chain</dt>
-          <dd id="query_chain" class="edit">{{ query_info['query_ife'] }}</dd>
+          <dd id="query_chain" class="edit"><a class='pdb'>{{ query_info['query_ife'] }}</a></dd>
 
           <dt>Query Macromolecule Standardized Name</dt>
           <dd id="rfam_description" class="edit">{{ query_info['chain_name'] }}</dd>
@@ -175,12 +204,13 @@
             <tr>
               <td>{{ loop.index }}</td>
               <td><input type='checkbox' id='{{ loop.index0 }}' class='jmolInline' data-coord='{{ coord[k] }}'></td>
-              <td>{{ k }}</td>
+              <td><a class='pdb'>{{ k }}</a></td>
               <td><a>{{ chain_info[k]['resolution'] }}</a></td>
               {% if neighboring_chains[k] is not none %}
               <td>
                 {% for v in neighboring_chains[k] %}
-                <span style="display: block; white-space: pre;"><b style="min-width: 25px; display: inline-block;">{{v[0]}}:</b> {{v[1]}}</span>
+                <span style="display: block; white-space: pre;"><b
+                    style="min-width: 25px; display: inline-block;">{{v[0]}}:</b> {{v[1]}}</span>
                 {% endfor %}
               </td>
               {% else %}
@@ -245,33 +275,33 @@
   <script type="text/javascript" src="https://rna.bgsu.edu/rna3dhub/js/heatmap_2024.js"></script>
 
   <script type="text/javascript">
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       var downloadButton = document.getElementById('downloadCSV');
 
       if (downloadButton) {
         console.log('Download button found!');
 
-        downloadButton.addEventListener('click', function() {
+        downloadButton.addEventListener('click', function () {
           console.log('Download button clicked!');
 
           var csvData = [];
           var headers = [];
 
           var tableHeaders = document.querySelectorAll('.annotation-table thead th');
-          tableHeaders.forEach(function(header, index) {
+          tableHeaders.forEach(function (header, index) {
             if (index !== 4) {  // Skip the "Neighboring Macromolecules" column
               headers.push(header.textContent.trim());
             }
           });
-          csvData.push(headers.join(','));  
+          csvData.push(headers.join(','));
 
           var tableRows = document.querySelectorAll('.annotation-table tbody tr');
-          tableRows.forEach(function(row) {
+          tableRows.forEach(function (row) {
             var rowData = [];
             var cells = row.querySelectorAll('td');
 
-            cells.forEach(function(cell, index) {
-              if (index === 1) {  
+            cells.forEach(function (cell, index) {
+              if (index === 1) {
                 var checkbox = cell.querySelector('input[type="checkbox"]');
                 rowData.push(checkbox.checked ? 'checked' : '');
               } else if (index !== 4) {  // Skip the "Neighboring Macromolecules" column
@@ -293,25 +323,139 @@
         console.log('Download button not found.');
       }
     });
+
+    document.addEventListener('DOMContentLoaded', function () {
+      // Create a single pop-up element
+      const popup = document.createElement("div");
+      popup.classList.add("popup");
+      document.body.appendChild(popup); // Append to body to prevent clipping
+
+      const cache = new Map(); // Cache to store API responses
+      let hideTimeout; // Store timeout for delayed hiding
+
+      const showPopup = (element, pdb, data) => {
+        if (!pdb) {
+          console.error("PDB value is undefined!");
+          return;
+        }
+
+        popup.innerHTML = `
+          <div class="popup-header">${pdb}</div>
+          <hr>
+          <div class="popup-content">${data}</div>
+        `;
+        popup.style.display = "block";
+        popup.style.position = "absolute";
+        popup.style.zIndex = "1000"; // Ensure it's above other elements
+
+        const rect = element.getBoundingClientRect();
+        const popupWidth = popup.offsetWidth;
+        const popupHeight = popup.offsetHeight;
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+
+        let top = rect.bottom + window.scrollY;
+        let left = rect.left + window.scrollX;
+
+        // Ensure the pop-up doesn't overflow the right edge of the screen
+        if (left + popupWidth > windowWidth) {
+          left = windowWidth - popupWidth - 10;
+        }
+
+        // Ensure the pop-up doesn't overflow the bottom edge of the screen
+        if (top + popupHeight > windowHeight) {
+          top = rect.top + window.scrollY - popupHeight - 10;
+        }
+
+        popup.style.top = `${top}px`;
+        popup.style.left = `${left}px`;
+      };
+
+      const hidePopup = () => {
+        hideTimeout = setTimeout(() => {
+          popup.style.display = "none";
+        }, 10000); // Hide after 10 seconds
+      };
+
+      const cancelHidePopup = () => {
+        clearTimeout(hideTimeout); // Cancel hiding if mouse enters pop-up
+      };
+
+      const fetchDataAndShowPopup = (pdb, element) => {
+        if (!pdb) {
+          console.error("PDB value is missing in fetchDataAndShowPopup.");
+          return;
+        }
+
+        if (cache.has(pdb)) {
+          showPopup(element, pdb, cache.get(pdb)); // ✅ Pass pdb explicitly
+          return;
+        }
+
+        const apiUrl = `https://rna.bgsu.edu/rna3dhub/rest/getPdbInfo?pdb=${encodeURIComponent(pdb)}`;
+
+        fetch(apiUrl)
+          .then(response => {
+            if (!response.ok) throw new Error(`API error: ${response.statusText}`);
+            return response.text();
+          })
+          .then(data => {
+            cache.set(pdb, data); // Cache the fetched data
+            showPopup(element, pdb, data); // ✅ Pass pdb explicitly
+          })
+          .catch(error => {
+            console.error(`Error fetching data for PDB ${pdb}:`, error.message);
+          });
+      };
+
+      // Event delegation for all `.pdb` links (allows multiple instances on the page)
+      document.addEventListener("mouseover", event => {
+        const target = event.target;
+        if (target.classList.contains("pdb")) {
+          const pdb = target.textContent.trim();
+          if (!pdb) {
+            console.error("PDB text content is empty!");
+            return;
+          }
+          fetchDataAndShowPopup(pdb, target);
+        }
+      });
+
+      document.addEventListener("mouseout", event => {
+        const target = event.target;
+        if (target.classList.contains("pdb")) {
+          hidePopup();
+        }
+      });
+
+      // Prevent hiding when mouse is inside the pop-up
+      popup.addEventListener("mouseover", cancelHidePopup);
+
+      // Hide pop-up if mouse leaves it
+      popup.addEventListener("mouseout", hidePopup);
+    });
+
+
+
   </script>
 
   <script type="text/javascript">
     window.onload = function () {
       // Custom sort for checkbox; checked boxes are listed first
-      $.fn.dataTable.ext.order['dom-checkbox'] = function(settings, colIdx) {
-        return this.api().column(colIdx, { order: 'index' }).nodes().map(function(td, i) {
-            return $('input[type="checkbox"]', td).prop('checked') ? 1 : 2;
+      $.fn.dataTable.ext.order['dom-checkbox'] = function (settings, colIdx) {
+        return this.api().column(colIdx, { order: 'index' }).nodes().map(function (td, i) {
+          return $('input[type="checkbox"]', td).prop('checked') ? 1 : 2;
         });
       };
 
       var my_data_table = $('.annotation-table > table').DataTable({
-        "paging": false,  
-        "info": false,    
-        "searching": true, 
-        "ordering": true,  
-        "order": [[0, 'asc']], 
+        "paging": false,
+        "info": false,
+        "searching": true,
+        "ordering": true,
+        "order": [[0, 'asc']],
         "columnDefs": [
-          { "targets": 1, "orderable": false, "orderDataType": "dom-checkbox" } 
+          { "targets": 1, "orderable": false, "orderDataType": "dom-checkbox" }
         ],
         // Adding a custom download button beside the search bar
         "dom": '<"top d-flex justify-content-between"fB>rt<"bottom"lp><"clear">',
@@ -325,43 +469,43 @@
           }
         ],
         "language": {
-          "search": "Filter:" 
+          "search": "Filter:"
         }
       });
 
       // Function to check if the checkbox column is currently sorted in ascending order
       function isSortedAscending() {
-          var checkboxes = my_data_table.column(1).nodes().toArray().map(function(td) {
-              return $('input[type="checkbox"]', td).prop('checked') ? 1 : 2;
-          });
-          for (var i = 0; i < checkboxes.length - 1; i++) {
-              if (checkboxes[i] > checkboxes[i + 1]) {
-                  return false; // Not sorted in ascending order
-              }
+        var checkboxes = my_data_table.column(1).nodes().toArray().map(function (td) {
+          return $('input[type="checkbox"]', td).prop('checked') ? 1 : 2;
+        });
+        for (var i = 0; i < checkboxes.length - 1; i++) {
+          if (checkboxes[i] > checkboxes[i + 1]) {
+            return false; // Not sorted in ascending order
           }
-          return true; // Sorted in ascending order
+        }
+        return true; // Sorted in ascending order
       }
 
       // Handle the click event on the header for sorting
-      $('thead th').on('click', function() {
-          var colIdx = $(this).index();
+      $('thead th').on('click', function () {
+        var colIdx = $(this).index();
 
-          // If the clicked column is the checkbox column
-          if (colIdx === 1) {
-              if (isSortedAscending()) {
-                  // If already sorted in ascending order, sort in descending order
-                  my_data_table.order([1, 'desc']).draw();
-              } else {
-                  // Otherwise, sort in ascending order
-                  my_data_table.order([1, 'asc']).draw();
-              }
+        // If the clicked column is the checkbox column
+        if (colIdx === 1) {
+          if (isSortedAscending()) {
+            // If already sorted in ascending order, sort in descending order
+            my_data_table.order([1, 'desc']).draw();
+          } else {
+            // Otherwise, sort in ascending order
+            my_data_table.order([1, 'asc']).draw();
           }
+        }
       });
 
       var firstCheckbox = document.querySelector('.annotation-table .jmolInline');
 
       if (firstCheckbox) {
-        firstCheckbox.checked = true; 
+        firstCheckbox.checked = true;
 
         $.jmolTools.models[firstCheckbox.id].jmolToggle.apply(firstCheckbox);
       }
