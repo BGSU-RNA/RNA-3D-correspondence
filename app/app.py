@@ -885,10 +885,6 @@ def align_chains():
         output = "%s" % inst
         return output
 
-
-    # output = "Just after importing"
-    # return output
-
     query_parameters = request.args
 
     chains = query_parameters.get('chains').replace("'","")
@@ -934,10 +930,10 @@ def nucleotide_annotation():
 
     # return a list of unit ids and individual annotations
 
-    # http://rna.bgsu.edu/correspondence/nucleotide_annotation?chain=8B0X|1|A
-    # http://rna.bgsu.edu/correspondence/nucleotide_annotation?chain=7K00|1|a
-    # http://rna.bgsu.edu/correspondence/nucleotide_annotation?chain=
-    # http://rna.bgsu.edu/correspondence/nucleotide_annotation?chain=
+    # https://rna.bgsu.edu/correspondence/nucleotide_annotation?chain=8B0X|1|A
+    # https://rna.bgsu.edu/correspondence/nucleotide_annotation?chain=7K00|1|a
+    # https://rna.bgsu.edu/correspondence/nucleotide_annotation?chain=
+    # https://rna.bgsu.edu/correspondence/nucleotide_annotation?chain=
 
     output = "Making progress"
 
@@ -946,10 +942,6 @@ def nucleotide_annotation():
     except Exception as inst:
         output = "%s" % inst
         return output
-
-
-    # output = "Just after importing"
-    # return output
 
     query_parameters = request.args
 
@@ -991,34 +983,34 @@ def nucleotide_annotation():
     return response
 
 
-@app.route('/basepair_bar_diagram')
-def basepair_bar_diagram():
+@app.route('/r3daid')
+def r3daid():
     """
     User inputs chains, gets PDF in return
-    http://rna.bgsu.edu/correspondence/basepair_bar_diagram?chains=8GLP|1|S2,4V88|1|A6
-    http://rna.bgsu.edu/correspondence/basepair_bar_diagram?chains=4TNA|1|A,3Q1Q|1|C
-    http://rna.bgsu.edu/correspondence/basepair_bar_diagram?chains=4V9F|1|9,1S72|1|9
+    https://rna.bgsu.edu/correspondence/r3daid?chains=8GLP|1|S2,4V88|1|A6
+    https://rna.bgsu.edu/correspondence/r3daid?chains=4TNA|1|A,3Q1Q|1|C
+    https://rna.bgsu.edu/correspondence/r3daid?chains=4V9F|1|9,1S72|1|9
 
     """
 
     query_parameters = request.args
 
     if query_parameters.get('input_form','').lower() == 'true':
-        return render_template("basepair_bar_diagram.html",input_parameters=query_parameters)
+        return render_template("r3daid.html",input_parameters=query_parameters)
 
     if query_parameters.get('chains','') == '':
-        return render_template("basepair_bar_diagram.html",input_parameters=query_parameters)
+        return render_template("r3daid.html",input_parameters=query_parameters)
 
     from flask import send_file
     import os
 
     # try:
     #     os.environ['MPLBACKEND'] = 'agg'
-    #     os.environ['MPLCONFIGDIR'] = '/var/www/correspondence/basepair_bar_diagrams'
+    #     os.environ['MPLCONFIGDIR'] = '/var/www/correspondence/app/r3daid'
     #     os.environ['LANG'] = 'en_US.UTF-8'    # why would this work?
     #     os.environ['LC_ALL'] = 'en_US.UTF-8'
 
-    #     #from basepair_bar_diagram import basepair_bar_diagram
+    #     #from r3daid import r3daid
     # except Exception as e:
     #     return str(e)
 
@@ -1038,21 +1030,13 @@ def basepair_bar_diagram():
     chains_string = chains_string.replace(":","")
     chains_string = chains_string.replace(" ","")
 
-    chains = ["4V9F|1|0", "6SKG|1|BA"]     # archaeal LSU
-    chains = ["5J7L|1|AA", "4V88|1|A6"]    # SSU bacterial to eukaryotic
-    chains = ["6ZMI|1|L5", "5TBW|1|1"]     # Eukaryotic LSU
-    chains = ["8GLP|1|S2", "4V88|1|A6"]    # Eukaryotic SSU
-    chains = ["8B0X|1|a", "8GLP|1|L5"]      # LSU bacterial to eukaryotic
-    chains = ["4TNA|1|A", "3Q1Q|1|C"]       # tRNA
-    #chains_string = "_".join(chains).replace("|","_")
-
     chains = chains_string.split(",")
 
     if len(chains) < 2:
         return "Please enter two or more chains separated by commas, for example, 5J7L|1|AA,4V88|1|A6"
 
-    filename = 'basepair_bar_diagram_'+chains_string.replace("|","_").replace(",","_") + ".pdf"
-    path_filename = os.path.join('/var','www','correspondence','basepair_bar_diagrams',filename)
+    filename = 'r3daid_'+chains_string.replace("|","_").replace(",","_") + ".pdf"
+    path_filename = os.path.join('/var','www','correspondence','app','r3daid',filename)
 
     pairs_file = "/var/www/html/pairs/"   # where the pipeline stores these files
 
@@ -1064,23 +1048,14 @@ def basepair_bar_diagram():
         # python problem with matplotlib prevents us from running this directly
 
         # run from command line
-        # command = 'export MPLBACKEND=agg; python /var/www/correspondence/basepair_bar_diagram.py "%s" "%s"' % (chains[0],chains[1])
-        # command = 'python /var/www/correspondence/basepair_bar_diagram.py "%s" "%s" --output "%s"' % (chains[0],chains[1],path_filename)
-        command = '/usr/bin/python /var/www/correspondence/basepair_bar_diagram.py "%s" "%s" --output "%s" --pairs "%s" > /var/www/correspondence/bbd.txt' % (chains[0],chains[1],path_filename,pairs_file)
-        # command = '/opt/rh/python27/root/usr/bin/python /var/www/correspondence/basepair_bar_diagram.py "%s" "%s" --output "%s" --pairs "%s" > /var/www/correspondence/bbd.txt' % (chains[0],chains[1],path_filename,pairs_file)
-
-        # command = '/opt/rh/python27/root/usr/bin/python /var/www/correspondence/basepair_bar_diagram_mock.py > /var/www/correspondence/bbd.txt'
-
-        # command = 'python -m pip list > /var/www/correspondence/bbd.txt'
-        # command = 'which python > /var/www/correspondence/bbd.txt'
-        # command = 'python /var/www/correspondence/basepair_bar_diagram_mock.py > /var/www/correspondence/bbd.txt'
+        command = '/usr/local/pipeline/pipelineenv/bin/python3 /var/www/correspondence/app/r3daid.py "%s" "%s" --output "%s" --pairs "%s" > /var/www/correspondence/bbd.txt' % (chains[0],chains[1],path_filename,pairs_file)
 
         #os.system('touch %s' % path_filename)
         #os.system('export MPLBACKEND=agg')
         try:
             # sometimes these four lines are needed, sometimes not.  Added back in 2024-02-22.
             os.environ['MPLBACKEND'] = 'agg'
-            os.environ['MPLCONFIGDIR'] = '/var/www/correspondence/basepair_bar_diagrams'
+            os.environ['MPLCONFIGDIR'] = '/var/www/correspondence/app/r3daid'
             os.environ['LANG'] = 'en_US.UTF-8'    # why would this work?
             os.environ['LC_ALL'] = 'en_US.UTF-8'
 
@@ -1103,11 +1078,21 @@ def basepair_bar_diagram():
         return str(e) + " but we tried this command: " + " " + command
 
 
+@app.route('/basepair_bar_diagram')
+def basepair_bar_diagram():
+    """
+    New name, redirect to that
+    """
+
+    query_string = request.query_string.decode("utf-8")
+    new_url = "https://rna.bgsu.edu/correspondence/r3daid?%s" % query_string
+    return redirect(new_url, code=302)
+
+
 @app.route('/circular')
 def circular_diagram():
     """
-    Examples
-    https://rna.bgsu.edu/correspondence/circular?chains=5J7L|1|AA
+    Now part of the fr3d website, so this route redirects to there
     """
 
     # this route is now handled by the fr3d server
